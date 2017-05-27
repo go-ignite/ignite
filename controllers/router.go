@@ -3,6 +3,7 @@ package controllers
 import (
 	"flag"
 	"fmt"
+	"ignite/models"
 	"os"
 
 	"github.com/gin-gonic/contrib/sessions"
@@ -43,6 +44,12 @@ func (self *MainRouter) Initialize(r *gin.Engine) {
 
 	if err != nil {
 		fmt.Println("Cannot connetc to database:", err.Error())
+		os.Exit(1)
+	}
+
+	err = engine.Sync2(new(models.User))
+	if err != nil {
+		fmt.Println("Failed to sync database struct:", err.Error())
 		os.Exit(1)
 	}
 
