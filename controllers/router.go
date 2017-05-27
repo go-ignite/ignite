@@ -9,10 +9,11 @@ import (
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/go-xorm/xorm"
+	toml "github.com/pelletier/go-toml"
 )
 
 var (
-	optConf = flag.String("c", "./config.toml", "config file")
+	conf = flag.String("c", "./config.toml", "config file")
 )
 
 type MainRouter struct {
@@ -22,13 +23,16 @@ type MainRouter struct {
 
 func (self *MainRouter) Initialize(r *gin.Engine) {
 	//Check config file
-	if _, err := os.Stat(*optConf); os.IsNotExist(err) {
+	if _, err := os.Stat(*conf); os.IsNotExist(err) {
 		fmt.Println("Cannot load config.toml, file doesn't exist...")
 		os.Exit(1)
 	}
 
+	config, err := toml.LoadFile(*conf)
+
 	//Init DB connection
-	engine, err := xorm.NewEngine("mysql", "root:123@/test?charset=utf8")
+	connString := fmt.Sprintf("%s:%s@/ignite?charset=utf8", config.Get("mysql.user").(string), config.Get("mysql.password").(string))
+	engine, err := xorm.NewEngine("mysql", connString)
 
 	if err != nil {
 		fmt.Println("Cannot connetc to database:", err.Error())
