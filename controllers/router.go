@@ -39,7 +39,7 @@ func (self *MainRouter) Initialize(r *gin.Engine) {
 
 	//Init session store
 	store := sessions.NewCookieStore([]byte("secret"))
-	r.Use(sessions.Sessions("mysession", store))
+	r.Use(sessions.Sessions("ignite", store))
 
 	self.router = r
 	self.router.GET("/", self.IndexHandler)
