@@ -13,5 +13,5 @@ func main() {
 	r.LoadHTMLGlob("templates/*")
 
 	mainRouter := &controllers.MainRouter{}
-	mainRouter.InitRouter(r)
+	mainRouter.Initialize(r)
 }

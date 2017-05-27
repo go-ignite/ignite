@@ -5,7 +5,7 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Ignite</title>
+  <title>ignite</title>
   <link href="/static/css/fonts.css" rel="stylesheet">
   <link href="/static/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
@@ -53,7 +53,7 @@
     <div class="container" id="hero">
       <div class="row">
         <div class="col-md-8 col-md-offset-2 text-center inner">
-          <h1 class="animated swing delay-1s">Ignite<span>V1</span></h1>
+          <h1 class="animated swing delay-1s">ignite<span>V1</span></h1>
           <p>A dockernized service for <em>SS</em></p>
         </div>
       </div>
@@ -65,9 +65,9 @@
       </div>
     </div>
     <div class="container text-center" id="signup">
-      <form class="form" action="/login" method="post">
+      <form class="form" action="/signup" method="post">
         <h1>Signup</h1>
-        <input type="text" placeholder="Invitation Code" name="invite_code">
+        <input type="text" placeholder="Invitation Code" name="invite-code">
         <input type="text" placeholder="Username" name="username">
         <input type="password" placeholder="Password" name="password">
         <input type="password" placeholder="Confirm Password" name="confirm-password">
