@@ -26,12 +26,12 @@
         <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navMain">
             <span class="glyphicon glyphicon-chevron-right" style="color:white;"></span>
           </button>
-        <a class="navbar-brand" href="#">Project X</a>
+        <a class="navbar-brand" href="#">Ignite</a>
       </div>
       <div class="collapse navbar-collapse" id="navMain">
         <ul class="nav navbar-nav pull-right">
-          <li class="active"><a href="#">Home</a></li>
-          <li><a href="#">About</a></li>
+          <li class="active"><a href="#">首页</a></li>
+          <li><a href="#">关于</a></li>
         </ul>
       </div>
     </div>
