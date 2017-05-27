@@ -30,9 +30,16 @@ func (self *MainRouter) Initialize(r *gin.Engine) {
 
 	config, err := toml.LoadFile(*conf)
 
+	if err != nil {
+		fmt.Println("Failed to load config file:", *conf)
+		os.Exit(1)
+	}
+
 	//Init DB connection
 	connString := fmt.Sprintf("%s:%s@/ignite?charset=utf8", config.Get("mysql.user").(string), config.Get("mysql.password").(string))
-	engine, err := xorm.NewEngine("mysql", connString)
+	engine, _ := xorm.NewEngine("mysql", connString)
+
+	err = engine.Ping()
 
 	if err != nil {
 		fmt.Println("Cannot connetc to database:", err.Error())
