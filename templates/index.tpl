@@ -62,7 +62,7 @@
       <div class="row">
         <div class="col-md-6 col-md-offset-3 text-center">
           <a href="#" class="signup-btn">注册</a>
-          <p class="login-text">Already has an account? Click <em>here</em> to login.</p>
+          <p class="login-text">已注册用户，点击 <em>此处</em> 登陆.</p>
         </div>
       </div>
     </div>
