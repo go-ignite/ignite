@@ -26,11 +26,13 @@
         <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navMain">
             <span class="glyphicon glyphicon-chevron-right" style="color:white;"></span>
           </button>
-        <a class="navbar-brand" href="#">Ignite</a>
+        <a class="navbar-brand" href="/">ignite</a>
       </div>
       <div class="collapse navbar-collapse" id="navMain">
         <ul class="nav navbar-nav pull-right">
-          <li class="active"><a href="#">首页</a></li>
+          <li class="active"><a href="/">首页</a></li>
+          <li><a href="#">注册</a></li>
+          <li><a href="#">登录</a></li>
           <li><a href="#">关于</a></li>
         </ul>
       </div>
@@ -40,11 +42,11 @@
   <div class="video-container">
     <div class="filter"></div>
     <video autoplay loop class="fillWidth">
-      <source src="http://opzx9m4cb.bkt.clouddn.com/babyblue.mp4" type="video/mp4" />Your browser does not support the video tag. I suggest you upgrade your browser.
-      <source src="http://opzx9m4cb.bkt.clouddn.com/babyblue.webm" type="video/webm" />Your browser does not support the video tag. I suggest you upgrade your browser.
+      <source src="http://opzx9m4cb.bkt.clouddn.com/helloworld.mp4" type="video/mp4" />Your browser does not support the video tag. I suggest you upgrade your browser.
+      <source src="http://opzx9m4cb.bkt.clouddn.com/helloworld.webm" type="video/webm" />Your browser does not support the video tag. I suggest you upgrade your browser.
     </video>
     <div class="poster hidden">
-      <img src="http://opzx9m4cb.bkt.clouddn.com/babyblue.jpg" alt="">
+      <img src="http://opzx9m4cb.bkt.clouddn.com/helloworld.jpg" alt="">
     </div>
   </div>
 
@@ -59,7 +61,7 @@
       </div>
       <div class="row">
         <div class="col-md-6 col-md-offset-3 text-center">
-          <a href="#" class="signup-btn">Activate</a>
+          <a href="#" class="signup-btn">注册</a>
           <p class="login-text">Already has an account? Click <em>here</em> to login.</p>
         </div>
       </div>
