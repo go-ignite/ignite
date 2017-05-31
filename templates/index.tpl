@@ -101,10 +101,10 @@
   <!-- Toastr script-->
   <script src="/static/js/toastr.min.js"></script>
   <script src="/static/js/scripts.js"></script>
-  <script src="/static/js/signup.js"></script>
+  <script src="/static/js/user.js"></script>
   <script>
         $(document).ready(function() {
-            Signup.init();
+            User.init();
         });
     </script>
 </body>

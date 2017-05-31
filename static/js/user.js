@@ -1,4 +1,4 @@
-var Signup = function () {
+var User = function () {
 
     var signupHandler = function () {
         $('#signup-btn').on('click', function (e) {
