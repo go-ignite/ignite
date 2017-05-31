@@ -5,6 +5,8 @@ import (
 	"ignite/models"
 	"net/http"
 
+	"golang.org/x/crypto/bcrypt"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -32,20 +34,59 @@ func (router *MainRouter) SignupHandler(c *gin.Context) {
 	}
 
 	iv := new(models.InviteCode)
-	count, _ := router.db.Where("invite_code = ?", inviteCode).Count(iv)
+	router.db.Where("invite_code = ? && available = 1", inviteCode).Get(iv)
 
-	if count == 0 {
+	if iv.Id == 0 {
 		fmt.Println("Invalid invite code!")
 		c.JSON(http.StatusOK, &models.Response{Success: false, Message: "Invalid invite code!"})
 		return
 	}
 
 	user := new(models.User)
-	count, _ = router.db.Where("username = ?", username).Count(user)
+	count, _ := router.db.Where("username = ?", username).Count(user)
 
 	if count > 0 {
 		fmt.Println("Username duplicated!")
 		c.JSON(http.StatusOK, &models.Response{Success: false, Message: "Username is duplicated!"})
+		return
+	}
+
+	//Create user account
+	session := router.db.NewSession()
+	defer session.Close()
+
+	session.Begin()
+
+	//1.Create user account
+	user.Username = username
+	hashedPass, _ := bcrypt.GenerateFromPassword([]byte(pwd), bcrypt.DefaultCost)
+	user.HashedPwd = hashedPass
+	user.InviteCode = iv.InviteCode
+	user.PackageLimit = iv.PackageLimit
+
+	affected, _ := session.Insert(user)
+
+	if affected == 0 {
+		session.Rollback()
+		fmt.Println("Failed to create user account!")
+		c.JSON(http.StatusOK, &models.Response{Success: false, Message: "Failed to create user account!"})
+		return
+	}
+
+	//2.Set invite code as used status
+	iv.Available = false
+	affected, _ = session.Id(iv.Id).Cols("available").Update(iv)
+
+	if affected == 0 {
+		session.Rollback()
+		fmt.Println("Failed to create user account!")
+		c.JSON(http.StatusOK, &models.Response{Success: false, Message: "Failed to create user account!"})
+		return
+	}
+
+	if err := session.Commit(); err != nil {
+		fmt.Println("Failed to create user account!")
+		c.JSON(http.StatusOK, &models.Response{Success: false, Message: "Failed to create user account!"})
 		return
 	}
 
