@@ -18,9 +18,28 @@ func (router *MainRouter) IndexHandler(c *gin.Context) {
 }
 
 func (router *MainRouter) LoginHandler(c *gin.Context) {
-	c.HTML(http.StatusOK, "index.tpl", gin.H{
-		"title": "Main website",
-	})
+	username := c.PostForm("username")
+	pwd := c.PostForm("password")
+
+	user := new(models.User)
+	router.db.Where("username = ?", username).Get(user)
+
+	if user.Id == 0 {
+		fmt.Println("User doesn't exist!")
+		c.JSON(http.StatusOK, &models.Response{Success: false, Message: "User doesn't exist!"})
+		return
+	}
+
+	if bcrypt.CompareHashAndPassword(user.HashedPwd, []byte(pwd)) != nil {
+		c.JSON(http.StatusOK, &models.Response{Success: false, Message: "Username or password is incorrect!"})
+		return
+	}
+
+	session := sessions.Default(c)
+	session.Set("userId", user.Id)
+	session.Save()
+
+	c.JSON(http.StatusOK, &models.Response{Success: true, Message: "Success!"})
 }
 
 func (router *MainRouter) SignupHandler(c *gin.Context) {
