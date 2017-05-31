@@ -7,6 +7,7 @@ import (
 
 	"golang.org/x/crypto/bcrypt"
 
+	"github.com/gin-gonic/contrib/sessions"
 	"github.com/gin-gonic/gin"
 )
 
@@ -52,10 +53,10 @@ func (router *MainRouter) SignupHandler(c *gin.Context) {
 	}
 
 	//Create user account
-	session := router.db.NewSession()
-	defer session.Close()
+	trans := router.db.NewSession()
+	defer trans.Close()
 
-	session.Begin()
+	trans.Begin()
 
 	//1.Create user account
 	user.Username = username
@@ -64,10 +65,10 @@ func (router *MainRouter) SignupHandler(c *gin.Context) {
 	user.InviteCode = iv.InviteCode
 	user.PackageLimit = iv.PackageLimit
 
-	affected, _ := session.Insert(user)
+	affected, _ := trans.Insert(user)
 
 	if affected == 0 {
-		session.Rollback()
+		trans.Rollback()
 		fmt.Println("Failed to create user account!")
 		c.JSON(http.StatusOK, &models.Response{Success: false, Message: "Failed to create user account!"})
 		return
@@ -75,20 +76,24 @@ func (router *MainRouter) SignupHandler(c *gin.Context) {
 
 	//2.Set invite code as used status
 	iv.Available = false
-	affected, _ = session.Id(iv.Id).Cols("available").Update(iv)
+	affected, _ = trans.Id(iv.Id).Cols("available").Update(iv)
 
 	if affected == 0 {
-		session.Rollback()
+		trans.Rollback()
 		fmt.Println("Failed to create user account!")
 		c.JSON(http.StatusOK, &models.Response{Success: false, Message: "Failed to create user account!"})
 		return
 	}
 
-	if err := session.Commit(); err != nil {
+	if err := trans.Commit(); err != nil {
 		fmt.Println("Failed to create user account!")
 		c.JSON(http.StatusOK, &models.Response{Success: false, Message: "Failed to create user account!"})
 		return
 	}
+
+	session := sessions.Default(c)
+	session.Set("userId", user.Id)
+	session.Save()
 
 	fmt.Printf("User %s with invite code: %s", username, inviteCode)
 	c.JSON(http.StatusOK, &models.Response{Success: true, Message: "Success!"})
