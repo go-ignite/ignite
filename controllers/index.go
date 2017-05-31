@@ -7,7 +7,7 @@ import (
 
 	"golang.org/x/crypto/bcrypt"
 
-	"github.com/gin-gonic/contrib/sessions"
+	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 )
 
@@ -34,6 +34,9 @@ func (router *MainRouter) LoginHandler(c *gin.Context) {
 		c.JSON(http.StatusOK, &models.Response{Success: false, Message: "Username or password is incorrect!"})
 		return
 	}
+
+	fmt.Println("Come here...")
+	fmt.Println("userId is:", user.Id)
 
 	session := sessions.Default(c)
 	session.Set("userId", user.Id)

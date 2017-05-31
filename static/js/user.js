@@ -8,7 +8,7 @@ var User = function () {
             var url = form.attr("action");
             $.post(url, form.serialize(), function (data) {
                 if (data.success) {
-                    window.location.href = '/panel';
+                    window.location.href = '/panel/index';
                 } else {
                     //Signup failed
                     toastr.warning(data.message);
@@ -36,7 +36,10 @@ var User = function () {
             var url = form.attr("action");
             $.post(url, form.serialize(), function (data) {
                 if (data.success) {
-                    window.location.href = '/panel';
+                    console.log("login successfully!");
+                    console.log(data);
+
+                    window.location.href = '/panel/index';
                 } else {
                     //Login failed
                     toastr.warning(data.message);

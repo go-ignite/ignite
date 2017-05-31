@@ -3,7 +3,7 @@ package controllers
 import (
 	"net/http"
 
-	"github.com/gin-gonic/contrib/sessions"
+	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 )
 
@@ -16,7 +16,5 @@ func (router *MainRouter) LogoutHandler(c *gin.Context) {
 	session.Delete("userId")
 	session.Save()
 
-	c.HTML(http.StatusOK, "index.html", gin.H{
-		"title": "Main website",
-	})
+	c.Redirect(http.StatusFound, "/")
 }

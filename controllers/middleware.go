@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/gin-gonic/contrib/sessions"
+	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 )
 
@@ -13,20 +13,22 @@ func ValidateSession() gin.HandlerFunc {
 
 		session := sessions.Default(c)
 		v := session.Get("userId")
+		fmt.Println("In middleware handler...")
+
 		switch v.(type) {
 		case int64:
 			fmt.Println("session --> userId is:", v)
 			if v == 0 {
 				//Session is invalid
-				c.Redirect(http.StatusMovedPermanently, "/")
+				c.Redirect(http.StatusFound, "/")
 			}
 		case nil:
 			//User already logout
 			fmt.Println("session --> empty session")
-			c.Redirect(http.StatusMovedPermanently, "/")
+			c.Redirect(http.StatusFound, "/")
 		default:
 			fmt.Println("session --> unknown session")
-			c.Redirect(http.StatusMovedPermanently, "/")
+			c.Redirect(http.StatusFound, "/")
 		}
 
 		// before request

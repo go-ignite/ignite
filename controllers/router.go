@@ -6,7 +6,7 @@ import (
 	"ignite/models"
 	"os"
 
-	"github.com/gin-gonic/contrib/sessions"
+	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/go-xorm/xorm"
@@ -73,7 +73,7 @@ func (self *MainRouter) Initialize(r *gin.Engine) {
 	pg := self.router.Group("/panel")
 	pg.Use(ValidateSession())
 	{
-		pg.GET("/", self.PanelIndexHandler)
+		pg.GET("/index", self.PanelIndexHandler)
 		pg.GET("/logout", self.LogoutHandler)
 	}
 
