@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+	"ignite/models"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -27,6 +28,13 @@ func (router *MainRouter) SignupHandler(c *gin.Context) {
 
 	if pwd != confirmPwd {
 		fmt.Println("password not match!")
+	}
+
+	iv := new(models.InviteCode)
+	count, _ := router.db.Where("invite_code = ?", inviteCode).Count(iv)
+
+	if count == 0 {
+		fmt.Println("Invalid invite code!")
 	}
 
 	fmt.Printf("User %s with invite code: %s", username, inviteCode)
