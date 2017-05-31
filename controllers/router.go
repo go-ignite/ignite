@@ -65,8 +65,10 @@ func (self *MainRouter) Initialize(r *gin.Engine) {
 	self.router.POST("/signup", self.SignupHandler)
 
 	pg := self.router.Group("/panel")
+	pg.Use(ValidateSession())
 	{
 		pg.GET("/", self.PanelIndexHandler)
+		pg.GET("/logout", self.LogoutHandler)
 	}
 
 	self.router.Run(":5000")
