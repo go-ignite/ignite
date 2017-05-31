@@ -22,6 +22,7 @@ func ValidateSession() gin.HandlerFunc {
 				//Session is invalid
 				c.Redirect(http.StatusFound, "/")
 			}
+			c.Set("userId", v.(int64))
 		case nil:
 			//User already logout
 			fmt.Println("session --> empty session")
