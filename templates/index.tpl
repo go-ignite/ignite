@@ -64,7 +64,7 @@
       <div class="row">
         <div class="col-md-6 col-md-offset-3 text-center">
           <a href="#" class="signup-btn">激活账号</a>
-          <p class="login-text">已注册用户，点击 <em>此处</em> 登陆.</p>
+          <p class="login-text">已注册用户，点击 <em><a id="exchange" href="#">此处</a></em> 登陆.</p>
         </div>
       </div>
     </div>
@@ -76,6 +76,14 @@
         <input type="password" placeholder="密码" name="password">
         <input type="password" placeholder="确认密码" name="confirm-password">
         <button id="signup-btn">激活</button>
+      </form>
+    </div>
+    <div class="container text-center" id="login">
+      <form class="form" id="login-form" action="/login" method="post">
+        <h1>用户登录</h1>
+        <input type="text" placeholder="用户名" name="username">
+        <input type="password" placeholder="密码" name="password">
+        <button id="signup-btn">登录</button>
       </form>
     </div>
   </section>
