@@ -27,7 +27,8 @@ func (router *MainRouter) SignupHandler(c *gin.Context) {
 	confirmPwd := c.PostForm("confirm-password")
 
 	if pwd != confirmPwd {
-		fmt.Println("password not match!")
+		fmt.Println("passwords not match!")
+		c.JSON(http.StatusOK, &models.Response{Success: false, Message: "Passwords don't match!"})
 	}
 
 	iv := new(models.InviteCode)
@@ -36,6 +37,15 @@ func (router *MainRouter) SignupHandler(c *gin.Context) {
 	if count == 0 {
 		fmt.Println("Invalid invite code!")
 		c.JSON(http.StatusOK, &models.Response{Success: false, Message: "Invalid invite code!"})
+		return
+	}
+
+	user := new(models.User)
+	count, _ = router.db.Where("username = ?", username).Count(user)
+
+	if count > 0 {
+		fmt.Println("Username duplicated!")
+		c.JSON(http.StatusOK, &models.Response{Success: false, Message: "Username is duplicated!"})
 		return
 	}
 
