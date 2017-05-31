@@ -9,13 +9,18 @@ import (
 )
 
 func (router *MainRouter) PanelIndexHandler(c *gin.Context) {
-	userID := c.MustGet("userId")
-	user := new(models.User)
-	router.db.Id(userID).Get(user)
+	userID, exists := c.Get("userId")
 
-	c.HTML(http.StatusOK, "panel.html", gin.H{
-		"username": user.Username,
-	})
+	if exists {
+		user := new(models.User)
+		router.db.Id(userID).Get(user)
+
+		c.HTML(http.StatusOK, "panel.html", gin.H{
+			"username": user.Username,
+		})
+	}
+
+	c.HTML(http.StatusOK, "panel.html", nil)
 }
 
 func (router *MainRouter) LogoutHandler(c *gin.Context) {
