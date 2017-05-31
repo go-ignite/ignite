@@ -35,11 +35,10 @@ func (router *MainRouter) SignupHandler(c *gin.Context) {
 
 	if count == 0 {
 		fmt.Println("Invalid invite code!")
+		c.JSON(http.StatusOK, &models.Response{Success: false, Message: "Invalid invite code!"})
+		return
 	}
 
 	fmt.Printf("User %s with invite code: %s", username, inviteCode)
-
-	c.HTML(http.StatusOK, "index.tpl", gin.H{
-		"title": "Main website",
-	})
+	c.JSON(http.StatusOK, &models.Response{Success: true, Message: "Success!"})
 }

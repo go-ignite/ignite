@@ -11,6 +11,8 @@
   <link href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
   <link href="/static/css/styles.css" rel="stylesheet">
   <link href="/static/css/animate.css" rel="stylesheet">
+  <!-- Toastr -->
+  <link href="/static/css/toastr.min.css" rel="stylesheet">
   <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
   <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
   <!--[if lt IE 9]>
@@ -73,7 +75,7 @@
         <input type="text" placeholder="用户名" name="username">
         <input type="password" placeholder="密码" name="password">
         <input type="password" placeholder="确认密码" name="confirm-password">
-        <button type="submit" id="signup-btn">激活</button>
+        <button id="signup-btn">激活</button>
       </form>
     </div>
   </section>
@@ -99,5 +101,11 @@
   <!-- Toastr script-->
   <script src="/static/js/toastr.min.js"></script>
   <script src="/static/js/scripts.js"></script>
+  <script src="/static/js/signup.js"></script>
+  <script>
+        $(document).ready(function() {
+            Signup.init();
+        });
+    </script>
 </body>
 </html>
