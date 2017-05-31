@@ -61,19 +61,19 @@
       </div>
       <div class="row">
         <div class="col-md-6 col-md-offset-3 text-center">
-          <a href="#" class="signup-btn">注册</a>
+          <a href="#" class="signup-btn">激活账号</a>
           <p class="login-text">已注册用户，点击 <em>此处</em> 登陆.</p>
         </div>
       </div>
     </div>
     <div class="container text-center" id="signup">
-      <form class="form" action="/signup" method="post">
-        <h1>Signup</h1>
-        <input type="text" placeholder="Invitation Code" name="invite-code">
-        <input type="text" placeholder="Username" name="username">
-        <input type="password" placeholder="Password" name="password">
-        <input type="password" placeholder="Confirm Password" name="confirm-password">
-        <button type="submit" id="login-button">Signup</button>
+      <form class="form" id="signup-form" action="/signup" method="post">
+        <h1>激活账号</h1>
+        <input type="text" placeholder="邀请码" name="invite-code">
+        <input type="text" placeholder="用户名" name="username">
+        <input type="password" placeholder="密码" name="password">
+        <input type="password" placeholder="确认密码" name="confirm-password">
+        <button type="submit" id="signup-btn">激活</button>
       </form>
     </div>
   </section>

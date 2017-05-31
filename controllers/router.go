@@ -63,5 +63,11 @@ func (self *MainRouter) Initialize(r *gin.Engine) {
 	self.router.GET("/", self.IndexHandler)
 	self.router.POST("/login", self.LoginHandler)
 	self.router.POST("/signup", self.SignupHandler)
+
+	pg := self.router.Group("/panel")
+	{
+		pg.GET("/", self.PanelIndexHandler)
+	}
+
 	self.router.Run(":5000")
 }
