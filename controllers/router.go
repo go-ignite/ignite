@@ -47,7 +47,7 @@ func (self *MainRouter) Initialize(r *gin.Engine) {
 		os.Exit(1)
 	}
 
-	err = engine.Sync2(new(models.User))
+	err = engine.Sync2(new(models.User), new(models.InviteCode))
 	if err != nil {
 		fmt.Println("Failed to sync database struct:", err.Error())
 		os.Exit(1)
