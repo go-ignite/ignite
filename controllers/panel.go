@@ -8,7 +8,7 @@ import (
 )
 
 func (router *MainRouter) PanelIndexHandler(c *gin.Context) {
-	c.HTML(http.StatusOK, "panel.tpl", nil)
+	c.HTML(http.StatusOK, "panel.html", nil)
 }
 
 func (router *MainRouter) LogoutHandler(c *gin.Context) {
@@ -16,7 +16,7 @@ func (router *MainRouter) LogoutHandler(c *gin.Context) {
 	session.Delete("userId")
 	session.Save()
 
-	c.HTML(http.StatusOK, "index.tpl", gin.H{
+	c.HTML(http.StatusOK, "index.html", gin.H{
 		"title": "Main website",
 	})
 }

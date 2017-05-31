@@ -16,7 +16,7 @@ var User = function () {
                 }
             }, "json");
         });
-    }
+    };
 
     var loginHandler = function () {
         $('#exchange').on('click', function (e) {
@@ -44,7 +44,7 @@ var User = function () {
                 }
             }, "json");
         });
-    }
+    };
 
     return {
         //main function to initiate the module
