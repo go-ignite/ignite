@@ -96,7 +96,8 @@
   <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
   <script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
   <script src="/static/js/bootstrap.min.js"></script>
+  <!-- Toastr script-->
+  <script src="/static/js/toastr.min.js"></script>
   <script src="/static/js/scripts.js"></script>
 </body>
-
 </html>
