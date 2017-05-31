@@ -37,7 +37,13 @@ func (self *MainRouter) Initialize(r *gin.Engine) {
 	}
 
 	//Init DB connection
-	connString := fmt.Sprintf("%s:%s@/ignite?charset=utf8", config.Get("mysql.user").(string), config.Get("mysql.password").(string))
+	var (
+		user     = config.Get("mysql.user").(string)
+		password = config.Get("mysql.password").(string)
+		host     = config.Get("mysql.host").(string)
+		dbname   = config.Get("mysql.dbname").(string)
+	)
+	connString := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8", user, password, host, dbname)
 	engine, _ := xorm.NewEngine("mysql", connString)
 
 	err = engine.Ping()
