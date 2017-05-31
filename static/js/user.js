@@ -3,17 +3,42 @@ var User = function () {
     var signupHandler = function () {
         $('#signup-btn').on('click', function (e) {
             e.preventDefault();
-            console.log("Clicked...")
 
             var form = $('#signup-form');
             var url = form.attr("action");
             $.post(url, form.serialize(), function (data) {
                 if (data.success) {
-                    console.log("Success...")
-                    window.location.href='/panel';
+                    window.location.href = '/panel';
                 } else {
                     //Signup failed
-                    console.log('Signup failed!');
+                    toastr.warning(data.message);
+                    return false;
+                }
+            }, "json");
+        });
+    }
+
+    var loginHandler = function () {
+        $('#exchange').on('click', function (e) {
+            e.preventDefault();
+
+            $('#hero').fadeOut(1000);
+            $('#hero').css("display", "none");
+
+            $('#signup').css("display", "none")
+            $('#login').fadeIn(500);
+        });
+
+        $('#login-btn').on('click', function (e) {
+            e.preventDefault();
+
+            var form = $('#login-form');
+            var url = form.attr("action");
+            $.post(url, form.serialize(), function (data) {
+                if (data.success) {
+                    window.location.href = '/panel';
+                } else {
+                    //Login failed
                     toastr.warning(data.message);
                     return false;
                 }
@@ -25,6 +50,7 @@ var User = function () {
         //main function to initiate the module
         init: function () {
             signupHandler();
+            loginHandler();
         }
     };
 }();
