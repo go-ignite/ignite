@@ -63,14 +63,6 @@ var User = function () {
         $('.header-li').on('click', function (e) {
             $(this).addClass("active").siblings().removeClass("active");
         });
-
-        $('.logout').on('click', function (e) {
-           $.get("/panel/logout");
-        });
-
-        $('.panel').on('click', function (e) {
-           window.location.href = '/panel/index';
-        });
     };
 
     return {

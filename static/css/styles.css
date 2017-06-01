@@ -348,7 +348,7 @@ form input:focus {
   top: 0;
   left: 0;
   width: 100%;
-  height: 100%;
+  height: 80%;
   z-index: 1;
 }
 .bg-bubbles li {

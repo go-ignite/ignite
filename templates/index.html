@@ -51,7 +51,7 @@
              <a href="#" class="signup-btn signup">激活账号</a>
              <p class="login-text">已注册用户，点击 <em><a class="login" href="#">此处</a></em> 登录</p>
           {{ else }}
-             <a class="signup-btn panel">控制台</a>
+             <a href="/panel/index" class="signup-btn">控制台</a>
           {{ end }}
         </div>
       </div>
@@ -76,26 +76,7 @@
     </div>
   </section>
 
-  <footer class="navbar navbar-fixed-bottom">
-    <div class="container">
-      <div class="row">
-        <div class="col-md-6">
-          <ul class="legals">
-            <li><a href="#">Terms &amp; Conditions</a></li>
-            <li><a href="#">Legals</a></li>
-          </ul>
-        </div>
-        <div class="col-md-6 credit">
-          <p>A dockernized service for <a href="#"><em>SS</em></a></p>
-        </div>
-      </div>
-    </div>
-  </footer>
-  <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-  <script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
-  <script src="/static/js/bootstrap.min.js"></script>
-  <!-- Toastr script-->
-  <script src="/static/js/toastr.min.js"></script>
+  {{ template "footer.html" .}}
   <script src="/static/js/scripts.js"></script>
   <script src="/static/js/user.js"></script>
   <script src="/static/js/header.js"></script>
