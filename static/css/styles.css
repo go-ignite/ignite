@@ -225,6 +225,7 @@ Hero
     left: 50%;
     transform: translate(-50%, -50%); 
     height: auto; 
+    z-index: 2;
 }
 
 .hero h1 { font-size: 40px; letter-spacing: 12px; margin: 10px; color:white}
@@ -270,7 +271,6 @@ Hero
 form {
   padding: 20px 0;
   position: relative;
-  z-index: 2;
 }
 
 .form h1 { margin: 0px 0px 20px 0;}
