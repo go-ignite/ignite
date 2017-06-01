@@ -1,6 +1,14 @@
 var User = function () {
 
     var signupHandler = function () {
+        $(".signup").click(function(event){
+            event.preventDefault();
+            $('#hero').fadeOut(1000);
+            $('#hero').css("display", "none");
+             $('#signup').fadeIn(500);
+        });
+
+
         $('#signup-btn').on('click', function (e) {
             e.preventDefault();
 
@@ -19,7 +27,7 @@ var User = function () {
     };
 
     var loginHandler = function () {
-        $('#exchange').on('click', function (e) {
+        $('.login').on('click', function (e) {
             e.preventDefault();
 
             $('#hero').fadeOut(1000);
