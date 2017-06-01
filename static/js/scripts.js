@@ -14,15 +14,6 @@ $(document).ready(function() {
 
 	$('.main-title').css('visibility', 'visible').addClass('animated fadeInDown');
 
-	 $(".signup-btn").click(function(event){
-		 event.preventDefault();
-	 
-	 	 $('#hero').fadeOut(1000);
-		 $('#hero').css("display", "none");
-
-		 $('#signup').fadeIn(500);
-	 	//$('.wrapper').addClass('form-success');
-	});
 });
 
 function initBannerVideoSize(element){
