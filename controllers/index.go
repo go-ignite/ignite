@@ -12,9 +12,7 @@ import (
 )
 
 func (router *MainRouter) IndexHandler(c *gin.Context) {
-	c.HTML(http.StatusOK, "index.html", gin.H{
-		"title": "Main website",
-	})
+	c.HTML(http.StatusOK, "index.html", nil)
 }
 
 func (router *MainRouter) LoginHandler(c *gin.Context) {
