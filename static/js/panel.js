@@ -1,4 +1,4 @@
-var User = function () {
+var Panel = function () {
 
     var createHandler = function () {
         $('#create-btn').on('click', function (e) {

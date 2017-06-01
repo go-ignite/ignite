@@ -327,7 +327,7 @@ form button:hover {
   background-color: #f5f7f9;
 }
 
-hero button {
+.hero button {
   -webkit-appearance: none;
      -moz-appearance: none;
           appearance: none;
@@ -344,7 +344,7 @@ hero button {
           transition-duration: 0.25s;
 }
 
-hero button:hover {
+.hero button:hover {
   color: gray;
   background-color: #f5f7f9;
 }

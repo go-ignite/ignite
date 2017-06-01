@@ -8,7 +8,6 @@ var User = function () {
              $('#signup').fadeIn(500);
         });
 
-
         $('#signup-btn').on('click', function (e) {
             e.preventDefault();
 
