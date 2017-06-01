@@ -1,6 +1,7 @@
 var Panel = function () {
 
     var createHandler = function () {
+        console.log("init called...")
         $('#create-btn').on('click', function (e) {
             e.preventDefault();
             console.log("create-btn clicked...");

@@ -225,6 +225,7 @@ Hero
     left: 50%;
     transform: translate(-50%, -50%); 
     height: auto; 
+    z-index: 2;
 }
 
 .hero h1 { font-size: 40px; letter-spacing: 12px; margin: 10px; color:white}
@@ -270,7 +271,6 @@ Hero
 form {
   padding: 20px 0;
   position: relative;
-  z-index: 2;
 }
 
 .form h1 { margin: 0px 0px 20px 0;}
@@ -305,7 +305,7 @@ form input:focus {
   color: #53e3a6;
 }
 
-form button {
+.common-btn {
   -webkit-appearance: none;
      -moz-appearance: none;
           appearance: none;
@@ -322,29 +322,7 @@ form button {
           transition-duration: 0.25s;
 }
 
-form button:hover {
-  color: gray;
-  background-color: #f5f7f9;
-}
-
-.hero button {
-  -webkit-appearance: none;
-     -moz-appearance: none;
-          appearance: none;
-  outline: 0;
-  background: rgba(61, 201, 179, 1);
-  border: 0;
-  padding: 10px 15px;
-  color: #fff;
-  border-radius: 3px;
-  width: 250px;
-  cursor: pointer;
-  font-size: 18px;
-  -webkit-transition-duration: 0.25s;
-          transition-duration: 0.25s;
-}
-
-.hero button:hover {
+.common-btn:hover {
   color: gray;
   background-color: #f5f7f9;
 }
