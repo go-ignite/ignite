@@ -305,7 +305,7 @@ form input:focus {
   color: #53e3a6;
 }
 
-form button {
+.common-btn {
   -webkit-appearance: none;
      -moz-appearance: none;
           appearance: none;
@@ -322,29 +322,7 @@ form button {
           transition-duration: 0.25s;
 }
 
-form button:hover {
-  color: gray;
-  background-color: #f5f7f9;
-}
-
-.hero button {
-  -webkit-appearance: none;
-     -moz-appearance: none;
-          appearance: none;
-  outline: 0;
-  background: rgba(61, 201, 179, 1);
-  border: 0;
-  padding: 10px 15px;
-  color: #fff;
-  border-radius: 3px;
-  width: 250px;
-  cursor: pointer;
-  font-size: 18px;
-  -webkit-transition-duration: 0.25s;
-          transition-duration: 0.25s;
-}
-
-.hero button:hover {
+.common-btn:hover {
   color: gray;
   background-color: #f5f7f9;
 }
