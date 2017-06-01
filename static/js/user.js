@@ -5,7 +5,9 @@ var User = function () {
             event.preventDefault();
             $('#hero').fadeOut(1000);
             $('#hero').css("display", "none");
-             $('#signup').fadeIn(500);
+
+            $('#login').css("display", "none")
+            $('#signup').fadeIn(500);
         });
 
         $('#signup-btn').on('click', function (e) {
@@ -28,7 +30,6 @@ var User = function () {
     var loginHandler = function () {
         $('.login').on('click', function (e) {
             e.preventDefault();
-
             $('#hero').fadeOut(1000);
             $('#hero').css("display", "none");
 
