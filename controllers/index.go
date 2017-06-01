@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"ignite/models"
 	"net/http"
+	"regexp"
 
 	"golang.org/x/crypto/bcrypt"
 
@@ -48,6 +49,13 @@ func (router *MainRouter) SignupHandler(c *gin.Context) {
 	username := c.PostForm("username")
 	pwd := c.PostForm("password")
 	confirmPwd := c.PostForm("confirm-password")
+
+	matched, _ := regexp.MatchString("^[a-zA-Z0-9]+$", username)
+
+	if !matched {
+		fmt.Println("Username is invalid!")
+		c.JSON(http.StatusOK, &models.Response{Success: false, Message: "Username is invalid!"})
+	}
 
 	if pwd != confirmPwd {
 		fmt.Println("passwords not match!")
