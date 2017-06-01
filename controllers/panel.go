@@ -3,24 +3,27 @@ package controllers
 import (
 	"net/http"
 
+	"ignite/models"
+
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
-	"ignite/models"
 )
 
 func (router *MainRouter) PanelIndexHandler(c *gin.Context) {
 	userID, exists := c.Get("userId")
 
-	if exists {
-		user := new(models.User)
-		router.db.Id(userID).Get(user)
-
-		c.HTML(http.StatusOK, "panel.html", gin.H{
-			"username": user.Username,
-		})
+	if !exists {
+		c.HTML(http.StatusOK, "panel.html", nil)
+		return
 	}
 
-	c.HTML(http.StatusOK, "panel.html", nil)
+	user := new(models.User)
+	router.db.Id(userID).Get(user)
+
+	c.HTML(http.StatusOK, "panel.html", gin.H{
+		"username": user.Username,
+	})
+
 }
 
 func (router *MainRouter) LogoutHandler(c *gin.Context) {
