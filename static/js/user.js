@@ -6,7 +6,8 @@ var User = function () {
             $('#hero').fadeOut(1000);
             $('#hero').css("display", "none");
 
-            $('#login').css("display", "none")
+            $('#login').css("display", "none");
+            $('.header-signup').addClass("active").siblings().removeClass("active");
             $('#signup').fadeIn(500);
         });
 
@@ -34,6 +35,7 @@ var User = function () {
             $('#hero').css("display", "none");
 
             $('#signup').css("display", "none")
+            $('.header-login').addClass("active").siblings().removeClass("active");
             $('#login').fadeIn(500);
         });
 
@@ -57,11 +59,18 @@ var User = function () {
         });
     };
 
+    var commonHandler = function () {
+        $('.header-li').on('click', function (e) {
+            $(this).addClass("active").siblings().removeClass("active");
+        });
+    };
+
     return {
         //main function to initiate the module
         init: function () {
             signupHandler();
             loginHandler();
+            commonHandler();
         }
     };
 }();
