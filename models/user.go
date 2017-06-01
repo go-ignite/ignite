@@ -15,3 +15,8 @@ type User struct {
 	Created      time.Time `xorm:"created"`
 	Updated      time.Time `xorm:"updated"`
 }
+
+type UserInfo struct {
+	Id       int64
+	Username string
+}

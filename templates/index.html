@@ -47,8 +47,12 @@
       </div>
       <div class="row">
         <div class="col-md-6 col-md-offset-3 text-center">
-          <a href="#" class="signup-btn signup">激活账号</a>
-          <p class="login-text">已注册用户，点击 <em><a class="login" href="#">此处</a></em> 登录</p>
+          {{ if not .uInfo }}
+             <a href="#" class="signup-btn signup">激活账号</a>
+             <p class="login-text">已注册用户，点击 <em><a class="login" href="#">此处</a></em> 登录</p>
+          {{ else }}
+             <a class="signup-btn panel">控制台</a>
+          {{ end }}
         </div>
       </div>
     </div>

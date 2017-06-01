@@ -1,4 +1,4 @@
-{{define "header.html"}}
+{{ define "header.html" }}
 
   <div class="navbar navbar-inverse navbar-fixed-top opaque-navbar">
     <div class="container">
@@ -11,8 +11,12 @@
       <div class="collapse navbar-collapse" id="navMain">
         <ul class="nav navbar-nav pull-right">
           <li class="active header-li"><a href="/">首页</a></li>
+           {{ if not .uInfo }}
           <li class="header-li header-signup"><a class="signup" href="#">注册</a></li>
           <li class="header-li header-login"><a class="login" href="#">登录</a></li>
+          {{ else }}
+          <li class="header-li"><a class="logout">退出</a></li>
+          {{ end }}
           <li class="header-li"><a href="#">关于</a></li>
         </ul>
       </div>
