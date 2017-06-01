@@ -251,7 +251,7 @@ Hero
     position: absolute;
 }
 .video-container .filter {
-    z-index: 100;
+    z-index: 0;
     position: absolute;
     background: rgba(0, 0, 0, 0.4);
     width: 100%;
