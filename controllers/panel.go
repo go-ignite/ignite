@@ -20,8 +20,13 @@ func (router *MainRouter) PanelIndexHandler(c *gin.Context) {
 	user := new(models.User)
 	router.db.Id(userID).Get(user)
 
+	uInfo := &models.UserInfo{
+		Id:       user.Id,
+		Username: user.Username,
+	}
+
 	c.HTML(http.StatusOK, "panel.html", gin.H{
-		"username": user.Username,
+		"uInfo": uInfo,
 	})
 
 }

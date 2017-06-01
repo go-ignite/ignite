@@ -12,7 +12,20 @@ import (
 )
 
 func (router *MainRouter) IndexHandler(c *gin.Context) {
-	c.HTML(http.StatusOK, "index.html", nil)
+	session := sessions.Default(c)
+	v := session.Get("userId")
+	var uInfo *models.UserInfo
+	if v != nil {
+		if uId, ok := v.(int64); ok {
+			uInfo = &models.UserInfo{
+				Id: uId,
+			}
+		}
+	}
+
+	c.HTML(http.StatusOK, "index.html", gin.H{
+		"uInfo": uInfo,
+	})
 }
 
 func (router *MainRouter) LoginHandler(c *gin.Context) {
