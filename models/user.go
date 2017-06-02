@@ -18,11 +18,12 @@ type User struct {
 }
 
 type UserInfo struct {
-	Id           int64
-	Username     string
-	Status       int
-	PackageLimit int
-	PackageUsed  float32
-	ServicePort  int
-	ServicePwd   string
+	Id                 int64
+	Username           string
+	Status             int
+	PackageLimit       int
+	PackageUsed        float32
+	PackageUsedPercent string
+	ServicePort        int
+	ServicePwd         string
 }

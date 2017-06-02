@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 
 	"ignite/models"
@@ -24,10 +25,15 @@ func (router *MainRouter) PanelIndexHandler(c *gin.Context) {
 		Id:           user.Id,
 		Username:     user.Username,
 		Status:       user.Status,
-		PackageLimit: user.PackageLimit,
 		PackageUsed:  user.PackageUsed,
+		PackageLimit: user.PackageLimit,
 		ServicePort:  user.ServicePort,
 		ServicePwd:   user.ServicePwd,
+	}
+	if user.PackageLimit == 0 {
+		uInfo.PackageUsedPercent = "0"
+	} else {
+		uInfo.PackageUsedPercent = fmt.Sprintf("%.2f", user.PackageUsed/float32(user.PackageLimit)*100)
 	}
 
 	c.HTML(http.StatusOK, "panel.html", gin.H{
