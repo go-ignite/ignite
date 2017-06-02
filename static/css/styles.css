@@ -393,7 +393,7 @@ InfoBox
   font-family: "Open Sans", sans;
   font-weight: 400;
   color: #377D6A;
-  background: white;
+  background: rgba(255,255,255,0.7);
   border: 0;
   border-radius: 3px;
   outline: 0;
