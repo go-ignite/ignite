@@ -389,7 +389,7 @@ InfoBox
 .basic-slide {
   display: inline-block;
   width: 280px;
-  padding: 10px 0 10px 15px;
+  padding: 10px 0 10px 0px;
   font-family: "Open Sans", sans;
   font-weight: 400;
   color: #377D6A;
