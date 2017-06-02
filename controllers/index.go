@@ -5,6 +5,7 @@ import (
 	"ignite/models"
 	"net/http"
 	"regexp"
+	"time"
 
 	"golang.org/x/crypto/bcrypt"
 
@@ -105,6 +106,7 @@ func (router *MainRouter) SignupHandler(c *gin.Context) {
 	user.HashedPwd = hashedPass
 	user.InviteCode = iv.InviteCode
 	user.PackageLimit = iv.PackageLimit
+	user.Expired = time.Now().AddDate(0, iv.AvailableLimit, 0)
 
 	affected, _ := trans.Insert(user)
 

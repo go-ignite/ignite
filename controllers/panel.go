@@ -21,14 +21,18 @@ func (router *MainRouter) PanelIndexHandler(c *gin.Context) {
 	router.db.Id(userID).Get(user)
 
 	uInfo := &models.UserInfo{
-		Id:       user.Id,
-		Username: user.Username,
+		Id:           user.Id,
+		Username:     user.Username,
+		Status:       user.Status,
+		PackageLimit: user.PackageLimit,
+		PackageUsed:  user.PackageUsed,
+		ServicePort:  user.ServicePort,
+		ServicePwd:   user.ServicePwd,
 	}
 
 	c.HTML(http.StatusOK, "panel.html", gin.H{
 		"uInfo": uInfo,
 	})
-
 }
 
 func (router *MainRouter) LogoutHandler(c *gin.Context) {
