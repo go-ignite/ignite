@@ -349,10 +349,53 @@ InfoBox
   margin: 0px auto 0px;
   position: relative;
   width: 460px;
+  height: auto;
   background: rgba(255,255,255, 0.45);
   border-radius: 15px;
-  padding: 30px 45px 30px;
+  padding: 30px 0px 0px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+}
+
+.stat-bar {
+  width: 100%;
+  height: 100px;
+  background: rgba(61, 201, 179, 0.67);
+  color: white;
+  /*background: rgba(236, 155, 59, 0.67);*/
+  margin: 0px 0px 0px 0px;
+  border-bottom-left-radius: 15px;
+  border-bottom-right-radius: 15px;
+}
+
+.a-half {
+  width: 50%;
+  height: 100px;
+  border-right: 1px solid #10aba3;
+  float: left;
+  background: transparent;
+  padding: 15px;
+}
+
+.stat-bar .no-border {
+    border-right: none;
+}
+
+.stat-bar .stat {
+  position: relative;
+  font-size: 40px;
+}
+
+.stat-bar .stat-value {
+  text-transform: uppercase;
+  font-weight: 400;
+  font-size: 12px;
+}
+
+.stat-bar up {
+  position: absolute;
+  bottom: 30px;
+  font-size: 45%;
+  margin-left: 2px;
 }
 
 /*Bubbles*/
