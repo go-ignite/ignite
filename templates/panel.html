@@ -37,6 +37,21 @@
                 {{ else }}
                 <div class="infobox">
                     <div class="header-bar text-left">账户概览</div>
+                    <div>
+                        <span>
+                        <input class="basic-slide" id="name" type="text" value="localhost" readonly />
+                        <label for="name">主机</label>
+                        </span>
+                        <span>
+                        <input class="basic-slide" id="name" type="text" value="6666" readonly />
+                        <label for="name">端口</label>
+                        </span>
+                        <span>
+                        <input class="basic-slide" id="name" type="text" value="NoOneKnows!" readonly />
+                        <label for="name">密码</label>
+                        </span>
+                    </div>
+                    <div class="middle-bar text-left">流量统计</div>
                     <div class="progressbar" data-perc="{{ .uInfo.PackageUsedPercent }}">
                         <div class="bar"><span></span></div>
                         <div class="label"><span></span></div>

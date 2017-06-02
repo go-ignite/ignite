@@ -363,10 +363,55 @@ InfoBox
   color: white;
   font-size: 20px;
   /*background: rgba(236, 155, 59, 0.67);*/
-  padding: 15px 10px;
-  margin: 0px 0px 40px 0px;
+  padding: 13px 10px;
+  margin: 0px 0px 10px 0px;
   border-top-left-radius: 15px;
   border-top-right-radius: 15px;
+}
+
+.middle-bar {
+  width: 100%;
+  height: 50px;
+  background: rgba(61, 201, 179, 0.67);
+  color: white;
+  font-size: 20px;
+  /*background: rgba(236, 155, 59, 0.67);*/
+  padding: 13px 10px;
+  margin: 10px 0px 25px 0px;
+}
+
+.infobox span {
+  position: relative;
+  display: inline-block;
+  margin: 10px 10px;
+}
+
+.basic-slide {
+  display: inline-block;
+  width: 280px;
+  padding: 10px 0 10px 15px;
+  font-family: "Open Sans", sans;
+  font-weight: 400;
+  color: #377D6A;
+  background: white;
+  border: 0;
+  border-radius: 3px;
+  outline: 0;
+  text-indent: 70px;
+  text-align: center;
+}
+
+.basic-slide + label {
+  display: inline-block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 10px 15px;
+  background: rgba(61, 201, 179, 0.67);
+  color: white;
+  border-top-left-radius: 3px;
+  border-bottom-left-radius: 3px;
+  font-weight: 500;
 }
 
 .stat-bar {
