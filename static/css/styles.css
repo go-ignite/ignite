@@ -431,8 +431,7 @@ InfoBox
   border-right: 1px solid #10aba3;
   float: left;
   background: transparent;
-  padding: 15px;
-  text-align: center;
+  padding: 15px 20px 0px 0px;
 }
 
 .stat-bar .no-border {

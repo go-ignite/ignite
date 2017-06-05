@@ -27,4 +27,5 @@ type UserInfo struct {
 	PackageLeftPercent string
 	ServicePort        int
 	ServicePwd         string
+	Expired            string
 }
