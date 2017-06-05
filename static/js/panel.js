@@ -7,10 +7,10 @@ var Panel = function () {
             console.log("create-btn clicked...");
 
             //1. Hide create-btn.
-            $('#create-btn').fadeOut(500);
+            $('#form-title').css('display', 'none');
+            $('#create-btn').css('display', 'none');
 
             //2. Show loading icon.
-            $('#form-title').text('创建中...');
             $('.boxLoading').fadeIn(500);
 
             // var form = $('#signup-form');
