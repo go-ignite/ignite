@@ -35,14 +35,14 @@
     <div class="wrapper">
         <div class="hero">
             <div class="container text-center">
-                {{ if eq .uInfo.Status 0}}
-                <form class="form" id="create-form" action="/signup" method="post">
+
+                <form class="form" id="create-form" action="/signup" method="post" {{ if ne .uInfo.Status 0}} style="display: none" {{ end }}>
                     <h1 id="form-title">创建服务</h1>
                     <button id="create-btn" class="common-btn">创建</button>
                     <div class="boxLoading"></div>
                 </form>
-                {{ else }}
-                <div class="infobox">
+
+                <div class="infobox" {{ if eq .uInfo.Status 0 }} style="display: none" {{ end }}>
                     <div class="header-bar text-left">账户概览</div>
                     <div>
                         <span>
@@ -84,7 +84,6 @@
                         </div>
                     </div>
                 </div>
-                {{ end }}
             </div>
         </div>
 

@@ -13,6 +13,8 @@ var Panel = function () {
             //2. Show loading icon.
             $('.boxLoading').fadeIn(500);
 
+            //3. Send create SS service request & show account info panel.
+
             // var form = $('#signup-form');
             // var url = form.attr("action");
             // $.post(url, form.serialize(), function (data) {
@@ -24,6 +26,9 @@ var Panel = function () {
             //         return false;
             //     }
             // }, "json");
+
+            $('.boxLoading').delay(1000).css('display', 'none');
+            $('.infobox').delay(1500).fadeIn(1000);
         });
     };
 
