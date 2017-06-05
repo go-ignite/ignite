@@ -14,6 +14,11 @@
     <!-- Toastr -->
     <link href="/static/css/toastr.min.css" rel="stylesheet">
     <link href="/static/css/progress-bar.css" rel="stylesheet">
+
+    {{ if eq .uInfo.Status 0}}
+    <link href="/static/css/loading.css" rel="stylesheet">
+    {{ end }}
+    
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
@@ -32,8 +37,9 @@
             <div class="container text-center">
                 {{ if eq .uInfo.Status 0}}
                 <form class="form" id="create-form" action="/signup" method="post">
-                    <h1>创建服务</h1>
+                    <h1 id="form-title">创建服务</h1>
                     <button id="create-btn" class="common-btn">创建</button>
+                    <div class="boxLoading"></div>
                 </form>
                 {{ else }}
                 <div class="infobox">

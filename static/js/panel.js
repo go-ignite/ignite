@@ -6,6 +6,13 @@ var Panel = function () {
             e.preventDefault();
             console.log("create-btn clicked...");
 
+            //1. Hide create-btn.
+            $('#create-btn').css('display', 'none');
+
+            //2. Show loading icon.
+            $('#form-title').text('创建中...');
+            $('.boxLoading').fadeIn(500);
+
             // var form = $('#signup-form');
             // var url = form.attr("action");
             // $.post(url, form.serialize(), function (data) {
