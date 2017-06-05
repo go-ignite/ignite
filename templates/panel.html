@@ -44,11 +44,11 @@
                         <label for="name">主机</label>
                         </span>
                         <span>
-                        <input class="basic-slide" id="name" type="text" value="6666" readonly />
+                        <input class="basic-slide" id="name" type="text" value="{{ .uInfo.ServicePort }}" readonly />
                         <label for="name">端口</label>
                         </span>
                         <span>
-                        <input class="basic-slide" id="name" type="text" value="NoOneKnows!" readonly />
+                        <input class="basic-slide" id="name" type="text" value="{{ .uInfo.ServicePwd }}" readonly />
                         <label for="name">密码</label>
                         </span>
                     </div>
