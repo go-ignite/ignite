@@ -102,7 +102,7 @@
 	position:absolute;
 	display:block;
 	width:62px;
-	height:30px;
+	height:33px;
 	line-height:30px;
 	top:38px;
 	left:0px;
@@ -160,6 +160,9 @@
 	-o-transform:rotate(45deg);
 	-ms-transform:rotate(45deg);
 	transform:rotate(45deg);
+}
+.label .perc {
+	margin-top: 3px;
 }
 @-webkit-keyframes sparkle {
 	from {background-position: 0 0;}
