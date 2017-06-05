@@ -312,10 +312,10 @@ form input:focus {
   outline: 0;
   background: rgba(61, 201, 179, 1);
   border: 0;
-  padding: 10px 15px;
   color: #fff;
   border-radius: 3px;
   width: 250px;
+  height: 50px;
   cursor: pointer;
   font-size: 18px;
   -webkit-transition-duration: 0.25s;
