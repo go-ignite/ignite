@@ -27,13 +27,14 @@ func (router *MainRouter) PanelIndexHandler(c *gin.Context) {
 		Status:       user.Status,
 		PackageUsed:  user.PackageUsed,
 		PackageLimit: user.PackageLimit,
+		PackageLeft:  float32(user.PackageLimit) - user.PackageUsed,
 		ServicePort:  user.ServicePort,
 		ServicePwd:   user.ServicePwd,
 	}
 	if user.PackageLimit == 0 {
-		uInfo.PackageUsedPercent = "0"
+		uInfo.PackageLeftPercent = "0"
 	} else {
-		uInfo.PackageUsedPercent = fmt.Sprintf("%.2f", user.PackageUsed/float32(user.PackageLimit)*100)
+		uInfo.PackageLeftPercent = fmt.Sprintf("%.2f", uInfo.PackageLeft/float32(user.PackageLimit)*100)
 	}
 
 	c.HTML(http.StatusOK, "panel.html", gin.H{

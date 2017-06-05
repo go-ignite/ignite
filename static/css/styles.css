@@ -425,13 +425,14 @@ InfoBox
   border-bottom-right-radius: 15px;
 }
 
-.a-half {
-  width: 50%;
+.a-third {
+  width: 33.33%;
   height: 100px;
   border-right: 1px solid #10aba3;
   float: left;
   background: transparent;
   padding: 15px;
+  text-align: center;
 }
 
 .stat-bar .no-border {

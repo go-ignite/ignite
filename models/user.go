@@ -23,7 +23,8 @@ type UserInfo struct {
 	Status             int
 	PackageLimit       int
 	PackageUsed        float32
-	PackageUsedPercent string
+	PackageLeft        float32
+	PackageLeftPercent string
 	ServicePort        int
 	ServicePwd         string
 }

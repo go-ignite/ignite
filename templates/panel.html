@@ -53,22 +53,28 @@
                         </span>
                     </div>
                     <div class="middle-bar text-left">流量统计</div>
-                    <div class="progressbar" data-perc="{{ .uInfo.PackageUsedPercent }}">
+                    <div class="progressbar" data-perc="{{ .uInfo.PackageLeftPercent }}">
                         <div class="bar"><span></span></div>
                         <div class="label"><span></span></div>
                     </div>
                     <div class="stat-bar">
-                        <div class="a-half">
+                        <div class="a-third">
                             <div class="stat">{{ .uInfo.PackageLimit }}
                                 <up>GB</up>
                             </div>
                             <div class="stat-value">总流量</div>
                         </div>
-                        <div class="a-half no-border">
+                        <div class="a-third">
                             <div class="stat">{{ .uInfo.PackageUsed }}
                                 <up>GB</up>
                             </div>
                             <div class="stat-value">已使用</div>
+                        </div>
+                        <div class="a-third no-border">
+                            <div class="stat">{{ .uInfo.PackageLeft }}
+                                <up>GB</up>
+                            </div>
+                            <div class="stat-value">剩余</div>
                         </div>
                     </div>
                 </div>
@@ -109,7 +115,7 @@
                             perc = Math.round(parseInt(length) / 3.56),
                             labelpos = (parseInt(length) - 2);
                         t.find('.label').css('left', labelpos);
-                        t.find('.perc').text(perc + '%');
+                        t.find('.perc').text(perc + '%可用');
                     }
                     perc();
                     setInterval(perc, 0);
