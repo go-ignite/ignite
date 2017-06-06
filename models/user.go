@@ -9,7 +9,8 @@ type User struct {
 	InviteCode   string
 	PackageLimit int       `xorm:"not null"` //Package bandwidth limit, unit: GB
 	PackageUsed  float32   //Package bandwidth used, unit: byte
-	Status       int       `xorm:"default 0"`          // 0=>not created 1=>running 2=>stopped
+	Status       int       `xorm:"default 0"` // 0=>not created 1=>running 2=>stopped
+	ServiceId    string    //SS container id
 	ServicePort  int       `xorm:"not null default 0"` //Docker service port for SS
 	ServicePwd   string    //Password for SS
 	Created      time.Time `xorm:"created"`

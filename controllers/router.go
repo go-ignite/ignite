@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"ignite/models"
+	"ignite/ss"
 	"os"
 
 	"github.com/gin-contrib/sessions"
@@ -35,6 +36,9 @@ func (self *MainRouter) Initialize(r *gin.Engine) {
 		fmt.Println("Failed to load config file:", *conf)
 		os.Exit(1)
 	}
+
+	// read ss url
+	ss.ImageUrl = config.Get("ss.image").(string)
 
 	//Init DB connection
 	var (

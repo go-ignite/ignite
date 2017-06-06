@@ -3,3 +3,6 @@ host = "localhost:3306"
 dbname = "ignite"
 user = "root"
 password = "123456"
+
+[ss]
+image = "registry.xiaozhou.net/ssmu:latest"
