@@ -4,10 +4,10 @@ import (
 	"errors"
 	"fmt"
 	"ignite/models"
+	"ignite/utils"
 	"net"
 
 	docker "github.com/fsouza/go-dockerclient"
-	"github.com/renstrom/shortuuid"
 )
 
 var (
@@ -22,7 +22,7 @@ func Init() (err error) {
 }
 
 func create(name string) (*models.ServiceResult, error) {
-	password := shortuuid.New()
+	password := utils.NewPasswd(16)
 	port, err := getAvaliablePort()
 	if err != nil {
 		return nil, err
