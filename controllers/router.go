@@ -40,6 +40,10 @@ func (self *MainRouter) Initialize(r *gin.Engine) {
 	// read ss url
 	ss.ImageUrl = config.Get("ss.image").(string)
 
+	from := int(config.Get("port.from").(int64))
+	to := int(config.Get("port.to").(int64))
+	ss.PortRange = []int{from, to}
+
 	//Init DB connection
 	var (
 		user     = config.Get("mysql.user").(string)

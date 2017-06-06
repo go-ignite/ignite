@@ -13,7 +13,7 @@ import (
 var (
 	ImageUrl  string
 	client    *docker.Client
-	portRange = []int{4000, 6000}
+	PortRange []int
 )
 
 func Init() (err error) {
@@ -65,7 +65,7 @@ func CreateAndStart(name string) (*models.ServiceResult, error) {
 }
 
 func getAvaliablePort() (int, error) {
-	for port := portRange[0]; port <= portRange[1]; port++ {
+	for port := PortRange[0]; port <= PortRange[1]; port++ {
 		conn, err := net.Dial("tcp", fmt.Sprintf(":%d", port))
 		if err != nil {
 			return port, nil
