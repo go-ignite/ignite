@@ -46,15 +46,15 @@
                     <div class="header-bar text-left">账户概览</div>
                     <div>
                         <span>
-                        <input class="basic-slide" id="name" type="text" value="localhost" readonly />
+                        <input class="basic-slide" id="host" type="text" value="localhost" readonly />
                         <label for="name">主机</label>
                         </span>
                         <span>
-                        <input class="basic-slide" id="name" type="text" value="{{ .uInfo.ServicePort }}" readonly />
+                        <input class="basic-slide" id="port" type="text" value="{{ .uInfo.ServicePort }}" readonly />
                         <label for="name">端口</label>
                         </span>
                         <span>
-                        <input class="basic-slide" id="name" type="text" value="{{ .uInfo.ServicePwd }}" readonly />
+                        <input class="basic-slide" id="pwd" type="text" value="{{ .uInfo.ServicePwd }}" readonly />
                         <label for="name">密码</label>
                         </span>
                     </div>
@@ -65,7 +65,7 @@
                     </div>
                     <div class="stat-bar">
                         <div class="a-third">
-                            <div class="stat">{{ .uInfo.PackageLimit }}
+                            <div class="stat" id="package-limit">{{ .uInfo.PackageLimit }}
                                 <up>GB</up>
                             </div>
                             <div class="stat-value">总流量</div>
