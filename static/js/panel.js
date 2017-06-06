@@ -14,14 +14,13 @@ var Panel = function () {
             $('.boxLoading').fadeIn(500);
 
             //3. Send create SS service request & show account info panel.
-
             var form = $('#create-form');
             var url = form.attr("action");
             $.post(url, form.serialize(), function (data) {
                 if (data.success) {
                     // window.location.href = '/panel/index';
                     $('.boxLoading').css('display', 'none');
-                    $('.infobox').delay(1500).fadeIn(1000);
+                    $('.infobox').fadeIn(1500);
                 } else {
                     //Signup failed
                     toastr.warning(data.message);
