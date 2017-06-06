@@ -75,6 +75,7 @@ func (self *MainRouter) Initialize(r *gin.Engine) {
 	{
 		pg.GET("/index", self.PanelIndexHandler)
 		pg.GET("/logout", self.LogoutHandler)
+		pg.POST("/create", self.CreateServiceHandler)
 	}
 
 	self.router.Run(":5000")

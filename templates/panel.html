@@ -36,7 +36,7 @@
         <div class="hero">
             <div class="container text-center">
 
-                <form class="form" id="create-form" action="/signup" method="post" {{ if ne .uInfo.Status 0}} style="display: none" {{ end }}>
+                <form class="form" id="create-form" action="/panel/create" method="post" {{ if ne .uInfo.Status 0}} style="display: none" {{ end }}>
                     <h1 id="form-title">创建服务</h1>
                     <button id="create-btn" class="common-btn">创建</button>
                     <div class="boxLoading"></div>

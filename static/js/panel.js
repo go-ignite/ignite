@@ -15,20 +15,19 @@ var Panel = function () {
 
             //3. Send create SS service request & show account info panel.
 
-            // var form = $('#signup-form');
-            // var url = form.attr("action");
-            // $.post(url, form.serialize(), function (data) {
-            //     if (data.success) {
-            //         window.location.href = '/panel/index';
-            //     } else {
-            //         //Signup failed
-            //         toastr.warning(data.message);
-            //         return false;
-            //     }
-            // }, "json");
-
-            $('.boxLoading').delay(1000).css('display', 'none');
-            $('.infobox').delay(1500).fadeIn(1000);
+            var form = $('#create-form');
+            var url = form.attr("action");
+            $.post(url, form.serialize(), function (data) {
+                if (data.success) {
+                    // window.location.href = '/panel/index';
+                    $('.boxLoading').css('display', 'none');
+                    $('.infobox').delay(1500).fadeIn(1000);
+                } else {
+                    //Signup failed
+                    toastr.warning(data.message);
+                    return false;
+                }
+            }, "json");
         });
     };
 

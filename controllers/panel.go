@@ -3,6 +3,7 @@ package controllers
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	"ignite/models"
 
@@ -48,4 +49,11 @@ func (router *MainRouter) LogoutHandler(c *gin.Context) {
 	session.Save()
 
 	c.Redirect(http.StatusFound, "/")
+}
+
+func (router *MainRouter) CreateServiceHandler(c *gin.Context) {
+	time.Sleep(time.Second * 3)
+	resp := models.Response{Success: true, Message: "OK!"}
+
+	c.JSON(http.StatusOK, resp)
 }
