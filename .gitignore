@@ -3,3 +3,5 @@ ignite.exe
 ignite.exe~
 .DS_Store
 config.toml
+stats/stats
+stats/stats.exe

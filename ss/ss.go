@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"ignite/models"
 	"ignite/utils"
+	"log"
 	"net"
 
 	docker "github.com/fsouza/go-dockerclient"
@@ -16,9 +17,13 @@ var (
 	PortRange []int
 )
 
-func Init() (err error) {
+func init() {
+	var err error
 	client, err = docker.NewClientFromEnv()
-	return err
+	if err != nil {
+		log.Println("New docker client error:", err.Error())
+		// TODO panic?
+	}
 }
 
 func create(name string) (*models.ServiceResult, error) {
@@ -54,6 +59,26 @@ func create(name string) (*models.ServiceResult, error) {
 
 func start(id string) error {
 	return client.StartContainer(id, nil)
+}
+
+func StatsOutNet(id string) (uint64, error) {
+	errC := make(chan error, 1)
+	statsC := make(chan *docker.Stats)
+	done := make(chan bool)
+	defer close(done)
+	go func() {
+		errC <- client.Stats(docker.StatsOptions{ID: id, Stats: statsC, Stream: false, Done: done})
+		close(errC)
+	}()
+	stats, ok := <-statsC
+	if !ok {
+		return 0, errors.New("Can't get stats result")
+	}
+	err := <-errC
+	if err != nil {
+		return 0, err
+	}
+	return stats.Networks["eth0"].TxBytes, nil
 }
 
 func CreateAndStart(name string) (*models.ServiceResult, error) {
