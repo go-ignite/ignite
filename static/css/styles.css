@@ -238,14 +238,14 @@ Hero
 
 .video-container {
     /*position: relative;*/
-    bottom: 0%;
+    /*bottom: 0%;
     left: 0%;
     height: 100%;
     width: 100%;
     overflow: hidden;
-    background: #000;
+    background: #000;*/
 }
-.video-container .poster img {
+/*.video-container .poster img {
     width: 100%;
     bottom: 0;
     position: absolute;
@@ -255,15 +255,16 @@ Hero
     position: absolute;
     background: rgba(0, 0, 0, 0.4);
     width: 100%;
-}
+}*/
 .video-container video {
-    position: absolute;
-    z-index: 0;
-    bottom: 0;
+    position: fixed; right: 0; bottom: 0;
+    min-width: 100%; min-height: 100%;
+    width: auto; height: auto; z-index: -100;
+    background-size: cover; 
 }
-.video-container video.fillWidth {
+/*.video-container video.fillWidth {
     width: 100%;
-}
+}*/
 
 #signup { padding: 40px 0 0px 0; height: auto; display: none;}
 #login { padding: 40px 0 0px 0; height: auto; display: none;}
