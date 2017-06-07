@@ -60,7 +60,7 @@ func (router *MainRouter) CreateServiceHandler(c *gin.Context) {
 	router.db.Id(userID).Get(user)
 
 	// 1. Create ss service
-	result, err := ss.CreateAndStart(user.Username)
+	result, err := ss.CreateAndStartContainer(user.Username)
 
 	if err != nil {
 		log.Println("Create ss service error:", err.Error())
@@ -89,9 +89,9 @@ func (router *MainRouter) CreateServiceHandler(c *gin.Context) {
 		return
 	}
 
-	data := models.ServiceResult{ID: result.ID, Host: ss.Host, Port: result.Port, Password: result.Password, PackageLimit: user.PackageLimit}
+	result.PackageLimit = user.PackageLimit
+	result.Host = ss.Host
 	resp := models.Response{Success: true, Message: "OK!", Data: result}
-	resp.Data = data
 
 	c.JSON(http.StatusOK, resp)
 }

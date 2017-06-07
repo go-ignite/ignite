@@ -28,7 +28,7 @@ func init() {
 	}
 }
 
-func create(name string) (*models.ServiceResult, error) {
+func CreateContainer(name string) (*models.ServiceResult, error) {
 	password := utils.NewPasswd(16)
 	port, err := getAvaliablePort()
 	if err != nil {
@@ -59,8 +59,16 @@ func create(name string) (*models.ServiceResult, error) {
 	return r, nil
 }
 
-func start(id string) error {
+func StartContainer(id string) error {
 	return client.StartContainer(id, nil)
+}
+
+func StopContainer(id string, timeout ...uint) error {
+	var t uint = 10
+	if len(timeout) > 0 {
+		t = timeout[0]
+	}
+	return client.StopContainer(id, t)
 }
 
 func RemoveContainer(id string) error {
@@ -76,7 +84,7 @@ func GetContainerStartTime(id string) (*time.Time, error) {
 	return &info.State.StartedAt, nil
 }
 
-func StatsOutNet(id string) (uint64, error) {
+func GetContainerStatsOutNet(id string) (uint64, error) {
 	errC := make(chan error, 1)
 	statsC := make(chan *docker.Stats)
 	done := make(chan bool)
@@ -96,12 +104,12 @@ func StatsOutNet(id string) (uint64, error) {
 	return stats.Networks["eth0"].TxBytes, nil
 }
 
-func CreateAndStart(name string) (*models.ServiceResult, error) {
-	r, err := create(name)
+func CreateAndStartContainer(name string) (*models.ServiceResult, error) {
+	r, err := CreateContainer(name)
 	if err != nil {
 		return nil, err
 	}
-	return r, start(r.ID)
+	return r, StartContainer(r.ID)
 }
 
 func getAvaliablePort() (int, error) {
