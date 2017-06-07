@@ -10,6 +10,7 @@ type Response struct {
 //ServiceResult struct for new created SS service
 type ServiceResult struct {
 	ID           string `json:"serviceId"`
+	Host         string `json:"host"`
 	Port         int    `json:"servicePort"`
 	Password     string `json:"servicePwd"`
 	PackageLimit int    `json:"packageLimit"`

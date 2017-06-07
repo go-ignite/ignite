@@ -1,10 +1,8 @@
 var Panel = function () {
 
     var createHandler = function () {
-        console.log("init called...")
         $('#create-btn').on('click', function (e) {
             e.preventDefault();
-            console.log("create-btn clicked...");
 
             //1. Hide create-btn.
             $('#form-title').css('display', 'none');
@@ -16,13 +14,21 @@ var Panel = function () {
             //3. Send create SS service request & show account info panel.
             var form = $('#create-form');
             var url = form.attr("action");
-            $.post(url, form.serialize(), function (data) {
-                if (data.success) {
-                    // window.location.href = '/panel/index';
+            $.post(url, form.serialize(), function (resp) {
+                if (resp.success) {
+                    $('#host').val(resp.data.host);
+                    $('#port').val(resp.data.servicePort);
+                    $('#pwd').val(resp.data.servicePwd);
+
+                    $('#package-limit').text(resp.data.packageLimit);
+                    $('#package-used').text('0');
+                    $('#package-left').text(resp.data.packageLimit);
+                    $('.progressbar').attr('data-perc', '0');
+
                     $('.boxLoading').css('display', 'none');
                     $('.infobox').fadeIn(1500);
                 } else {
-                    //Signup failed
+                    //Create SS service failed
                     toastr.warning(data.message);
                     return false;
                 }
