@@ -61,17 +61,21 @@ func (router *MainRouter) CreateServiceHandler(c *gin.Context) {
 
 	// 1. Create ss service
 	result, err := ss.CreateAndStart(user.Username)
+
 	if err != nil {
 		log.Println("Create ss service error:", err.Error())
 		resp := models.Response{Success: false, Message: "Create service error!"}
 		c.JSON(http.StatusOK, resp)
+		return
 	}
+
 	// 2. Update user info
 	user.Status = 1
 	user.ServiceId = result.ID
 	user.ServicePort = result.Port
 	user.ServicePwd = result.Password
 	affected, err := router.db.Id(userID).Cols("status", "service_port", "service_pwd", "service_id").Update(user)
+
 	if affected == 0 || err != nil {
 		// TODO remove created container
 		if err != nil {
@@ -79,8 +83,12 @@ func (router *MainRouter) CreateServiceHandler(c *gin.Context) {
 		}
 		resp := models.Response{Success: false, Message: "Create service error!"}
 		c.JSON(http.StatusOK, resp)
+		return
 	}
 
+	data := models.ServiceResult{ID: result.ID, Port: result.Port, Password: result.Password, PackageLimit: user.PackageLimit}
 	resp := models.Response{Success: true, Message: "OK!", Data: result}
+	resp.Data = data
+
 	c.JSON(http.StatusOK, resp)
 }

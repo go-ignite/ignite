@@ -7,9 +7,10 @@ type Response struct {
 	Data    interface{} `json:"data"`
 }
 
-//ServiceResponse struct for creating new SS service
+//ServiceResult struct for new created SS service
 type ServiceResult struct {
-	ID       string `json:"serviceId"`
-	Port     int    `json:"servicePort"`
-	Password string `json:"servicePwd"`
+	ID           string `json:"serviceId"`
+	Port         int    `json:"servicePort"`
+	Password     string `json:"servicePwd"`
+	PackageLimit int    `json:"packageLimit"`
 }
