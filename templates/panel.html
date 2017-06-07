@@ -14,6 +14,7 @@
     <!-- Toastr -->
     <link href="/static/css/toastr.min.css" rel="stylesheet">
     <link href="/static/css/progress-bar.css" rel="stylesheet">
+    <link href="/static/css/led.css" rel="stylesheet">
 
     {{ if eq .uInfo.Status 0}}
     <link href="/static/css/loading.css" rel="stylesheet">
@@ -43,7 +44,7 @@
                 </form>
 
                 <div class="infobox" {{ if eq .uInfo.Status 0 }} style="display: none" {{ end }}>
-                    <div class="header-bar text-left">账户概览</div>
+                    <div class="header-bar text-left"><div>账户概览</div><div clsss="pull-right led green"></div></div>
                     <div>
                         <span>
                         <input class="basic-slide" id="host" type="text" value="localhost" readonly />
@@ -118,7 +119,7 @@
                     function perc() {
                         var length = t.find('.bar').css('width'),
                             perc = Math.round(parseInt(length) / 3.56),
-                            labelpos = (parseInt(length) - 2);
+                            labelpos = (parseInt(length) - 15);
                         t.find('.label').css('left', labelpos);
                         t.find('.perc').text(perc + '%可用');
                     }
