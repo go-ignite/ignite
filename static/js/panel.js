@@ -20,9 +20,9 @@ var Panel = function () {
                     $('#port').val(resp.data.servicePort);
                     $('#pwd').val(resp.data.servicePwd);
 
-                    $('#package-limit').text(resp.data.packageLimit);
-                    $('#package-used').text('0');
-                    $('#package-left').text(resp.data.packageLimit);
+                    $('#package-limit').html(resp.data.packageLimit+'<up>GB</up>');
+                    $('#package-used').html('0<up>GB</up>');
+                    $('#package-left').html(resp.data.packageLimit+'<up>GB</up>');
                     $('.progressbar').attr('data-perc', '0');
 
                     $('.boxLoading').css('display', 'none');
