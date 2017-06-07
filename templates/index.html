@@ -26,17 +26,10 @@
 
   {{template "header.html" .}}
 
-  <div class="video-container">
-    <!--<div class="filter"></div>-->
-    <video autoplay loop>
-      <source src="http://opzx9m4cb.bkt.clouddn.com/helloworld.mp4" type="video/mp4" />Your browser does not support the video tag. I suggest you upgrade your browser.
-      <source src="http://opzx9m4cb.bkt.clouddn.com/helloworld.webm" type="video/webm" />Your browser does not support the video tag. I suggest you upgrade your browser.
-    </video>
-    <div class="poster hidden">
-      <img src="http://opzx9m4cb.bkt.clouddn.com/helloworld.jpg" alt="">
-    </div>
-  </div>
-
+  <video playsinline autoplay muted loop>
+    <source src="http://opzx9m4cb.bkt.clouddn.com/helloworld.mp4" type="video/mp4" />Your browser does not support the video tag. I suggest you upgrade your browser.
+    <source src="http://opzx9m4cb.bkt.clouddn.com/helloworld.webm" type="video/webm" />Your browser does not support the video tag. I suggest you upgrade your browser.
+  </video>
 
   <section class="hero">
     <div class="container" id="hero">
@@ -49,11 +42,10 @@
       <div class="row">
         <div class="col-md-6 col-md-offset-3 text-center">
           {{ if not .uInfo }}
-             <a href="#" class="signup-btn signup">激活账号</a>
-             <p class="login-text">已注册用户，点击 <em><a class="login" href="#">此处</a></em> 登录</p>
+          <a href="#" class="signup-btn signup">激活账号</a>
+          <p class="login-text">已注册用户，点击 <em><a class="login" href="#">此处</a></em> 登录</p>
           {{ else }}
-             <a href="/panel/index" class="signup-btn">控制台</a>
-          {{ end }}
+          <a href="/panel/index" class="signup-btn">控制台</a> {{ end }}
         </div>
       </div>
     </div>
@@ -82,10 +74,11 @@
   <script src="/static/js/user.js"></script>
   <script src="/static/js/header.js"></script>
   <script>
-        $(document).ready(function() {
-            User.init();
-            Header.init();
-        });
-    </script>
+    $(document).ready(function () {
+      User.init();
+      Header.init();
+    });
+  </script>
 </body>
+
 </html>

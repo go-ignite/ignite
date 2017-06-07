@@ -220,7 +220,8 @@ ul.dropdown-menu {
 /* ==========================================================================
 Hero
 ========================================================================== */
-.hero {  position: absolute;
+.hero {  
+    position: absolute;
     top: 45%;
     left: 50%;
     transform: translate(-50%, -50%); 
@@ -236,35 +237,21 @@ Hero
 .signup-btn:hover, .login-btn:hover, .signup-btn:focus, .login-btn:focus { background: rgba(61, 201, 179, 0.6); color: #fff; } 
 /* ========================================================================== */
 
-.video-container {
-    /*position: relative;*/
-    /*bottom: 0%;
-    left: 0%;
-    height: 100%;
-    width: 100%;
-    overflow: hidden;
-    background: #000;*/
+video {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    min-width: 100%;
+    min-height: 100%;
+    width: auto;
+    height: auto;
+    z-index: -100;
+    transform: translateX(-50%) translateY(-50%);
+    background: url('//demosthenes.info/assets/images/polina.jpg') no-repeat;
+    background-size: cover;
+    transition: 1s opacity;
 }
-/*.video-container .poster img {
-    width: 100%;
-    bottom: 0;
-    position: absolute;
-}
-.video-container .filter {
-    z-index: 0;
-    position: absolute;
-    background: rgba(0, 0, 0, 0.4);
-    width: 100%;
-}*/
-.video-container video {
-    position: fixed; right: 0; bottom: 0;
-    min-width: 100%; min-height: 100%;
-    width: auto; height: auto; z-index: -100;
-    background-size: cover; 
-}
-/*.video-container video.fillWidth {
-    width: 100%;
-}*/
+
 
 #signup { padding: 40px 0 0px 0; height: auto; display: none;}
 #login { padding: 40px 0 0px 0; height: auto; display: none;}
