@@ -89,7 +89,7 @@ func (router *MainRouter) CreateServiceHandler(c *gin.Context) {
 		return
 	}
 
-	data := models.ServiceResult{ID: result.ID, Port: result.Port, Password: result.Password, PackageLimit: user.PackageLimit}
+	data := models.ServiceResult{ID: result.ID, Host: ss.Host, Port: result.Port, Password: result.Password, PackageLimit: user.PackageLimit}
 	resp := models.Response{Success: true, Message: "OK!", Data: result}
 	resp.Data = data
 

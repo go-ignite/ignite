@@ -7,6 +7,7 @@ password = "123456"
 [ss]
 image = "registry.xiaozhou.net/ssmu:latest"
 
-[port]
+[host]
+address = "localhost"
 from = 4000
 to = 6000

@@ -34,14 +34,16 @@ func (self *MainRouter) Initialize(r *gin.Engine) {
 
 	if err != nil {
 		fmt.Println("Failed to load config file:", *conf)
+		fmt.Println(err.Error())
 		os.Exit(1)
 	}
 
 	// read ss url
 	ss.ImageUrl = config.Get("ss.image").(string)
 
-	from := int(config.Get("port.from").(int64))
-	to := int(config.Get("port.to").(int64))
+	ss.Host = config.Get("host.address").(string)
+	from := int(config.Get("host.from").(int64))
+	to := int(config.Get("host.to").(int64))
 	ss.PortRange = []int{from, to}
 
 	//Init DB connection

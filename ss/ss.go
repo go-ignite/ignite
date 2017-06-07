@@ -15,6 +15,7 @@ var (
 	ImageUrl  string
 	client    *docker.Client
 	PortRange []int
+	Host      string
 )
 
 func init() {
