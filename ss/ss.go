@@ -61,6 +61,11 @@ func start(id string) error {
 	return client.StartContainer(id, nil)
 }
 
+func RemoveContaienr(id string) error {
+	opt := docker.RemoveContainerOptions{ID: id, RemoveVolumes: true, Force: true}
+	return client.RemoveContainer(opt)
+}
+
 func StatsOutNet(id string) (uint64, error) {
 	errC := make(chan error, 1)
 	statsC := make(chan *docker.Stats)

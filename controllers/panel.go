@@ -77,10 +77,13 @@ func (router *MainRouter) CreateServiceHandler(c *gin.Context) {
 	affected, err := router.db.Id(userID).Cols("status", "service_port", "service_pwd", "service_id").Update(user)
 
 	if affected == 0 || err != nil {
-		// TODO remove created container
 		if err != nil {
 			log.Println("Update user info error:", err.Error())
 		}
+
+		//Force remove created container
+		ss.RemoveContaienr(result.ID)
+
 		resp := models.Response{Success: false, Message: "Create service error!"}
 		c.JSON(http.StatusOK, resp)
 		return
