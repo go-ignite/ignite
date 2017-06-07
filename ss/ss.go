@@ -7,6 +7,7 @@ import (
 	"ignite/utils"
 	"log"
 	"net"
+	"time"
 
 	docker "github.com/fsouza/go-dockerclient"
 )
@@ -65,6 +66,14 @@ func start(id string) error {
 func RemoveContainer(id string) error {
 	opt := docker.RemoveContainerOptions{ID: id, RemoveVolumes: true, Force: true}
 	return client.RemoveContainer(opt)
+}
+
+func GetContainerStartTime(id string) (*time.Time, error) {
+	info, err := client.InspectContainer(id)
+	if err != nil {
+		return nil, err
+	}
+	return &info.State.StartedAt, nil
 }
 
 func StatsOutNet(id string) (uint64, error) {
