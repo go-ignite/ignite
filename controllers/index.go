@@ -69,11 +69,13 @@ func (router *MainRouter) SignupHandler(c *gin.Context) {
 	if !matched {
 		fmt.Println("Username is invalid!")
 		c.JSON(http.StatusOK, &models.Response{Success: false, Message: "Username is invalid!"})
+		return
 	}
 
 	if pwd != confirmPwd {
 		fmt.Println("passwords not match!")
 		c.JSON(http.StatusOK, &models.Response{Success: false, Message: "Passwords don't match!"})
+		return
 	}
 
 	iv := new(models.InviteCode)
