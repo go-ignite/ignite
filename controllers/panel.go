@@ -82,7 +82,7 @@ func (router *MainRouter) CreateServiceHandler(c *gin.Context) {
 		}
 
 		//Force remove created container
-		ss.RemoveContaienr(result.ID)
+		ss.RemoveContainer(result.ID)
 
 		resp := models.Response{Success: false, Message: "Create service error!"}
 		c.JSON(http.StatusOK, resp)

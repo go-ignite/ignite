@@ -62,7 +62,7 @@ func start(id string) error {
 	return client.StartContainer(id, nil)
 }
 
-func RemoveContaienr(id string) error {
+func RemoveContainer(id string) error {
 	opt := docker.RemoveContainerOptions{ID: id, RemoveVolumes: true, Force: true}
 	return client.RemoveContainer(opt)
 }
