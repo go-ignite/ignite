@@ -33,6 +33,7 @@ func (router *MainRouter) PanelIndexHandler(c *gin.Context) {
 		PackageLeft:  fmt.Sprintf("%.2f", float32(user.PackageLimit)-user.PackageUsed),
 		ServicePort:  user.ServicePort,
 		ServicePwd:   user.ServicePwd,
+		Expired: 	  user.Expired.Format("2006-01-02"),
 	}
 	if user.PackageLimit == 0 {
 		uInfo.PackageLeftPercent = "0"

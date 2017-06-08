@@ -1,4 +1,13 @@
-.led {
+.status {
+  border-radius: 4px 4px 0 0;
+}
+
+.status span {
+  color: #377D6A;
+  font-size: 16px;
+}
+
+.status .led {
   width: 15px;
   height: 15px;
   border-radius: 100%;

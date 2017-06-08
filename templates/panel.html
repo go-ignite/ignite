@@ -14,12 +14,9 @@
     <!-- Toastr -->
     <link href="/static/css/toastr.min.css" rel="stylesheet">
     <link href="/static/css/progress-bar.css" rel="stylesheet">
-    <link href="/static/css/led.css" rel="stylesheet">
+    <link href="/static/css/led.css" rel="stylesheet"> {{ if eq .uInfo.Status 0}}
+    <link href="/static/css/loading.css" rel="stylesheet"> {{ end }}
 
-    {{ if eq .uInfo.Status 0}}
-    <link href="/static/css/loading.css" rel="stylesheet">
-    {{ end }}
-    
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
@@ -37,14 +34,17 @@
         <div class="hero">
             <div class="container text-center">
 
-                <form class="form" id="create-form" action="/panel/create" method="post" {{ if ne .uInfo.Status 0}} style="display: none" {{ end }}>
+                <form class="form" id="create-form" action="/panel/create" method="post" {{ if ne .uInfo.Status 0}} style="display: none"
+                    {{ end }}>
                     <h1 id="form-title">创建服务</h1>
                     <button id="create-btn" class="common-btn">创建</button>
                     <div class="boxLoading"></div>
                 </form>
 
                 <div class="infobox" {{ if eq .uInfo.Status 0 }} style="display: none" {{ end }}>
-                    <div class="header-bar text-left"><div>账户概览</div><div clsss="pull-right led green"></div></div>
+                    <div class="header-bar text-left">
+                        <div>账户概览</div>
+                    </div>
                     <div>
                         <span>
                         <input class="basic-slide" id="host" type="text" value="{{ .uInfo.Host }}" readonly />
@@ -58,6 +58,20 @@
                         <input class="basic-slide" id="pwd" type="text" value="{{ .uInfo.ServicePwd }}" readonly />
                         <label for="name">密码</label>
                         </span>
+                    </div>
+                    <div class="middle-bar text-left">服务状态</div>
+                    <div class="row">
+                        <div class="col-md-6 text-center">
+                            <section class="status">
+                                {{ if eq .uInfo.Status 1 }} <div class="led green"></div><span>运行中</span> {{ end }}
+                                {{ if eq .uInfo.Status 2 }} <div class="led yellow"></div><span>已停止</span> {{ end }}
+                            </section>
+                        </div>
+                        <div class="col-md-6 text-center">
+                            <section class="status">
+                                <span>到期: {{ .uInfo.Expired }}</span>
+                            </section>
+                        </div>
                     </div>
                     <div class="middle-bar text-left">流量统计</div>
                     <div class="progressbar" data-perc="{{ .uInfo.PackageLeftPercent }}">

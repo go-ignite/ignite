@@ -365,7 +365,7 @@ InfoBox
   font-size: 20px;
   /*background: rgba(236, 155, 59, 0.67);*/
   padding: 13px 10px;
-  margin: 10px 0px 25px 0px;
+  margin: 10px 0px 20px 0px;
 }
 
 .infobox span {
@@ -559,7 +559,7 @@ InfoBox
 /*Footer
 ========================================================================== */
 footer a { color: #a1a9b0; }
-footer { background-color: rgba(0,0,0,0.5); padding: 20px 0 20px; }
+footer { background-color: rgba(0,0,0,0.5); padding: 5px 0 5px; }
 footer p { color: #fff; }
 ul.legals { list-style: none; color: #fff; line-height: 25px; }
 ul.legals li { display: inline-block; }
