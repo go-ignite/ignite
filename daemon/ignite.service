@@ -1,0 +1,14 @@
+[Unit]
+Description=ignite service
+After=network.target
+
+[Service]
+WorkingDirectory=/path/to/ignite
+ExecStart=/path/to/ignite/executable
+User=docker
+Restart=always
+KillMode=process
+RestartSec=2s
+
+[Install]
+WantedBy=multi-user.target
