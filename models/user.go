@@ -22,11 +22,12 @@ type User struct {
 
 type UserInfo struct {
 	Id                 int64
+	Host               string
 	Username           string
 	Status             int
 	PackageLimit       int
-	PackageUsed        float32
-	PackageLeft        float32
+	PackageUsed        string
+	PackageLeft        string
 	PackageLeftPercent string
 	ServicePort        int
 	ServicePwd         string
