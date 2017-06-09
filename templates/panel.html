@@ -66,7 +66,7 @@
                     <div class="middle-bar text-left">服务状态</div>
                     <div class="row">
                         <div class="col-md-6 text-center">
-                            <section class="status">
+                            <section class="status" id="service-status">
                                 {{ if eq .uInfo.Status 1 }} <div class="led green"></div><span>运行中</span> {{ end }}
                                 {{ if eq .uInfo.Status 2 }} <div class="led yellow"></div><span>已停止</span> {{ end }}
                             </section>

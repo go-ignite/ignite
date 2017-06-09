@@ -24,6 +24,7 @@ var Panel = function () {
                     $('#package-used').html('0<up>GB</up>');
                     $('#package-left').html(resp.data.packageLimit+'<up>GB</up>');
                     $('.progressbar').attr('data-perc', '0');
+                    $('#service-status').html('<div class="led green"></div><span>运行中</span>');
 
                     $('.boxLoading').css('display', 'none');
                     $('.infobox').fadeIn(1500);
