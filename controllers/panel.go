@@ -33,7 +33,7 @@ func (router *MainRouter) PanelIndexHandler(c *gin.Context) {
 		PackageLeft:  fmt.Sprintf("%.2f", float32(user.PackageLimit)-user.PackageUsed),
 		ServicePort:  user.ServicePort,
 		ServicePwd:   user.ServicePwd,
-		Expired: 	  user.Expired.Format("2006-01-02"),
+		Expired:      user.Expired.Format("2006-01-02"),
 	}
 	if user.PackageLimit == 0 {
 		uInfo.PackageLeftPercent = "0"
@@ -55,11 +55,16 @@ func (router *MainRouter) LogoutHandler(c *gin.Context) {
 }
 
 func (router *MainRouter) CreateServiceHandler(c *gin.Context) {
-	//time.Sleep(time.Second * 3)
 	userID, _ := c.Get("userId")
 
 	user := new(models.User)
 	router.db.Id(userID).Get(user)
+
+	if user.ServiceId != "" {
+		resp := models.Response{Success: false, Message: "Service already created!"}
+		c.JSON(http.StatusOK, resp)
+		return
+	}
 
 	// 1. Create ss service
 	result, err := ss.CreateAndStartContainer(user.Username)
