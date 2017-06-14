@@ -28,9 +28,9 @@ func init() {
 	}
 }
 
-func CreateContainer(name string) (*models.ServiceResult, error) {
+func CreateContainer(name string, usedPorts *[]int) (*models.ServiceResult, error) {
 	password := utils.NewPasswd(16)
-	port, err := getAvaliablePort()
+	port, err := getAvaliablePort(usedPorts)
 	if err != nil {
 		return nil, err
 	}
@@ -104,21 +104,32 @@ func GetContainerStatsOutNet(id string) (uint64, error) {
 	return stats.Networks["eth0"].TxBytes, nil
 }
 
-func CreateAndStartContainer(name string) (*models.ServiceResult, error) {
-	r, err := CreateContainer(name)
+func CreateAndStartContainer(name string, usedPorts *[]int) (*models.ServiceResult, error) {
+	r, err := CreateContainer(name, usedPorts)
 	if err != nil {
 		return nil, err
 	}
 	return r, StartContainer(r.ID)
 }
 
-func getAvaliablePort() (int, error) {
+func getAvaliablePort(usedPorts *[]int) (int, error) {
+	portMap := map[int]int{}
+
+	for _, p := range *usedPorts {
+		portMap[p] = p
+	}
+
 	for port := PortRange[0]; port <= PortRange[1]; port++ {
 		conn, err := net.Dial("tcp", fmt.Sprintf(":%d", port))
 		if err != nil {
-			return port, nil
+			if _, exists := portMap[port]; !exists {
+				return port, nil
+			} else {
+				continue
+			}
 		}
 		conn.Close()
 	}
+
 	return 0, errors.New("no port available")
 }

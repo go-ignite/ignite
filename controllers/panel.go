@@ -60,6 +60,10 @@ func (router *MainRouter) CreateServiceHandler(c *gin.Context) {
 	user := new(models.User)
 	router.db.Id(userID).Get(user)
 
+	//Get all used ports.
+	var usedPorts []int
+	router.db.Table("user").Cols("service_port").Find(&usedPorts)
+
 	if user.ServiceId != "" {
 		resp := models.Response{Success: false, Message: "Service already created!"}
 		c.JSON(http.StatusOK, resp)
@@ -67,7 +71,7 @@ func (router *MainRouter) CreateServiceHandler(c *gin.Context) {
 	}
 
 	// 1. Create ss service
-	result, err := ss.CreateAndStartContainer(user.Username)
+	result, err := ss.CreateAndStartContainer(user.Username, &usedPorts)
 
 	if err != nil {
 		log.Println("Create ss service error:", err.Error())
