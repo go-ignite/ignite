@@ -24,6 +24,8 @@ type MainRouter struct {
 }
 
 func (self *MainRouter) Initialize(r *gin.Engine) {
+	flag.Parse()
+
 	//Check config file
 	if _, err := os.Stat(*conf); os.IsNotExist(err) {
 		fmt.Println("Cannot load config.toml, file doesn't exist...")
