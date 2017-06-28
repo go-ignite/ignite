@@ -21,7 +21,16 @@ func (router *MainRouter) PanelIndexHandler(c *gin.Context) {
 	}
 
 	user := new(models.User)
-	router.db.Id(userID).Get(user)
+	exists, _ = router.db.Id(userID).Get(user)
+
+	if !exists {
+		//Service has been removed by admininistrator.
+		session := sessions.Default(c)
+		session.Delete("userId")
+		session.Save()
+
+		c.Redirect(http.StatusFound, "/")
+	}
 
 	uInfo := &models.UserInfo{
 		Id:           user.Id,
@@ -35,6 +44,7 @@ func (router *MainRouter) PanelIndexHandler(c *gin.Context) {
 		ServicePwd:   user.ServicePwd,
 		Expired:      user.Expired.Format("2006-01-02"),
 	}
+
 	if user.PackageLimit == 0 {
 		uInfo.PackageLeftPercent = "0"
 	} else {
