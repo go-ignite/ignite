@@ -7,6 +7,14 @@ type Response struct {
 	Data    interface{} `json:"data"`
 }
 
+//
+type PageData struct {
+	Total     int64       `json:"total"`
+	PageIndex int         `json:"pageIndex"`
+	PageSize  int         `json:"pageSize"`
+	Data      interface{} `json:"data"`
+}
+
 //ServiceResult struct for new created SS service
 type ServiceResult struct {
 	ID           string `json:"serviceId"`
