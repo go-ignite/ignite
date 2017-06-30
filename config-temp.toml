@@ -1,3 +1,6 @@
+[app]
+address = ":5000"
+
 [mysql]
 host = "localhost:3306"
 dbname = "ignite"

@@ -90,5 +90,5 @@ func (self *MainRouter) Initialize(r *gin.Engine) {
 		pg.POST("/create", self.CreateServiceHandler)
 	}
 
-	self.router.Run(":5000")
+	self.router.Run(config.Get("app.address").(string))
 }
