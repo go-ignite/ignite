@@ -247,7 +247,7 @@ video {
     height: auto;
     z-index: -100;
     transform: translateX(-50%) translateY(-50%);
-    background: url('http://opzx9m4cb.bkt.clouddn.com/helloworld.jpg') no-repeat;
+    background: url('http://ow84t6cit.bkt.clouddn.com/helloworld.jpg') no-repeat;
     background-size: cover;
     transition: 1s opacity;
 }
