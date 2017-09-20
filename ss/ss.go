@@ -76,6 +76,15 @@ func RemoveContainer(id string) error {
 	return client.RemoveContainer(opt)
 }
 
+func IsContainerRunning(id string) bool {
+	info, err := client.InspectContainer(id)
+	if err != nil {
+		return false
+	}
+
+	return info.State.Running
+}
+
 func GetContainerStartTime(id string) (*time.Time, error) {
 	info, err := client.InspectContainer(id)
 	if err != nil {
