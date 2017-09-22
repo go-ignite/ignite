@@ -30,7 +30,7 @@ func init() {
 
 func CreateContainer(name string, usedPorts *[]int) (*models.ServiceResult, error) {
 	password := utils.NewPasswd(16)
-	port, err := getAvaliablePort(usedPorts)
+	port, err := getAvailablePort(usedPorts)
 	if err != nil {
 		return nil, err
 	}
@@ -121,7 +121,7 @@ func CreateAndStartContainer(name string, usedPorts *[]int) (*models.ServiceResu
 	return r, StartContainer(r.ID)
 }
 
-func getAvaliablePort(usedPorts *[]int) (int, error) {
+func getAvailablePort(usedPorts *[]int) (int, error) {
 	portMap := map[int]int{}
 
 	for _, p := range *usedPorts {
