@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"fmt"
-	"ignite/models"
 	"net/http"
 	"regexp"
 	"time"
@@ -11,6 +10,7 @@ import (
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
+	"github.com/go-ignite/ignite/models"
 )
 
 func (router *MainRouter) IndexHandler(c *gin.Context) {

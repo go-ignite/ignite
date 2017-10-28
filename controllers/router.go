@@ -3,12 +3,12 @@ package controllers
 import (
 	"flag"
 	"fmt"
-	"ignite/models"
-	"ignite/ss"
 	"os"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
+	"github.com/go-ignite/ignite/models"
+	"github.com/go-ignite/ignite/ss"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/go-xorm/xorm"
 	toml "github.com/pelletier/go-toml"

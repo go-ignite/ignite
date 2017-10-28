@@ -5,11 +5,10 @@ import (
 	"log"
 	"net/http"
 
-	"ignite/models"
-	"ignite/ss"
-
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
+	"github.com/go-ignite/ignite/models"
+	"github.com/go-ignite/ignite/ss"
 )
 
 func (router *MainRouter) PanelIndexHandler(c *gin.Context) {

@@ -3,13 +3,13 @@ package ss
 import (
 	"errors"
 	"fmt"
-	"ignite/models"
-	"ignite/utils"
 	"log"
 	"net"
 	"time"
 
 	docker "github.com/fsouza/go-dockerclient"
+	"github.com/go-ignite/ignite/models"
+	"github.com/go-ignite/ignite/utils"
 )
 
 var (

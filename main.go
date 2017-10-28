@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
-	"ignite/controllers"
 	"os"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-ignite/ignite/controllers"
 )
 
 var (
