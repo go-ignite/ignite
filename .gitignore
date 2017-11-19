@@ -5,3 +5,4 @@ ignite.exe~
 config.toml
 stats/stats
 stats/stats.exe
+ignite.db
