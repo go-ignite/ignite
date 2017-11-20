@@ -1,11 +1,11 @@
 [app]
 address = ":5000"
 
-[mysql]
-host = "localhost:3306"
-dbname = "ignite"
-user = "root"
-password = "123456"
+[db]
+#driver = "mysql"
+#connect = "root:@tcp(localhost:3306)/ignite?charset=utf8"
+driver = "sqlite3"
+connect = "./ignite.db"
 
 [ss]
 image = "registry.xiaozhou.net/ssmu:latest"
