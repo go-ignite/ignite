@@ -6,8 +6,6 @@ import (
 	"github.com/go-ignite/ignite/conf"
 	"github.com/go-ignite/ignite/ss"
 	"github.com/go-ignite/ignite/utils"
-	_ "github.com/go-sql-driver/mysql"
-	_ "github.com/mattn/go-sqlite3"
 	"github.com/go-xorm/xorm"
 )
 
