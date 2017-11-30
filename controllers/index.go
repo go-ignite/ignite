@@ -79,7 +79,7 @@ func (router *MainRouter) SignupHandler(c *gin.Context) {
 	}
 
 	iv := new(models.InviteCode)
-	router.db.Where("invite_code = ? && available = 1", inviteCode).Get(iv)
+	router.db.Where("invite_code = ? AND available = 1", inviteCode).Get(iv)
 
 	if iv.Id == 0 {
 		fmt.Println("Invalid invite code!")
