@@ -8,7 +8,7 @@ driver = "sqlite3"
 connect = "./ignite.db"
 
 [ss]
-image = "registry.xiaozhou.net/ssmu:latest"
+image = "timothyye/ss-go:latest"
 
 [host]
 address = "localhost"
