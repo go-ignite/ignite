@@ -18,7 +18,7 @@ WORKDIR /root/ignite
 COPY --from=builder /go/src/github.com/go-ignite/ignite/ignite ./
 COPY --from=builder /go/src/github.com/go-ignite/ignite/templates ./templates
 COPY --from=builder /go/src/github.com/go-ignite/ignite/static ./static
-COPY --from=builder /go/src/github.com/go-ignite/ignite/data ./data
+COPY --from=builder /go/src/github.com/go-ignite/ignite/conf ./conf
 
 EXPOSE 5000
 CMD ["/bin/sh", "-c", "./ignite"]

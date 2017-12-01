@@ -3,4 +3,4 @@ ignite.exe
 ignite.exe~
 .DS_Store
 conf/config.toml
-ignite.db
+data
