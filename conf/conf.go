@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	conf = flag.String("c", "./config.toml", "config file")
+	conf = flag.String("c", "./data/config.toml", "config file")
 )
 
 var (
@@ -30,7 +30,7 @@ var (
 
 func InitConf() {
 	//Check config file
-	if _, err := os.Stat(*conf); os.IsExist(err) {
+	if _, err := os.Stat(*conf); !os.IsNotExist(err) {
 		if config, err := toml.LoadFile(*conf); err == nil {
 			APP_Address = config.Get("app.address").(string)
 
