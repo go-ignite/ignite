@@ -12,7 +12,7 @@ RUN apk --no-cache add ca-certificates tzdata \
 			&& apk del tzdata
 
 WORKDIR /root/ignite
-COPY --from=builder /go/src/github.com/go-ignite/ignite/ignite /go/src/github.com/go-ignite/ignite/config.toml ./
+COPY --from=builder /go/src/github.com/go-ignite/ignite/ignite ./
 COPY --from=builder /go/src/github.com/go-ignite/ignite/templates ./templates
 COPY --from=builder /go/src/github.com/go-ignite/ignite/static ./static
 
