@@ -3,6 +3,7 @@ A SS panel for managing multiple users, powered by Go &amp; Docker.
 
 * [Overview](#overview)
 * [Features](#features)
+* [Snapshots](#snapshots)
 * [Install](#install)
 * [Build](#build)
 * [Contributing](#contributing)
