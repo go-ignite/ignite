@@ -18,7 +18,7 @@ A SS panel for managing multiple users, powered by Go &amp; Docker.
 * __Simple to use__ - Easy to create and activate server by one click.
 * __Fast__ - Create & destroy server container via docker in seconds.
 * __Safe__ - Users are isolated by different containers, it is easy to suspend account by stopping related docker container.
-* __Automatic__ - User's account will be suspended automaticlly by background job if it exceeds the max bandwidth limit or the expired date.
+* __Automatic__ - User's account will be suspended automatically by background job if it exceeds the max bandwidth limit or the expired date.
 * __Easy to deploy__ - ignite is powered by Go, you can copy and run it by very easy steps, you can also deploy ignite by docker.
 
 # Snapshots
