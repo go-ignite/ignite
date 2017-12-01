@@ -339,6 +339,12 @@
 			"revisionTime": "2016-11-23T14:36:37Z"
 		},
 		{
+			"checksumSHA1": "8i1QHcK+4UqLlIWy3a/XWgOL4hE=",
+			"path": "github.com/mattn/go-sqlite3",
+			"revision": "47157b55f33fde3bf09c73d8bd2e60da14fd6e3b",
+			"revisionTime": "2017-11-17T15:06:37Z"
+		},
+		{
 			"checksumSHA1": "OUupkCHnh8e3RHRNcMFqQJqhaQI=",
 			"origin": "github.com/docker/docker/vendor/github.com/opencontainers/go-digest",
 			"path": "github.com/opencontainers/go-digest",
