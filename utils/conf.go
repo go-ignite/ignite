@@ -1,4 +1,4 @@
-package conf
+package utils
 
 import (
 	"flag"
@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	conf = flag.String("c", "./data/config.toml", "config file")
+	conf = flag.String("c", "./conf/config.toml", "config file")
 )
 
 var (

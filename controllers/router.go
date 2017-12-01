@@ -3,7 +3,6 @@ package controllers
 import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
-	"github.com/go-ignite/ignite/conf"
 	"github.com/go-ignite/ignite/ss"
 	"github.com/go-ignite/ignite/utils"
 	"github.com/go-xorm/xorm"
@@ -15,16 +14,16 @@ type MainRouter struct {
 }
 
 func (self *MainRouter) Initialize(r *gin.Engine) {
-	ss.Host = conf.HOST_Address
-	ss.ImageUrl = conf.SS_Image
-	ss.PortRange = []int{conf.HOST_From, conf.HOST_To}
+	ss.Host = utils.HOST_Address
+	ss.ImageUrl = utils.SS_Image
+	ss.PortRange = []int{utils.HOST_From, utils.HOST_To}
 
 	//Init session store
 	store := sessions.NewCookieStore([]byte("secret"))
 	r.Use(sessions.Sessions("ignite", store))
 
 	self.router = r
-	self.db = utils.InitDB(conf.DB_Driver, conf.DB_Connect)
+	self.db = utils.InitDB(utils.DB_Driver, utils.DB_Connect)
 	self.router.GET("/", self.IndexHandler)
 	self.router.POST("/login", self.LoginHandler)
 	self.router.POST("/signup", self.SignupHandler)
@@ -37,5 +36,5 @@ func (self *MainRouter) Initialize(r *gin.Engine) {
 		pg.POST("/create", self.CreateServiceHandler)
 	}
 
-	self.router.Run(conf.APP_Address)
+	self.router.Run(utils.APP_Address)
 }

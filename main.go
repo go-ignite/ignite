@@ -4,13 +4,13 @@ import (
 	"flag"
 
 	"github.com/gin-gonic/gin"
-	"github.com/go-ignite/ignite/conf"
 	"github.com/go-ignite/ignite/controllers"
+	"github.com/go-ignite/ignite/utils"
 )
 
 func main() {
 	flag.Parse()
-	conf.InitConf()
+	utils.InitConf()
 	initRouter()
 }
 
