@@ -1,0 +1,16 @@
+[app]
+address = ":5000"
+
+[db]
+#driver = "mysql"
+#connect = "root:@tcp(localhost:3306)/ignite?charset=utf8"
+driver = "sqlite3"
+connect = "./data/ignite.db"
+
+[ss]
+image = "timothyye/ss-go:latest"
+
+[host]
+address = "localhost"
+from = 4000
+to = 6000
