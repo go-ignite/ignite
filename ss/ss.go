@@ -23,8 +23,7 @@ func init() {
 	var err error
 	client, err = docker.NewClientFromEnv()
 	if err != nil {
-		log.Println("New docker client error:", err.Error())
-		// TODO panic?
+		log.Fatalln("ignite require Docker installed")
 	}
 }
 
@@ -44,7 +43,7 @@ func CreateContainer(name string, usedPorts *[]int) (*models.ServiceResult, erro
 		},
 		HostConfig: &docker.HostConfig{
 			PortBindings: map[docker.Port][]docker.PortBinding{
-				docker.Port(portStr + "/tcp"): []docker.PortBinding{{HostPort: portStr}}},
+				docker.Port(portStr + "/tcp"): {{HostPort: portStr}}},
 			RestartPolicy: docker.AlwaysRestart(),
 		},
 	})
