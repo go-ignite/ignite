@@ -19,6 +19,7 @@ COPY --from=builder /go/src/github.com/go-ignite/ignite/ignite ./
 COPY --from=builder /go/src/github.com/go-ignite/ignite/templates ./templates
 COPY --from=builder /go/src/github.com/go-ignite/ignite/static ./static
 COPY --from=builder /go/src/github.com/go-ignite/ignite/conf ./conf
+RUN mv ./conf/config-temp.toml ./conf/config.toml
 
 EXPOSE 5000
 CMD ["/bin/sh", "-c", "./ignite"]
