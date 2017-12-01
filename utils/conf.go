@@ -1,16 +1,11 @@
 package utils
 
 import (
-	"flag"
 	"fmt"
 	"os"
 	"strconv"
 
 	toml "github.com/pelletier/go-toml"
-)
-
-var (
-	conf = flag.String("c", "./conf/config.toml", "config file")
 )
 
 var (
@@ -28,10 +23,10 @@ var (
 	HOST_From, HOST_To int
 )
 
-func InitConf() {
+func InitConf(confPath string) {
 	//Check config file
-	if _, err := os.Stat(*conf); !os.IsNotExist(err) {
-		if config, err := toml.LoadFile(*conf); err == nil {
+	if _, err := os.Stat(confPath); !os.IsNotExist(err) {
+		if config, err := toml.LoadFile(confPath); err == nil {
 			APP_Address = config.Get("app.address").(string)
 
 			SS_Image = config.Get("ss.image").(string)
