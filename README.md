@@ -45,7 +45,7 @@ To build ignite, you need to prepare your Go development environment first, then
 Pull request is welcome!
 
 * Fork ignite
-* Clone it: ```git clone https://github.com/yourname/telebot```
+* Clone it: ```git clone https://github.com/yourname/ignite```
 * Create your feature branch: ```git checkout -b my-new-feature```
 * Make changes and add them: ```git add .```
 * Commit changes: ```git commit -m "Add some feature"```
