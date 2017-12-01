@@ -8,9 +8,11 @@ import (
 	"github.com/go-ignite/ignite/utils"
 )
 
+var confPath = flag.String("c", "./conf/config.toml", "config file")
+
 func main() {
 	flag.Parse()
-	utils.InitConf()
+	utils.InitConf(*confPath)
 	initRouter()
 }
 
