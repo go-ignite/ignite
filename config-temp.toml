@@ -5,7 +5,7 @@ address = ":5000"
 #driver = "mysql"
 #connect = "root:@tcp(localhost:3306)/ignite?charset=utf8"
 driver = "sqlite3"
-connect = "./ignite.db"
+connect = "./data/ignite.db"
 
 [ss]
 image = "timothyye/ss-go:latest"
