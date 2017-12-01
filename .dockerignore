@@ -1,4 +1,7 @@
 ignite
-snapshots
-conf/config-temp.toml
+ignite.exe
+ignite.exe~
+.DS_Store
+conf/config.toml
 data
+snapshots
