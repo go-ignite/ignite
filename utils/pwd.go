@@ -32,5 +32,4 @@ func rand_char(length int, chars []byte) string {
 			}
 		}
 	}
-	panic("unreachable")
 }
