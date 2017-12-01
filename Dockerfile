@@ -15,9 +15,10 @@ RUN mkdir /lib64 && ln -s /lib/libc.musl-x86_64.so.1 /lib64/ld-linux-x86-64.so.2
 VOLUME /root/ignite/data
 
 WORKDIR /root/ignite
-COPY --from=builder /go/src/github.com/go-ignite/ignite/ignite /go/src/github.com/go-ignite/ignite/config.toml ./
+COPY --from=builder /go/src/github.com/go-ignite/ignite/ignite ./
 COPY --from=builder /go/src/github.com/go-ignite/ignite/templates ./templates
 COPY --from=builder /go/src/github.com/go-ignite/ignite/static ./static
+COPY --from=builder /go/src/github.com/go-ignite/ignite/data ./data
 
 EXPOSE 5000
 CMD ["/bin/sh", "-c", "./ignite"]

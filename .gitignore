@@ -2,5 +2,5 @@ ignite
 ignite.exe
 ignite.exe~
 .DS_Store
-config.toml
+data/config.toml
 ignite.db
