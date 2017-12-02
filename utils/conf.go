@@ -45,9 +45,6 @@ func InitConf(confPath string) {
 	if connect := os.Getenv("DB_CONNECT"); connect != "" {
 		DB_Connect = connect
 	}
-	if image := os.Getenv("SS_IMAGE"); image != "" {
-		SS_Image = image
-	}
 	if address := os.Getenv("HOST_ADDRESS"); address != "" {
 		HOST_Address = address
 	}
