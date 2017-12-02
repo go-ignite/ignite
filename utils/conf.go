@@ -51,7 +51,7 @@ func InitConf(confPath string) {
 	if from := os.Getenv("HOST_FROM"); from != "" {
 		HOST_From, _ = strconv.Atoi(from)
 	}
-	if to := os.Getenv("HOST_To"); to != "" {
+	if to := os.Getenv("HOST_TO"); to != "" {
 		HOST_To, _ = strconv.Atoi(to)
 	}
 	fmt.Println("config: ", map[string]interface{}{
