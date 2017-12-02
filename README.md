@@ -1,4 +1,5 @@
-# ignite
+![](https://github.com/go-ignite/ignite/raw/master/snapshots/ignite.png)
+---
 A SS panel for managing multiple users, powered by Go &amp; Docker.
 
 * [Overview](#overview)
