@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"os"
 	"time"
 
 	docker "github.com/fsouza/go-dockerclient"
@@ -28,6 +29,7 @@ func init() {
 }
 
 func CreateContainer(name string, usedPorts *[]int) (*models.ServiceResult, error) {
+	PullImage()
 	password := utils.NewPasswd(16)
 	port, err := getAvailablePort(usedPorts)
 	if err != nil {
@@ -60,6 +62,11 @@ func CreateContainer(name string, usedPorts *[]int) (*models.ServiceResult, erro
 
 func StartContainer(id string) error {
 	return client.StartContainer(id, nil)
+}
+
+func PullImage() error {
+	return client.PullImage(docker.PullImageOptions{Repository: ImageUrl, OutputStream: os.Stdout},
+		docker.AuthConfiguration{})
 }
 
 func StopContainer(id string, timeout ...uint) error {
