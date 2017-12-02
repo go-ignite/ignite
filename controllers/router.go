@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"log"
+
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/go-ignite/ignite/ss"
@@ -36,5 +38,10 @@ func (self *MainRouter) Initialize(r *gin.Engine) {
 		pg.POST("/create", self.CreateServiceHandler)
 	}
 
+	go func() {
+		if err := ss.PullImage(); err != nil {
+			log.Printf("Pull image [%s] error: %s\n", ss.ImageUrl, err.Error())
+		}
+	}()
 	self.router.Run(utils.APP_Address)
 }
