@@ -79,7 +79,13 @@ func StopContainer(id string, timeout ...uint) error {
 
 func RemoveContainer(id string) error {
 	opt := docker.RemoveContainerOptions{ID: id, RemoveVolumes: true, Force: true}
-	return client.RemoveContainer(opt)
+	err := client.RemoveContainer(opt)
+	if err != nil {
+		if _, ok := err.(*docker.NoSuchContainer); ok {
+			return nil
+		}
+	}
+	return err
 }
 
 func IsContainerRunning(id string) bool {
