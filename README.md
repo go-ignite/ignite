@@ -1,5 +1,11 @@
 ![](https://github.com/go-ignite/ignite/raw/master/snapshots/ignite.png)
 ---
+
+[![Release](http://github-release-version.herokuapp.com/github/go-ignite/ignite/release.svg?style=flat)](https://github.com/go-ignite/ignite/releases/latest)
+[![Go Report Card](https://goreportcard.com/badge/github.com/go-ignite/ignite)](https://goreportcard.com/report/github.com/go-ignite/ignite)
+[![Microbadger Image](https://images.microbadger.com/badges/image/go-ignite/ignite.svg)](https://microbadger.com/images/go-ignite/ignite)
+[![DUB](https://img.shields.io/dub/l/vibe-d.svg)](https://github.com/go-ignite/ignite/blob/master/LICENSE)
+
 A SS panel for managing multiple users, powered by Go &amp; Docker.
 
 * [Overview](#overview)
