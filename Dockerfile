@@ -5,7 +5,7 @@ RUN CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -o ignite .
 
 
 FROM alpine
-LABEL maintainer="iwendellsun@gmail.com"
+LABEL maintainer="go-ignite"
 RUN apk --no-cache add ca-certificates tzdata sqlite \
 			&& cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
 			&& echo "Asia/Shanghai" >  /etc/timezone \
