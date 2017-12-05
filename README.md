@@ -2,6 +2,7 @@
 ---
 
 [![Release](http://github-release-version.herokuapp.com/github/go-ignite/ignite/release.svg?style=flat)](https://github.com/go-ignite/ignite/releases/latest)
+[![Build Status](https://travis-ci.org/go-ignite/ignite.svg?branch=master)](https://travis-ci.org/go-ignite/ignite)
 [![Go Report Card](https://goreportcard.com/badge/github.com/go-ignite/ignite)](https://goreportcard.com/report/github.com/go-ignite/ignite)
 [![Chat Telegram](https://img.shields.io/badge/chat-telegram-brightgreen.svg)](https://t.me/joinchat/FuddvBLqni3u5wJmNwnc0w)
 [![Microbadger Image](https://images.microbadger.com/badges/image/goignite/ignite.svg)](https://microbadger.com/images/goignite/ignite)
