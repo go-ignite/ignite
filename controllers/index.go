@@ -64,7 +64,7 @@ func (router *MainRouter) SignupHandler(c *gin.Context) {
 	pwd := c.PostForm("password")
 	confirmPwd := c.PostForm("confirm-password")
 
-	matched, _ := regexp.MatchString("^[a-zA-Z0-9]+$", username)
+	matched, _ := regexp.MatchString("^[a-zA-Z0-9][a-zA-Z0-9_.-]+$", username)
 
 	if !matched {
 		fmt.Println("Username is invalid!")
