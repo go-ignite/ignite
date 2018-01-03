@@ -69,6 +69,11 @@ func PullImage() error {
 		docker.AuthConfiguration{})
 }
 
+func KillContainer(id string) error {
+	opt := docker.KillContainerOptions{ID: id}
+	return client.KillContainer(opt)
+}
+
 func StopContainer(id string, timeout ...uint) error {
 	var t uint = 10
 	if len(timeout) > 0 {
