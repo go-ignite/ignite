@@ -267,6 +267,12 @@
 			"revisionTime": "2017-04-28T10:59:23Z"
 		},
 		{
+			"checksumSHA1": "T53e/guXG8DCtAf+3tjoD9X5eLw=",
+			"path": "github.com/go-ignite/ignite",
+			"revision": "ba47e34bdd817cdf9a05f0105768e046b4f07c56",
+			"revisionTime": "2018-01-03T03:42:28Z"
+		},
+		{
 			"checksumSHA1": "QD6LqgLz2JMxXqns8TaxtK9AuHs=",
 			"path": "github.com/go-sql-driver/mysql",
 			"revision": "2e00b5cd70399450106cec6431c2e2ce3cae5034",
