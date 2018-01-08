@@ -12,7 +12,14 @@ import (
 )
 
 var (
-	methods = map[string]bool{"aes-256-cfb": true, "chacha20-ietf-poly1305": true, "aes-256-gcm": true, "aes-192-gcm": true, "aes-128-gcm": true}
+	methods    = []string{"aes-256-cfb", "aes-128-gcm", "aes-192-gcm", "aes-256-gcm", "chacha20-ietf-poly1305"}
+	methodsMap = map[string]bool{
+		"aes-256-cfb":            true,
+		"aes-128-gcm":            true,
+		"aes-192-gcm":            true,
+		"aes-256-gcm":            true,
+		"chacha20-ietf-poly1305": true,
+	}
 )
 
 func (router *MainRouter) PanelIndexHandler(c *gin.Context) {
@@ -36,16 +43,20 @@ func (router *MainRouter) PanelIndexHandler(c *gin.Context) {
 	}
 
 	uInfo := &models.UserInfo{
-		Id:           user.Id,
-		Host:         ss.Host,
-		Username:     user.Username,
-		Status:       user.Status,
-		PackageUsed:  fmt.Sprintf("%.2f", user.PackageUsed),
-		PackageLimit: user.PackageLimit,
-		PackageLeft:  fmt.Sprintf("%.2f", float32(user.PackageLimit)-user.PackageUsed),
-		ServicePort:  user.ServicePort,
-		ServicePwd:   user.ServicePwd,
-		Expired:      user.Expired.Format("2006-01-02"),
+		Id:            user.Id,
+		Host:          ss.Host,
+		Username:      user.Username,
+		Status:        user.Status,
+		PackageUsed:   fmt.Sprintf("%.2f", user.PackageUsed),
+		PackageLimit:  user.PackageLimit,
+		PackageLeft:   fmt.Sprintf("%.2f", float32(user.PackageLimit)-user.PackageUsed),
+		ServicePort:   user.ServicePort,
+		ServicePwd:    user.ServicePwd,
+		ServiceMethod: user.ServiceMethod,
+		Expired:       user.Expired.Format("2006-01-02"),
+	}
+	if uInfo.ServiceMethod == "" {
+		uInfo.ServiceMethod = "aes-256-cfb"
 	}
 
 	if user.PackageLimit == 0 {
@@ -55,7 +66,8 @@ func (router *MainRouter) PanelIndexHandler(c *gin.Context) {
 	}
 
 	c.HTML(http.StatusOK, "panel.html", gin.H{
-		"uInfo": uInfo, "methods": methods,
+		"uInfo":   uInfo,
+		"methods": methods,
 	})
 }
 
@@ -74,24 +86,26 @@ func (router *MainRouter) CreateServiceHandler(c *gin.Context) {
 	fmt.Println("UserID", userID)
 	fmt.Println("Method:", method)
 
-	//TODO: use method parameter to create container...
+	if !methodsMap[method] {
+		resp := models.Response{Success: false, Message: "Invalid method value!"}
+		c.JSON(http.StatusOK, resp)
+		return
+	}
 
 	user := new(models.User)
 	router.db.Id(userID).Get(user)
-
-	//Get all used ports.
-	var usedPorts []int
-	router.db.Table("user").Cols("service_port").Find(&usedPorts)
-
 	if user.ServiceId != "" {
 		resp := models.Response{Success: false, Message: "Service already created!"}
 		c.JSON(http.StatusOK, resp)
 		return
 	}
 
-	// 1. Create ss service
-	result, err := ss.CreateAndStartContainer(user.Username, &usedPorts)
+	//Get all used ports.
+	var usedPorts []int
+	router.db.Table("user").Cols("service_port").Find(&usedPorts)
 
+	// 1. Create ss service
+	result, err := ss.CreateAndStartContainer(user.Username, method, &usedPorts)
 	if err != nil {
 		log.Println("Create ss service error:", err.Error())
 		resp := models.Response{Success: false, Message: "Create service error!"}
@@ -104,7 +118,8 @@ func (router *MainRouter) CreateServiceHandler(c *gin.Context) {
 	user.ServiceId = result.ID
 	user.ServicePort = result.Port
 	user.ServicePwd = result.Password
-	affected, err := router.db.Id(userID).Cols("status", "service_port", "service_pwd", "service_id").Update(user)
+	user.ServiceMethod = method
+	affected, err := router.db.Id(userID).Cols("status", "service_port", "service_pwd", "service_id", "service_method").Update(user)
 
 	if affected == 0 || err != nil {
 		if err != nil {

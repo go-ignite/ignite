@@ -13,6 +13,7 @@ type User struct {
 	ServiceId       string     //SS container id
 	ServicePort     int        `xorm:"not null default 0"` //Docker service port for SS
 	ServicePwd      string     //Password for SS
+	ServiceMethod   string     //Encryption method for SS
 	LastStatsResult uint64     //Last time stats result,unit: byte
 	LastStatsTime   *time.Time //Last time stats time
 	Created         time.Time  `xorm:"created"`
@@ -31,5 +32,6 @@ type UserInfo struct {
 	PackageLeftPercent string
 	ServicePort        int
 	ServicePwd         string
+	ServiceMethod      string
 	Expired            string
 }

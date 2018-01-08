@@ -41,8 +41,8 @@
                     <span class="custom-dropdown big">
                         <select id="method" name="method">
                             <option value="-1">请选择加密方式</option>
-                            {{ range $key, $value := .methods }}
-                                <option value="{{$key}}">{{$key}}</option>
+                            {{ range $i, $v := .methods }}
+                                <option value="{{$v}}">{{$v}}</option>
                             {{ end }}
                         </select>
                     </span>
@@ -69,7 +69,7 @@
                         <label for="name">密码</label>
                         </span>
                         <span>
-                        <input class="basic-slide" id="encrypt" type="text" value="aes-256-cfb" readonly />
+                        <input class="basic-slide" id="encrypt" type="text" value="{{ .uInfo.ServiceMethod }}" readonly />
                         <label for="name">加密</label>
                         </span>
                     </div>
