@@ -28,7 +28,7 @@ func init() {
 	}
 }
 
-func CreateContainer(name string, usedPorts *[]int) (*models.ServiceResult, error) {
+func CreateContainer(name, method string, usedPorts *[]int) (*models.ServiceResult, error) {
 	PullImage()
 	password := utils.NewPasswd(16)
 	port, err := getAvailablePort(usedPorts)
@@ -39,13 +39,14 @@ func CreateContainer(name string, usedPorts *[]int) (*models.ServiceResult, erro
 	container, err := client.CreateContainer(docker.CreateContainerOptions{
 		Name: name,
 		Config: &docker.Config{
-			Image:        ImageUrl,
-			Cmd:          []string{"-k", password, "-p", portStr},
-			ExposedPorts: map[docker.Port]struct{}{docker.Port(portStr + "/tcp"): {}},
+			Image: ImageUrl,
+			Cmd:   []string{"-k", password, "-m", method},
 		},
 		HostConfig: &docker.HostConfig{
 			PortBindings: map[docker.Port][]docker.PortBinding{
-				docker.Port(portStr + "/tcp"): {{HostPort: portStr}}},
+				docker.Port("3389/tcp"): {{HostPort: portStr}},
+				docker.Port("3389/udp"): {{HostPort: portStr}},
+			},
 			RestartPolicy: docker.AlwaysRestart(),
 		},
 	})
@@ -130,8 +131,8 @@ func GetContainerStatsOutNet(id string) (uint64, error) {
 	return stats.Networks["eth0"].TxBytes, nil
 }
 
-func CreateAndStartContainer(name string, usedPorts *[]int) (*models.ServiceResult, error) {
-	r, err := CreateContainer(name, usedPorts)
+func CreateAndStartContainer(name, method string, usedPorts *[]int) (*models.ServiceResult, error) {
+	r, err := CreateContainer(name, method, usedPorts)
 	if err != nil {
 		return nil, err
 	}
