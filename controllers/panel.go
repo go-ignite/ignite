@@ -65,6 +65,12 @@ func (router *MainRouter) LogoutHandler(c *gin.Context) {
 
 func (router *MainRouter) CreateServiceHandler(c *gin.Context) {
 	userID, _ := c.Get("userId")
+	method := c.PostForm("method")
+
+	fmt.Println("UserID", userID)
+	fmt.Println("Method:", method)
+
+	//TODO: use method parameter to create container...
 
 	user := new(models.User)
 	router.db.Id(userID).Get(user)
