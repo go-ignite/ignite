@@ -12,6 +12,7 @@
     <link href="/static/css/styles.css" rel="stylesheet">
     <link href="/static/css/animate.css" rel="stylesheet">
     <!-- Toastr -->
+    <link href="/static/css/dropdown.css" rel="stylesheet">
     <link href="/static/css/toastr.min.css" rel="stylesheet">
     <link href="/static/css/progress-bar.css" rel="stylesheet">
     <link href="/static/css/led.css" rel="stylesheet"> {{ if eq .uInfo.Status 0}}
@@ -37,29 +38,14 @@
                 <form class="form" id="create-form" action="/panel/create" method="post" {{ if ne .uInfo.Status 0}} style="display: none"
                     {{ end }}>
                     <h1 id="form-title">创建服务</h1>
-                    <div class="btn-group">
-                        <button type="button" class="common-btn btn-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        SS-go <span class="caret"></span>
-                        </button>
-                        <ul class="dropdown-menu">
-                        <li><a href="#">SS-go</a></li>
-                        <li><a href="#">SS-libev</a></li>
-                        <li><a href="#">SSR-python</a></li>
-                        </ul>
-                    </div>
-                    <br/><br/>
-                    <div class="btn-group">
-                        <button type="button" class="common-btn btn-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        aes-256-cfb <span class="caret"></span>
-                        </button>
-                        <ul class="dropdown-menu">
-                        <li><a href="#">aes-256-cfb</a></li>    
-                        <li><a href="#">chacha20-ietf-poly1305</a></li>
-                        <li><a href="#">aes-256-gcm</a></li>
-                        <li><a href="#">aes-192-gcm</a></li>
-                        <li><a href="#">aes-128-gcm</a></li>    
-                        </ul>
-                    </div>
+                    <span class="custom-dropdown big">
+                        <select id="method" name="method">
+                            <option value="-1">请选择加密方式</option>
+                            {{ range $key, $value := .methods }}
+                                <option value="{{$key}}">{{$key}}</option>
+                            {{ end }}
+                        </select>
+                    </span>
                     <br/><br/>
                     <button id="create-btn" class="common-btn">创建</button>
                     <div class="boxLoading"></div>
