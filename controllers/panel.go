@@ -11,6 +11,10 @@ import (
 	"github.com/go-ignite/ignite/ss"
 )
 
+var (
+	methods = map[string]bool{"aes-256-cfb": true, "chacha20-ietf-poly1305": true, "aes-256-gcm": true, "aes-192-gcm": true, "aes-128-gcm": true}
+)
+
 func (router *MainRouter) PanelIndexHandler(c *gin.Context) {
 	userID, exists := c.Get("userId")
 
@@ -51,7 +55,7 @@ func (router *MainRouter) PanelIndexHandler(c *gin.Context) {
 	}
 
 	c.HTML(http.StatusOK, "panel.html", gin.H{
-		"uInfo": uInfo,
+		"uInfo": uInfo, "methods": methods,
 	})
 }
 
@@ -65,6 +69,12 @@ func (router *MainRouter) LogoutHandler(c *gin.Context) {
 
 func (router *MainRouter) CreateServiceHandler(c *gin.Context) {
 	userID, _ := c.Get("userId")
+	method := c.PostForm("method")
+
+	fmt.Println("UserID", userID)
+	fmt.Println("Method:", method)
+
+	//TODO: use method parameter to create container...
 
 	user := new(models.User)
 	router.db.Id(userID).Get(user)
