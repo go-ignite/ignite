@@ -204,11 +204,6 @@ h2::after { content: " "; border: solid 2px #3dc9b3; display: block; width: 35px
     transition: background-color .5s ease 0s;
 }
 
-ul.dropdown-menu {
-    background-color: black;
-}
-
-
 @media (max-width: 992px) {
   .opaque-navbar {
     background-color: black;
