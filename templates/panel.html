@@ -38,7 +38,7 @@
                 <form class="form" id="create-form" action="/panel/create" method="post" {{ if ne .uInfo.Status 0}} style="display: none"
                     {{ end }}>
                     <h1 id="form-title">创建服务</h1>
-                    <span class="custom-dropdown big">
+                    <span id="form-method" class="custom-dropdown big">
                         <select id="method" name="method">
                             <option value="-1">请选择加密方式</option>
                             {{ range $i, $v := .methods }}

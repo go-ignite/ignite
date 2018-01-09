@@ -7,6 +7,7 @@ var Panel = function () {
             //1. Hide create-btn.
             $('#form-title').css('display', 'none');
             $('#create-btn').css('display', 'none');
+            $('#form-method').css('display', 'none');
 
             //2. Show loading icon.
             $('.boxLoading').fadeIn(500);
@@ -19,6 +20,7 @@ var Panel = function () {
                     $('#host').val(resp.data.host);
                     $('#port').val(resp.data.servicePort);
                     $('#pwd').val(resp.data.servicePwd);
+                    $('#encrypt').val($('#method').val());
 
                     $('#package-limit').html(resp.data.packageLimit+'<up>GB</up>');
                     $('#package-used').html('0<up>GB</up>');
