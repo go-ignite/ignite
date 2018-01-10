@@ -15,7 +15,7 @@ var (
 	servers          = []string{"SS", "SSR"}
 	ssMethods        = []string{"aes-256-cfb", "aes-128-gcm", "aes-192-gcm", "aes-256-gcm", "chacha20-ietf-poly1305"}
 	ssrMethods       = []string{"aes-256-cfb", "aes-256-ctr", "chacha20", "chacha20-ietf"}
-	serverMethodsMap map[string]map[string]bool
+	serverMethodsMap = map[string]map[string]bool{}
 )
 
 func init() {
@@ -27,6 +27,7 @@ func init() {
 	for _, method := range ssrMethods {
 		ssrMethodMap[method] = true
 	}
+
 	serverMethodsMap["SS"] = ssMethodMap
 	serverMethodsMap["SSR"] = ssrMethodMap
 }
