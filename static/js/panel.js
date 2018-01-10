@@ -2,12 +2,21 @@ var Panel = function () {
 
     var createHandler = function () {
         $('#server-type').on('change', function (e) {
+            var methods=[];
             if(this.value == 'SS') {
                 // for ss
-                console.log(ssMethods);
-            } else {
+                methods=ssMethods;
+            } else if(this.value=="SSR"){
                 // for ssr
-                console.log(ssrMethods);
+                methods=ssrMethods;
+            }
+            $("#method").empty();
+            if(methods.length==0){
+                $("#method").append("<option value='-1'>请选择加密方式</option>");
+            }else{
+                for (i in methods){
+                    $("#method").append("<option value='"+methods[i]+"'>"+methods[i]+"</option>");
+                } 
             }
         });
 
