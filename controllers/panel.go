@@ -12,20 +12,23 @@ import (
 )
 
 var (
-	methods              = []string{"aes-256-cfb", "aes-128-gcm", "aes-192-gcm", "aes-256-gcm", "chacha20-ietf-poly1305"}
-	servers              = []string{"SS", "SSR"}
-	serverMap, methodMap map[string]bool
+	servers          = []string{"SS", "SSR"}
+	ssMethods        = []string{"aes-256-cfb", "aes-128-gcm", "aes-192-gcm", "aes-256-gcm", "chacha20-ietf-poly1305"}
+	ssrMethods       = []string{"aes-256-cfb", "aes-256-ctr", "chacha20", "chacha20-ietf"}
+	serverMethodsMap map[string]map[string]bool
 )
 
 func init() {
-	serverMap = map[string]bool{}
-	for _, server := range servers {
-		serverMap[server] = true
+	ssMethodMap := map[string]bool{}
+	for _, method := range ssMethods {
+		ssMethodMap[method] = true
 	}
-	methodMap = map[string]bool{}
-	for _, method := range methods {
-		methodMap[method] = true
+	ssrMethodMap := map[string]bool{}
+	for _, method := range ssrMethods {
+		ssrMethodMap[method] = true
 	}
+	serverMethodsMap["SS"] = ssMethodMap
+	serverMethodsMap["SSR"] = ssrMethodMap
 }
 
 func (router *MainRouter) PanelIndexHandler(c *gin.Context) {
@@ -76,9 +79,10 @@ func (router *MainRouter) PanelIndexHandler(c *gin.Context) {
 	}
 
 	c.HTML(http.StatusOK, "panel.html", gin.H{
-		"uInfo":   uInfo,
-		"methods": methods,
-		"servers": servers,
+		"uInfo":       uInfo,
+		"ss_methods":  ssMethods,
+		"ssr_methods": ssrMethods,
+		"servers":     servers,
 	})
 }
 
@@ -99,14 +103,15 @@ func (router *MainRouter) CreateServiceHandler(c *gin.Context) {
 	fmt.Println("ServerType:", serverType)
 	fmt.Println("Method:", method)
 
-	if !methodMap[method] {
-		resp := models.Response{Success: false, Message: "加密方法配置错误!"}
+	methodMap, ok := serverMethodsMap[serverType]
+	if !ok {
+		resp := models.Response{Success: false, Message: "服务类型配置错误!"}
 		c.JSON(http.StatusOK, resp)
 		return
 	}
 
-	if !serverMap[serverType] {
-		resp := models.Response{Success: false, Message: "服务类型配置错误!"}
+	if !methodMap[method] {
+		resp := models.Response{Success: false, Message: "加密方法配置错误!"}
 		c.JSON(http.StatusOK, resp)
 		return
 	}
