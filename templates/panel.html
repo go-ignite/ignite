@@ -38,7 +38,7 @@
                 <form class="form" id="create-form" action="/panel/create" method="post" {{ if ne .uInfo.Status 0}} style="display: none"
                     {{ end }}>
                     <h1 id="form-title">创建服务</h1>
-                    <span id="form-method" class="custom-dropdown big">
+                    <span id="form-type" class="custom-dropdown big">
                         <select id="server-type" name="server-type">
                             <option value="-1">请选择服务端类型</option>
                             {{ range $i, $v := .servers }}
@@ -69,6 +69,10 @@
                         <input class="basic-slide" id="host" type="text" value="{{ .uInfo.Host }}" readonly />
                         <label for="name">主机</label>
                         </span>
+                        <span>
+                            <input class="basic-slide" id="types" type="text" value="{{ .uInfo.ServiceType }}" readonly />
+                            <label for="name">类型</label>
+                            </span>
                         <span>
                         <input class="basic-slide" id="port" type="text" value="{{ .uInfo.ServicePort }}" readonly />
                         <label for="name">端口</label>

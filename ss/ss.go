@@ -13,8 +13,12 @@ import (
 	"github.com/go-ignite/ignite/utils"
 )
 
+const (
+	SS_IMAGE  = "goignite/ss-libev:latest"
+	SSR_IMAGE = "goignite/ssr:latest"
+)
+
 var (
-	ImageUrl  string
 	client    *docker.Client
 	PortRange []int
 	Host      string
@@ -28,8 +32,17 @@ func init() {
 	}
 }
 
-func CreateContainer(name, method string, usedPorts *[]int) (*models.ServiceResult, error) {
-	PullImage()
+func CreateContainer(serverType, name, method string, usedPorts *[]int) (*models.ServiceResult, error) {
+	image := ""
+	switch serverType {
+	case "SS":
+		image = SS_IMAGE
+	case "SSR":
+		image = SSR_IMAGE
+	default:
+		return nil, errors.New("invalid server type")
+	}
+	PullImage(image)
 	password := utils.NewPasswd(16)
 	port, err := getAvailablePort(usedPorts)
 	if err != nil {
@@ -39,7 +52,7 @@ func CreateContainer(name, method string, usedPorts *[]int) (*models.ServiceResu
 	container, err := client.CreateContainer(docker.CreateContainerOptions{
 		Name: name,
 		Config: &docker.Config{
-			Image: ImageUrl,
+			Image: image,
 			Cmd:   []string{"-k", password, "-m", method},
 		},
 		HostConfig: &docker.HostConfig{
@@ -62,11 +75,11 @@ func CreateContainer(name, method string, usedPorts *[]int) (*models.ServiceResu
 }
 
 func StartContainer(id string) error {
-	return client.StartContainer(id, nil)
+	return client.StartContainer(id, &docker.HostConfig{})
 }
 
-func PullImage() error {
-	return client.PullImage(docker.PullImageOptions{Repository: ImageUrl, OutputStream: os.Stdout},
+func PullImage(image string) error {
+	return client.PullImage(docker.PullImageOptions{Repository: image, OutputStream: os.Stdout},
 		docker.AuthConfiguration{})
 }
 
@@ -131,8 +144,8 @@ func GetContainerStatsOutNet(id string) (uint64, error) {
 	return stats.Networks["eth0"].TxBytes, nil
 }
 
-func CreateAndStartContainer(name, method string, usedPorts *[]int) (*models.ServiceResult, error) {
-	r, err := CreateContainer(name, method, usedPorts)
+func CreateAndStartContainer(serverType, name, method string, usedPorts *[]int) (*models.ServiceResult, error) {
+	r, err := CreateContainer(serverType, name, method, usedPorts)
 	if err != nil {
 		return nil, err
 	}

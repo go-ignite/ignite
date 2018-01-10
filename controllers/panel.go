@@ -12,20 +12,21 @@ import (
 )
 
 var (
-	methods    = []string{"aes-256-cfb", "aes-128-gcm", "aes-192-gcm", "aes-256-gcm", "chacha20-ietf-poly1305"}
-	methodsMap = map[string]bool{
-		"aes-256-cfb":            true,
-		"aes-128-gcm":            true,
-		"aes-192-gcm":            true,
-		"aes-256-gcm":            true,
-		"chacha20-ietf-poly1305": true,
-	}
-	servers    = []string{"SS", "SSR"}
-	serversMap = map[string]bool{
-		"SS":  true,
-		"SSR": true,
-	}
+	methods              = []string{"aes-256-cfb", "aes-128-gcm", "aes-192-gcm", "aes-256-gcm", "chacha20-ietf-poly1305"}
+	servers              = []string{"SS", "SSR"}
+	serverMap, methodMap map[string]bool
 )
+
+func init() {
+	serverMap = map[string]bool{}
+	for _, server := range servers {
+		serverMap[server] = true
+	}
+	methodMap = map[string]bool{}
+	for _, method := range methods {
+		methodMap[method] = true
+	}
+}
 
 func (router *MainRouter) PanelIndexHandler(c *gin.Context) {
 	userID, exists := c.Get("userId")
@@ -58,10 +59,14 @@ func (router *MainRouter) PanelIndexHandler(c *gin.Context) {
 		ServicePort:   user.ServicePort,
 		ServicePwd:    user.ServicePwd,
 		ServiceMethod: user.ServiceMethod,
+		ServiceType:   user.ServiceType,
 		Expired:       user.Expired.Format("2006-01-02"),
 	}
 	if uInfo.ServiceMethod == "" {
 		uInfo.ServiceMethod = "aes-256-cfb"
+	}
+	if uInfo.ServiceType == "" {
+		uInfo.ServiceType = "SS"
 	}
 
 	if user.PackageLimit == 0 {
@@ -94,14 +99,14 @@ func (router *MainRouter) CreateServiceHandler(c *gin.Context) {
 	fmt.Println("ServerType:", serverType)
 	fmt.Println("Method:", method)
 
-	if !methodsMap[method] {
-		resp := models.Response{Success: false, Message: "Invalid method value!"}
+	if !methodMap[method] {
+		resp := models.Response{Success: false, Message: "加密方法配置错误!"}
 		c.JSON(http.StatusOK, resp)
 		return
 	}
 
-	if !serversMap[serverType] {
-		resp := models.Response{Success: false, Message: "Invalid server type!"}
+	if !serverMap[serverType] {
+		resp := models.Response{Success: false, Message: "服务类型配置错误!"}
 		c.JSON(http.StatusOK, resp)
 		return
 	}
@@ -109,7 +114,7 @@ func (router *MainRouter) CreateServiceHandler(c *gin.Context) {
 	user := new(models.User)
 	router.db.Id(userID).Get(user)
 	if user.ServiceId != "" {
-		resp := models.Response{Success: false, Message: "Service already created!"}
+		resp := models.Response{Success: false, Message: "服务已创建!"}
 		c.JSON(http.StatusOK, resp)
 		return
 	}
@@ -119,10 +124,10 @@ func (router *MainRouter) CreateServiceHandler(c *gin.Context) {
 	router.db.Table("user").Cols("service_port").Find(&usedPorts)
 
 	// 1. Create ss service
-	result, err := ss.CreateAndStartContainer(user.Username, method, &usedPorts)
+	result, err := ss.CreateAndStartContainer(serverType, user.Username, method, &usedPorts)
 	if err != nil {
 		log.Println("Create ss service error:", err.Error())
-		resp := models.Response{Success: false, Message: "Create service error!"}
+		resp := models.Response{Success: false, Message: "创建服务失败!"}
 		c.JSON(http.StatusOK, resp)
 		return
 	}
@@ -133,8 +138,8 @@ func (router *MainRouter) CreateServiceHandler(c *gin.Context) {
 	user.ServicePort = result.Port
 	user.ServicePwd = result.Password
 	user.ServiceMethod = method
-	affected, err := router.db.Id(userID).Cols("status", "service_port", "service_pwd", "service_id", "service_method").Update(user)
-
+	user.ServiceType = serverType
+	affected, err := router.db.Id(userID).Cols("status", "service_port", "service_pwd", "service_id", "service_method", "service_type").Update(user)
 	if affected == 0 || err != nil {
 		if err != nil {
 			log.Println("Update user info error:", err.Error())
@@ -143,14 +148,14 @@ func (router *MainRouter) CreateServiceHandler(c *gin.Context) {
 		//Force remove created container
 		ss.RemoveContainer(result.ID)
 
-		resp := models.Response{Success: false, Message: "Create service error!"}
+		resp := models.Response{Success: false, Message: "更新用户信息失败!"}
 		c.JSON(http.StatusOK, resp)
 		return
 	}
 
 	result.PackageLimit = user.PackageLimit
 	result.Host = ss.Host
-	resp := models.Response{Success: true, Message: "OK!", Data: result}
+	resp := models.Response{Success: true, Message: "服务创建成功!", Data: result}
 
 	c.JSON(http.StatusOK, resp)
 }
