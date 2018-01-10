@@ -1,6 +1,16 @@
 var Panel = function () {
 
     var createHandler = function () {
+        $('#server-type').on('change', function (e) {
+            if(this.value == 'SS') {
+                // for ss
+                console.log(ssMethods);
+            } else {
+                // for ssr
+                console.log(ssrMethods);
+            }
+        });
+
         $('#create-btn').on('click', function (e) {
             e.preventDefault();
 

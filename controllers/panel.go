@@ -27,6 +27,7 @@ func init() {
 	for _, method := range ssrMethods {
 		ssrMethodMap[method] = true
 	}
+
 	serverMethodsMap["SS"] = ssMethodMap
 	serverMethodsMap["SSR"] = ssrMethodMap
 }
