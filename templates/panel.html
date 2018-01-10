@@ -39,6 +39,15 @@
                     {{ end }}>
                     <h1 id="form-title">创建服务</h1>
                     <span id="form-method" class="custom-dropdown big">
+                        <select id="server-type" name="server-type">
+                            <option value="-1">请选择服务端类型</option>
+                            {{ range $i, $v := .servers }}
+                                <option value="{{$v}}">{{$v}}</option>
+                            {{ end }}
+                        </select>
+                    </span>
+                    <br/><br/>
+                    <span id="form-method" class="custom-dropdown big">
                         <select id="method" name="method">
                             <option value="-1">请选择加密方式</option>
                             {{ range $i, $v := .methods }}

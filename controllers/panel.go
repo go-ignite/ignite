@@ -20,6 +20,11 @@ var (
 		"aes-256-gcm":            true,
 		"chacha20-ietf-poly1305": true,
 	}
+	servers    = []string{"SS", "SSR"}
+	serversMap = map[string]bool{
+		"SS":  true,
+		"SSR": true,
+	}
 )
 
 func (router *MainRouter) PanelIndexHandler(c *gin.Context) {
@@ -68,6 +73,7 @@ func (router *MainRouter) PanelIndexHandler(c *gin.Context) {
 	c.HTML(http.StatusOK, "panel.html", gin.H{
 		"uInfo":   uInfo,
 		"methods": methods,
+		"servers": servers,
 	})
 }
 
@@ -82,12 +88,20 @@ func (router *MainRouter) LogoutHandler(c *gin.Context) {
 func (router *MainRouter) CreateServiceHandler(c *gin.Context) {
 	userID, _ := c.Get("userId")
 	method := c.PostForm("method")
+	serverType := c.PostForm("server-type")
 
 	fmt.Println("UserID", userID)
+	fmt.Println("ServerType:", serverType)
 	fmt.Println("Method:", method)
 
 	if !methodsMap[method] {
 		resp := models.Response{Success: false, Message: "Invalid method value!"}
+		c.JSON(http.StatusOK, resp)
+		return
+	}
+
+	if !serversMap[serverType] {
+		resp := models.Response{Success: false, Message: "Invalid server type!"}
 		c.JSON(http.StatusOK, resp)
 		return
 	}
