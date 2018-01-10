@@ -146,6 +146,9 @@
         <script src="/static/js/panel.js"></script>
         <script src="/static/js/header.js"></script>
         <script>
+            ssMethods = {{ .ss_methods }};
+            ssrMethods = {{ .ssr_methods }};
+
             $(document).ready(function () {
                 Panel.init();
                 Header.init();
