@@ -1,15 +1,14 @@
 var User = function () {
+    var currentId = 'hero';
 
+    function animateToggle(targetId) {
+        $('#' + currentId).fadeOut(500);
+        $('#' + currentId).css("display", "none");
+        $('.header-' + targetId).addClass("active").siblings().removeClass("active");
+        $('#' + targetId).fadeIn(1000);
+        currentId = targetId; 
+    }
     var signupHandler = function () {
-        $(".signup").click(function(event){
-            event.preventDefault();
-            $('#hero').fadeOut(1000);
-            $('#hero').css("display", "none");
-
-            $('#login').css("display", "none");
-            $('.header-signup').addClass("active").siblings().removeClass("active");
-            $('#signup').fadeIn(500);
-        });
 
         $('#signup-btn').on('click', function (e) {
             e.preventDefault();
@@ -29,15 +28,6 @@ var User = function () {
     };
 
     var loginHandler = function () {
-        $('.login').on('click', function (e) {
-            e.preventDefault();
-            $('#hero').fadeOut(1000);
-            $('#hero').css("display", "none");
-
-            $('#signup').css("display", "none")
-            $('.header-login').addClass("active").siblings().removeClass("active");
-            $('#login').fadeIn(500);
-        });
 
         $('#login-btn').on('click', function (e) {
             e.preventDefault();
@@ -62,6 +52,15 @@ var User = function () {
     var commonHandler = function () {
         $('.header-li').on('click', function (e) {
             $(this).addClass("active").siblings().removeClass("active");
+        });
+        $(".hero-move").click(function(){
+            animateToggle('hero');
+        });
+        $(".signup-move").click(function(){
+            animateToggle('signup');
+        });
+        $('.login-move').on('click', function() {
+            animateToggle('login');
         });
     };
 
