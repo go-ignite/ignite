@@ -11,6 +11,8 @@
   <link href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
   <link href="/static/css/styles.css" rel="stylesheet">
   <link href="/static/css/animate.css" rel="stylesheet">
+  <!-- iconfont -->
+  <link rel="stylesheet" href="//at.alicdn.com/t/font_537943_aej5aeuyfym34n29.css">
   <!-- Toastr -->
   <link href="/static/css/toastr.min.css" rel="stylesheet">
   <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
@@ -26,7 +28,8 @@
 
   {{template "header.html" .}}
 
-  <video playsinline autoplay muted loop>
+  <div class="bg-videosnap"></div>
+  <video playsinline autoplay muted loop class="bg-video">
     <source src="/static/images/helloworld.mp4" type="video/mp4" />Your browser does not support the video tag. I suggest you upgrade your browser.
     <source src="/static/images/helloworld.webm" type="video/webm" />Your browser does not support the video tag. I suggest you upgrade your browser.
   </video>
@@ -43,8 +46,8 @@
       <div class="row">
         <div class="col-md-6 col-md-offset-3 text-center">
           {{ if not .uInfo }}
-          <a href="#" class="signup-btn signup">激活账号</a>
-          <p class="login-text">已注册用户，点击 <em><a class="login" href="#">此处</a></em> 登录</p>
+          <a href="#" class="signup-btn signup-move">激活账号</a>
+          <p class="login-text">已注册用户，点击 <em><a class="login-move signup-loginhref" href="#">此处</a></em> 登录</p>
           {{ else }}
           <a href="/panel/index" class="signup-btn">控制台</a> {{ end }}
         </div>
@@ -74,11 +77,14 @@
   <script src="/static/js/scripts.js"></script>
   <script src="/static/js/user.js"></script>
   <script src="/static/js/header.js"></script>
+
   <script>
-    $(document).ready(function () {
+    (function(){
       User.init();
       Header.init();
-    });
+      var videoElm = window.os.isPc ? '.bg-video' : '.bg-videosnap';
+      document.querySelector(videoElm).style.display = 'block';
+    })()
   </script>
 </body>
 

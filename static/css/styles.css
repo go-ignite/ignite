@@ -212,6 +212,13 @@ h2::after { content: " "; border: solid 2px #3dc9b3; display: block; width: 35px
   }
 }
 
+@media (max-width: 768px) {
+  .navbar-fixed-bottom {
+    display: none;
+  }
+}
+
+
 /* ==========================================================================
 Hero
 ========================================================================== */
@@ -230,25 +237,13 @@ Hero
 
 .signup-btn, .login-btn{ background: rgba(61, 201, 179, 1); padding: 20px 40px; border-radius: 5px; -moz-border-radius: 5px; -webkit-border-radius: 5px; -o-border-radius: 5px; color: #fff; text-transform: uppercase; letter-spacing: 1px; display: inline-block; -webkit-box-shadow: 0px 3px 0px 0px #309383; -moz-box-shadow: 0px 3px 0px 0px #309383; box-shadow: 0px 3px 0px 0px #309383; margin: 20px 0 0; font-weight: bold; }
 .signup-btn:hover, .login-btn:hover, .signup-btn:focus, .login-btn:focus { background: rgba(61, 201, 179, 0.6); color: #fff; } 
+.signup-loginhref {
+  color: #a1a9b0
+}
 /* ========================================================================== */
 
-video {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    min-width: 100%;
-    min-height: 100%;
-    width: auto;
-    height: auto;
-    z-index: -100;
-    transform: translateX(-50%) translateY(-50%);
-    background: url('/static/images/helloworld.jpg') no-repeat;
-    background-size: cover;
-    transition: 1s opacity;
-}
-
-
 #signup { padding: 40px 0 0px 0; height: auto; display: none;}
+
 #login { padding: 40px 0 0px 0; height: auto; display: none;}
 
 form {
@@ -259,9 +254,6 @@ form {
 .form h1 { margin: 0px 0px 20px 0;}
 
 form input {
-  -webkit-appearance: none;
-     -moz-appearance: none;
-          appearance: none;
   outline: 0;
   border: 1px solid rgba(255, 255, 255, 0.4);
   background-color: rgba(255, 255, 255, 0.2);
@@ -279,19 +271,19 @@ form input {
 }
 
 form input:hover {
-  background-color: rgba(255, 255, 255, 0.4);
+  background-color: rgba(255, 255, 255, 0.5);
+}
+form input::placeholder {
+  color: rgba(255, 255, 255, .7);
 }
 
 form input:focus {
   background-color: white;
   width: 300px;
-  color: #53e3a6;
+  color: #555;
 }
 
 .common-btn {
-  -webkit-appearance: none;
-     -moz-appearance: none;
-          appearance: none;
   outline: 0;
   background: rgba(61, 201, 179, 1);
   border: 0;
@@ -465,6 +457,24 @@ InfoBox
   margin-left: 2px;
 }
 
+
+/* video */
+.bg-videosnap,
+.bg-video {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: -100;
+  min-width: 100%;
+  min-height: 100%;
+  background: url('/static/images/helloworld.jpg') no-repeat;
+  background-size: cover;
+  transition: 1s opacity;
+}
+
 /*Bubbles*/
 .bg-bubbles {
   position: absolute;
@@ -577,8 +587,13 @@ InfoBox
   }
 }
 
+
 /*Footer
 ========================================================================== */
+.footer {
+  display: flex;
+  justify-content: space-between;
+}
 footer a { color: #a1a9b0; }
 footer { background-color: rgba(0,0,0,0.5); padding: 5px 0 5px; }
 footer p { color: #fff; }
@@ -601,3 +616,5 @@ Waypoints
 .delay-05s { animation-delay: 0.5s; -webkit-animation-delay: 0.5s; }
 .delay-1s { animation-delay: 1s; -webkit-animation-delay: 1s; }
 .wp3 { background: url('/static/images/iphone-bg.png') no-repeat center center; background-position: 200px 10px; height: 100%; }
+
+
