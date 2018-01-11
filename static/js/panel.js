@@ -1,17 +1,17 @@
 var Panel = function () {
 
     var createHandler = function () {
-        $('#extend').on('click', function(e) {
-            if($('#extend').hasClass('fa-angle-double-up')) {
-                $('#extend').removeClass('fa-angle-double-up');
-                $('#extend').addClass('fa-angle-double-down');
-                $('#account-detail').slideToggle('slow');
-            } else {
-                $('#extend').removeClass('fa-angle-double-down');
-                $('#extend').addClass('fa-angle-double-up');
-                $('#account-detail').slideToggle('slow');
-            }
-        });
+        // $('#extend').on('click', function(e) {
+        //     if($('#extend').hasClass('fa-angle-double-up')) {
+        //         $('#extend').removeClass('fa-angle-double-up');
+        //         $('#extend').addClass('fa-angle-double-down');
+        //         $('#account-detail').slideToggle('slow');
+        //     } else {
+        //         $('#extend').removeClass('fa-angle-double-down');
+        //         $('#extend').addClass('fa-angle-double-up');
+        //         $('#account-detail').slideToggle('slow');
+        //     }
+        // });
 
         $('#server-type').on('change', function (e) {
             var methods = [];
