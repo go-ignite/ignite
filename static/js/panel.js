@@ -2,21 +2,21 @@ var Panel = function () {
 
     var createHandler = function () {
         $('#server-type').on('change', function (e) {
-            var methods=[];
-            if(this.value == 'SS') {
+            var methods = [];
+            if (this.value == 'SS') {
                 // for ss
-                methods=ssMethods;
-            } else if(this.value=="SSR"){
+                methods = ssMethods;
+            } else if (this.value == "SSR") {
                 // for ssr
-                methods=ssrMethods;
+                methods = ssrMethods;
             }
             $("#method").empty();
-            if(methods.length==0){
+            if (methods.length == 0) {
                 $("#method").append("<option value='-1'>请选择加密方式</option>");
-            }else{
-                for (i in methods){
-                    $("#method").append("<option value='"+methods[i]+"'>"+methods[i]+"</option>");
-                } 
+            } else {
+                for (i in methods) {
+                    $("#method").append("<option value='" + methods[i] + "'>" + methods[i] + "</option>");
+                }
             }
         });
 
@@ -43,9 +43,9 @@ var Panel = function () {
                     $('#encrypt').val($('#method').val());
                     $('#types').val($('#server-type').val());
 
-                    $('#package-limit').html(resp.data.packageLimit+'<up>GB</up>');
+                    $('#package-limit').html(resp.data.packageLimit + '<up>GB</up>');
                     $('#package-used').html('0<up>GB</up>');
-                    $('#package-left').html(resp.data.packageLimit+'<up>GB</up>');
+                    $('#package-left').html(resp.data.packageLimit + '<up>GB</up>');
                     $('.progressbar').attr('data-perc', '0');
                     $('#service-status').html('<div class="led green"></div><span>运行中</span>');
 
