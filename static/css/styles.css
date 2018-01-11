@@ -339,6 +339,10 @@ InfoBox
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
 }
 
+.infobox.multiline {
+  width: 650px;
+}
+
 .header-bar {
   width: 100%;
   height: 50px;
@@ -369,9 +373,20 @@ InfoBox
   margin: 5px 10px;
 }
 
-.basic-slide {
-  display: inline-block;
+.basic-slide_line {
+  margin: 10px auto;
   width: 280px;
+  position: relative;
+}
+
+.basic-slide {
+  overflow: hidden;
+  padding: 10px 0;
+}
+
+.basic-slide_input {
+  width: 100%;
+  display: inline-block;
   padding: 10px 0 10px 0px;
   font-family: "Open Sans", sans;
   font-weight: 400;
@@ -384,7 +399,18 @@ InfoBox
   text-align: center;
 }
 
-.basic-slide + label {
+.multiline .basic-slide {
+  display: flex;
+  justify-content: space-around;
+}
+
+.basic-slide_wrap {
+  display: block;
+  width: 280px;
+  margin: auto;
+}
+
+.basic-slide_label {
   display: inline-block;
   position: absolute;
   top: 0;
