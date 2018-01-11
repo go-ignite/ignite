@@ -216,6 +216,19 @@ h2::after { content: " "; border: solid 2px #3dc9b3; display: block; width: 35px
   .navbar-fixed-bottom {
     display: none;
   }
+  .hero,
+  .infobox {
+    width: 100% !important;
+  }
+  .basic-slide {
+    display: block !important;
+    justify-content: space-around;
+    max-height: 200px;
+    overflow: auto;
+  }
+  .progressbar {
+    display: none !important;
+  }
 }
 
 
@@ -372,7 +385,6 @@ InfoBox
 }
 
 .basic-slide {
-  overflow: hidden;
   padding: 10px 0;
 }
 
