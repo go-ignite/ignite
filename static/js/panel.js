@@ -35,16 +35,11 @@ var Panel = function () {
         $('#create-btn').on('click', function (e) {
             e.preventDefault();
 
-            //1. Hide create-btn.
-            $('#form-title').css('display', 'none');
-            $('#create-btn').css('display', 'none');
-            $('#form-method').css('display', 'none');
-            $('#form-type').css('display', 'none');
-
-            //2. Show loading icon.
+            // Show loading
+            $('#create-form').css('display', 'none');
             $('.boxLoading').fadeIn(500);
 
-            //3. Send create SS service request & show account info panel.
+            // Send create SS service request & show account info panel.
             var form = $('#create-form');
             var url = form.attr("action");
             $.post(url, form.serialize(), function (resp) {
@@ -64,8 +59,10 @@ var Panel = function () {
                     $('.boxLoading').css('display', 'none');
                     $('.infobox').fadeIn(1500);
                 } else {
-                    //Create SS service failed
-                    toastr.warning(data.message);
+                    $('.boxLoading').css('display', 'block');
+                    $('.boxLoading').fadeOut(500);
+                    $('#create-form').fadeIn(500);
+                    toastr.warning(resp.message);
                     return false;
                 }
             }, "json");
