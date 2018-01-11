@@ -61,9 +61,9 @@
 
                 <div class="infobox" {{ if eq .uInfo.Status 0 }} style="display: none" {{ end }}>
                     <div class="header-bar text-left">
-                        <div>账户概览</div>
+                        <div>账户概览<i id="extend" class="fa fa-angle-double-down pull-right" aria-hidden="true"></i></div>
                     </div>
-                    <div>
+                    <div id="account-detail" style="display:none">
                         <span>
                             <input class="basic-slide" id="host" type="text" value="{{ .uInfo.Host }}" readonly />
                             <label for="name">主机</label>
@@ -166,8 +166,8 @@
         <script src="/static/js/panel.js"></script>
         <script src="/static/js/header.js"></script>
         <script>
-            ssMethods = {{ .ss_methods }};
-            ssrMethods = {{ .ssr_methods }};
+            ssMethods = {{.ss_methods}};
+            ssrMethods = {{.ssr_methods}};
 
             $(document).ready(function () {
                 Panel.init();
@@ -177,7 +177,9 @@
                     var t = $(this);
                     var dataperc = t.attr('data-perc'),
                         barperc = Math.round(dataperc * 3.56);
-                    t.find('.bar').animate({ width: barperc }, dataperc * 25);
+                    t.find('.bar').animate({
+                        width: barperc
+                    }, dataperc * 25);
                     t.find('.label').append('<div class="perc"></div>');
 
                     function perc() {

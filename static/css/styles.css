@@ -347,7 +347,7 @@ InfoBox
   font-size: 20px;
   /*background: rgba(236, 155, 59, 0.67);*/
   padding: 13px 10px;
-  margin: 0px 0px 5px 0px;
+  margin: 0px 0px 0px 0px;
   border-top-left-radius: 15px;
   border-top-right-radius: 15px;
 }
@@ -360,7 +360,7 @@ InfoBox
   font-size: 20px;
   /*background: rgba(236, 155, 59, 0.67);*/
   padding: 13px 10px;
-  margin: 5px 0px 5px 0px;
+  margin: 0px 0px 5px 0px;
 }
 
 .infobox span {
