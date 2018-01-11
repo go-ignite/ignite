@@ -42,17 +42,19 @@
                         <select id="server-type" name="server-type">
                             <option value="-1">请选择服务端类型</option>
                             {{ range $i, $v := .servers }}
-                                <option value="{{$v}}">{{$v}}</option>
+                            <option value="{{$v}}">{{$v}}</option>
                             {{ end }}
                         </select>
                     </span>
-                    <br/><br/>
+                    <br/>
+                    <br/>
                     <span id="form-method" class="custom-dropdown big">
                         <select id="method" name="method">
                             <option value="-1">请选择加密方式</option>
                         </select>
                     </span>
-                    <br/><br/>
+                    <br/>
+                    <br/>
                     <button id="create-btn" class="common-btn">创建</button>
                     <div class="boxLoading"></div>
                 </form>
@@ -63,32 +65,49 @@
                     </div>
                     <div>
                         <span>
-                        <input class="basic-slide" id="host" type="text" value="{{ .uInfo.Host }}" readonly />
-                        <label for="name">主机</label>
+                            <input class="basic-slide" id="host" type="text" value="{{ .uInfo.Host }}" readonly />
+                            <label for="name">主机</label>
                         </span>
                         <span>
                             <input class="basic-slide" id="types" type="text" value="{{ .uInfo.ServiceType }}" readonly />
                             <label for="name">类型</label>
-                            </span>
-                        <span>
-                        <input class="basic-slide" id="port" type="text" value="{{ .uInfo.ServicePort }}" readonly />
-                        <label for="name">端口</label>
                         </span>
                         <span>
-                        <input class="basic-slide" id="pwd" type="text" value="{{ .uInfo.ServicePwd }}" readonly />
-                        <label for="name">密码</label>
+                            <input class="basic-slide" id="port" type="text" value="{{ .uInfo.ServicePort }}" readonly />
+                            <label for="name">端口</label>
                         </span>
                         <span>
-                        <input class="basic-slide" id="encrypt" type="text" value="{{ .uInfo.ServiceMethod }}" readonly />
-                        <label for="name">加密</label>
+                            <input class="basic-slide" id="pwd" type="text" value="{{ .uInfo.ServicePwd }}" readonly />
+                            <label for="name">密码</label>
                         </span>
+                        <span>
+                            <input class="basic-slide" id="encrypt" type="text" value="{{ .uInfo.ServiceMethod }}" readonly />
+                            <label for="name">加密</label>
+                        </span>
+                        {{ if eq .uInfo.ServiceType "SSR" }}
+                        <span>
+                            <input class="basic-slide" id="protocol" type="text" value="auth_aes128_md5" readonly />
+                            <label for="name">协议</label>
+                        </span>
+                        <span>
+                            <input class="basic-slide" id="protocol-param" type="text" value="32" readonly />
+                            <label for="name">协参</label>
+                        </span>
+                        <span>
+                            <input class="basic-slide" id="obfs" type="text" value="tls1.2_ticket_auth_compatible" readonly />
+                            <label for="name">混淆</label>
+                        </span>
+                        {{ end }}
                     </div>
                     <div class="middle-bar text-left">服务状态</div>
                     <div class="row">
                         <div class="col-md-6 text-center">
                             <section class="status" id="service-status">
-                                {{ if eq .uInfo.Status 1 }} <div class="led green"></div><span>运行中</span> {{ end }}
-                                {{ if eq .uInfo.Status 2 }} <div class="led yellow"></div><span>已停止</span> {{ end }}
+                                {{ if eq .uInfo.Status 1 }}
+                                <div class="led green"></div>
+                                <span>运行中</span> {{ end }} {{ if eq .uInfo.Status 2 }}
+                                <div class="led yellow"></div>
+                                <span>已停止</span> {{ end }}
                             </section>
                         </div>
                         <div class="col-md-6 text-center">
@@ -99,8 +118,12 @@
                     </div>
                     <div class="middle-bar text-left">流量统计</div>
                     <div class="progressbar" data-perc="{{ .uInfo.PackageLeftPercent }}">
-                        <div class="bar"><span></span></div>
-                        <div class="label"><span></span></div>
+                        <div class="bar">
+                            <span></span>
+                        </div>
+                        <div class="label">
+                            <span></span>
+                        </div>
                     </div>
                     <div class="stat-bar">
                         <div class="a-third">
