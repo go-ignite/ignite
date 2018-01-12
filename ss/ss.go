@@ -13,8 +13,12 @@ import (
 	"github.com/go-ignite/ignite/utils"
 )
 
+const (
+	SS_IMAGE  = "goignite/ss-libev:latest"
+	SSR_IMAGE = "goignite/ssr:latest"
+)
+
 var (
-	ImageUrl  string
 	client    *docker.Client
 	PortRange []int
 	Host      string
@@ -28,8 +32,17 @@ func init() {
 	}
 }
 
-func CreateContainer(name string, usedPorts *[]int) (*models.ServiceResult, error) {
-	PullImage()
+func CreateContainer(serverType, name, method string, usedPorts *[]int) (*models.ServiceResult, error) {
+	image := ""
+	switch serverType {
+	case "SS":
+		image = SS_IMAGE
+	case "SSR":
+		image = SSR_IMAGE
+	default:
+		return nil, errors.New("invalid server type")
+	}
+	PullImage(image)
 	password := utils.NewPasswd(16)
 	port, err := getAvailablePort(usedPorts)
 	if err != nil {
@@ -39,13 +52,14 @@ func CreateContainer(name string, usedPorts *[]int) (*models.ServiceResult, erro
 	container, err := client.CreateContainer(docker.CreateContainerOptions{
 		Name: name,
 		Config: &docker.Config{
-			Image:        ImageUrl,
-			Cmd:          []string{"-k", password, "-p", portStr},
-			ExposedPorts: map[docker.Port]struct{}{docker.Port(portStr + "/tcp"): {}},
+			Image: image,
+			Cmd:   []string{"-k", password, "-m", method},
 		},
 		HostConfig: &docker.HostConfig{
 			PortBindings: map[docker.Port][]docker.PortBinding{
-				docker.Port(portStr + "/tcp"): {{HostPort: portStr}}},
+				docker.Port("3389/tcp"): {{HostPort: portStr}},
+				docker.Port("3389/udp"): {{HostPort: portStr}},
+			},
 			RestartPolicy: docker.AlwaysRestart(),
 		},
 	})
@@ -61,11 +75,11 @@ func CreateContainer(name string, usedPorts *[]int) (*models.ServiceResult, erro
 }
 
 func StartContainer(id string) error {
-	return client.StartContainer(id, nil)
+	return client.StartContainer(id, &docker.HostConfig{})
 }
 
-func PullImage() error {
-	return client.PullImage(docker.PullImageOptions{Repository: ImageUrl, OutputStream: os.Stdout},
+func PullImage(image string) error {
+	return client.PullImage(docker.PullImageOptions{Repository: image, OutputStream: os.Stdout},
 		docker.AuthConfiguration{})
 }
 
@@ -130,8 +144,8 @@ func GetContainerStatsOutNet(id string) (uint64, error) {
 	return stats.Networks["eth0"].TxBytes, nil
 }
 
-func CreateAndStartContainer(name string, usedPorts *[]int) (*models.ServiceResult, error) {
-	r, err := CreateContainer(name, usedPorts)
+func CreateAndStartContainer(serverType, name, method string, usedPorts *[]int) (*models.ServiceResult, error) {
+	r, err := CreateContainer(serverType, name, method, usedPorts)
 	if err != nil {
 		return nil, err
 	}

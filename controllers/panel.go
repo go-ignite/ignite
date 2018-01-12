@@ -11,6 +11,27 @@ import (
 	"github.com/go-ignite/ignite/ss"
 )
 
+var (
+	servers          = []string{"SS", "SSR"}
+	ssMethods        = []string{"aes-256-cfb", "aes-128-gcm", "aes-192-gcm", "aes-256-gcm", "chacha20-ietf-poly1305"}
+	ssrMethods       = []string{"aes-256-cfb", "aes-256-ctr", "chacha20", "chacha20-ietf"}
+	serverMethodsMap = map[string]map[string]bool{}
+)
+
+func init() {
+	ssMethodMap := map[string]bool{}
+	for _, method := range ssMethods {
+		ssMethodMap[method] = true
+	}
+	ssrMethodMap := map[string]bool{}
+	for _, method := range ssrMethods {
+		ssrMethodMap[method] = true
+	}
+
+	serverMethodsMap["SS"] = ssMethodMap
+	serverMethodsMap["SSR"] = ssrMethodMap
+}
+
 func (router *MainRouter) PanelIndexHandler(c *gin.Context) {
 	userID, exists := c.Get("userId")
 
@@ -32,16 +53,24 @@ func (router *MainRouter) PanelIndexHandler(c *gin.Context) {
 	}
 
 	uInfo := &models.UserInfo{
-		Id:           user.Id,
-		Host:         ss.Host,
-		Username:     user.Username,
-		Status:       user.Status,
-		PackageUsed:  fmt.Sprintf("%.2f", user.PackageUsed),
-		PackageLimit: user.PackageLimit,
-		PackageLeft:  fmt.Sprintf("%.2f", float32(user.PackageLimit)-user.PackageUsed),
-		ServicePort:  user.ServicePort,
-		ServicePwd:   user.ServicePwd,
-		Expired:      user.Expired.Format("2006-01-02"),
+		Id:            user.Id,
+		Host:          ss.Host,
+		Username:      user.Username,
+		Status:        user.Status,
+		PackageUsed:   fmt.Sprintf("%.2f", user.PackageUsed),
+		PackageLimit:  user.PackageLimit,
+		PackageLeft:   fmt.Sprintf("%.2f", float32(user.PackageLimit)-user.PackageUsed),
+		ServicePort:   user.ServicePort,
+		ServicePwd:    user.ServicePwd,
+		ServiceMethod: user.ServiceMethod,
+		ServiceType:   user.ServiceType,
+		Expired:       user.Expired.Format("2006-01-02"),
+	}
+	if uInfo.ServiceMethod == "" {
+		uInfo.ServiceMethod = "aes-256-cfb"
+	}
+	if uInfo.ServiceType == "" {
+		uInfo.ServiceType = "SS"
 	}
 
 	if user.PackageLimit == 0 {
@@ -51,7 +80,10 @@ func (router *MainRouter) PanelIndexHandler(c *gin.Context) {
 	}
 
 	c.HTML(http.StatusOK, "panel.html", gin.H{
-		"uInfo": uInfo,
+		"uInfo":       uInfo,
+		"ss_methods":  ssMethods,
+		"ssr_methods": ssrMethods,
+		"servers":     servers,
 	})
 }
 
@@ -65,26 +97,43 @@ func (router *MainRouter) LogoutHandler(c *gin.Context) {
 
 func (router *MainRouter) CreateServiceHandler(c *gin.Context) {
 	userID, _ := c.Get("userId")
+	method := c.PostForm("method")
+	serverType := c.PostForm("server-type")
+
+	fmt.Println("UserID", userID)
+	fmt.Println("ServerType:", serverType)
+	fmt.Println("Method:", method)
+
+	methodMap, ok := serverMethodsMap[serverType]
+	if !ok {
+		resp := models.Response{Success: false, Message: "服务类型配置错误!"}
+		c.JSON(http.StatusOK, resp)
+		return
+	}
+
+	if !methodMap[method] {
+		resp := models.Response{Success: false, Message: "加密方法配置错误!"}
+		c.JSON(http.StatusOK, resp)
+		return
+	}
 
 	user := new(models.User)
 	router.db.Id(userID).Get(user)
+	if user.ServiceId != "" {
+		resp := models.Response{Success: false, Message: "服务已创建!"}
+		c.JSON(http.StatusOK, resp)
+		return
+	}
 
 	//Get all used ports.
 	var usedPorts []int
 	router.db.Table("user").Cols("service_port").Find(&usedPorts)
 
-	if user.ServiceId != "" {
-		resp := models.Response{Success: false, Message: "Service already created!"}
-		c.JSON(http.StatusOK, resp)
-		return
-	}
-
 	// 1. Create ss service
-	result, err := ss.CreateAndStartContainer(user.Username, &usedPorts)
-
+	result, err := ss.CreateAndStartContainer(serverType, user.Username, method, &usedPorts)
 	if err != nil {
 		log.Println("Create ss service error:", err.Error())
-		resp := models.Response{Success: false, Message: "Create service error!"}
+		resp := models.Response{Success: false, Message: "创建服务失败!"}
 		c.JSON(http.StatusOK, resp)
 		return
 	}
@@ -94,8 +143,9 @@ func (router *MainRouter) CreateServiceHandler(c *gin.Context) {
 	user.ServiceId = result.ID
 	user.ServicePort = result.Port
 	user.ServicePwd = result.Password
-	affected, err := router.db.Id(userID).Cols("status", "service_port", "service_pwd", "service_id").Update(user)
-
+	user.ServiceMethod = method
+	user.ServiceType = serverType
+	affected, err := router.db.Id(userID).Cols("status", "service_port", "service_pwd", "service_id", "service_method", "service_type").Update(user)
 	if affected == 0 || err != nil {
 		if err != nil {
 			log.Println("Update user info error:", err.Error())
@@ -104,14 +154,14 @@ func (router *MainRouter) CreateServiceHandler(c *gin.Context) {
 		//Force remove created container
 		ss.RemoveContainer(result.ID)
 
-		resp := models.Response{Success: false, Message: "Create service error!"}
+		resp := models.Response{Success: false, Message: "更新用户信息失败!"}
 		c.JSON(http.StatusOK, resp)
 		return
 	}
 
 	result.PackageLimit = user.PackageLimit
 	result.Host = ss.Host
-	resp := models.Response{Success: true, Message: "OK!", Data: result}
+	resp := models.Response{Success: true, Message: "服务创建成功!", Data: result}
 
 	c.JSON(http.StatusOK, resp)
 }

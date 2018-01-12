@@ -17,7 +17,6 @@ type MainRouter struct {
 
 func (self *MainRouter) Initialize(r *gin.Engine) {
 	ss.Host = utils.HOST_Address
-	ss.ImageUrl = utils.SS_Image
 	ss.PortRange = []int{utils.HOST_From, utils.HOST_To}
 
 	//Init session store
@@ -39,8 +38,11 @@ func (self *MainRouter) Initialize(r *gin.Engine) {
 	}
 
 	go func() {
-		if err := ss.PullImage(); err != nil {
-			log.Printf("Pull image [%s] error: %s\n", ss.ImageUrl, err.Error())
+		if err := ss.PullImage(ss.SS_IMAGE); err != nil {
+			log.Printf("Pull image [%s] error: %s\n", ss.SS_IMAGE, err.Error())
+		}
+		if err := ss.PullImage(ss.SSR_IMAGE); err != nil {
+			log.Printf("Pull image [%s] error: %s\n", ss.SSR_IMAGE, err.Error())
 		}
 	}()
 	self.router.Run(utils.APP_Address)

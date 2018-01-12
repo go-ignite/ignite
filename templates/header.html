@@ -4,20 +4,20 @@
     <div class="container">
       <div class="navbar-header">
         <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navMain">
-            <span class="glyphicon glyphicon-chevron-right" style="color:white;"></span>
-          </button>
+            <i class="iconfont icon-caidanlan" style="color:white;"></i>
+        </button>
         <a class="navbar-brand" href="/">ignite</a>
       </div>
       <div class="collapse navbar-collapse" id="navMain">
         <ul class="nav navbar-nav pull-right">
-          <li class="active header-li"><a href="/">首页</a></li>
+          <li class="active header-li header-hero"><a class="hero-move" href="#">首页</a></li>
            {{ if not .uInfo }}
-          <li class="header-li header-signup"><a class="signup" href="#">注册</a></li>
-          <li class="header-li header-login"><a class="login" href="#">登录</a></li>
+          <li class="header-li header-signup"><a class="signup-move" href="#">注册</a></li>
+          <li class="header-li header-login"><a class="login-move" href="#">登录</a></li>
           {{ else }}
           <li class="header-li"><a href="/panel/logout">退出</a></li>
           {{ end }}
-          <li class="header-li"><a href="#">关于</a></li>
+          <!-- <a class="header-li"><a href="#">关于</a></a> -->
         </ul>
       </div>
     </div>
