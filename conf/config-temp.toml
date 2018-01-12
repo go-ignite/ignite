@@ -7,9 +7,6 @@ address = ":5000"
 driver = "sqlite3"
 connect = "./data/ignite.db"
 
-[ss]
-image = "goignite/ss-go:latest"
-
 [host]
 address = "localhost"
 from = 5001

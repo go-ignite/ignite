@@ -204,11 +204,6 @@ h2::after { content: " "; border: solid 2px #3dc9b3; display: block; width: 35px
     transition: background-color .5s ease 0s;
 }
 
-ul.dropdown-menu {
-    background-color: black;
-}
-
-
 @media (max-width: 992px) {
   .opaque-navbar {
     background-color: black;
@@ -216,6 +211,26 @@ ul.dropdown-menu {
     transition: background-color .5s ease 0s;
   }
 }
+
+@media (max-width: 768px) {
+  .navbar-fixed-bottom {
+    display: none;
+  }
+  .hero,
+  .infobox {
+    width: 100% !important;
+  }
+  .basic-slide {
+    display: block !important;
+    justify-content: space-around;
+    max-height: 200px;
+    overflow: auto;
+  }
+  .progressbar {
+    display: none !important;
+  }
+}
+
 
 /* ==========================================================================
 Hero
@@ -235,25 +250,13 @@ Hero
 
 .signup-btn, .login-btn{ background: rgba(61, 201, 179, 1); padding: 20px 40px; border-radius: 5px; -moz-border-radius: 5px; -webkit-border-radius: 5px; -o-border-radius: 5px; color: #fff; text-transform: uppercase; letter-spacing: 1px; display: inline-block; -webkit-box-shadow: 0px 3px 0px 0px #309383; -moz-box-shadow: 0px 3px 0px 0px #309383; box-shadow: 0px 3px 0px 0px #309383; margin: 20px 0 0; font-weight: bold; }
 .signup-btn:hover, .login-btn:hover, .signup-btn:focus, .login-btn:focus { background: rgba(61, 201, 179, 0.6); color: #fff; } 
+.signup-loginhref {
+  color: #a1a9b0
+}
 /* ========================================================================== */
 
-video {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    min-width: 100%;
-    min-height: 100%;
-    width: auto;
-    height: auto;
-    z-index: -100;
-    transform: translateX(-50%) translateY(-50%);
-    background: url('/static/images/helloworld.jpg') no-repeat;
-    background-size: cover;
-    transition: 1s opacity;
-}
-
-
 #signup { padding: 40px 0 0px 0; height: auto; display: none;}
+
 #login { padding: 40px 0 0px 0; height: auto; display: none;}
 
 form {
@@ -264,9 +267,6 @@ form {
 .form h1 { margin: 0px 0px 20px 0;}
 
 form input {
-  -webkit-appearance: none;
-     -moz-appearance: none;
-          appearance: none;
   outline: 0;
   border: 1px solid rgba(255, 255, 255, 0.4);
   background-color: rgba(255, 255, 255, 0.2);
@@ -284,19 +284,19 @@ form input {
 }
 
 form input:hover {
-  background-color: rgba(255, 255, 255, 0.4);
+  background-color: rgba(255, 255, 255, 0.5);
+}
+form input::placeholder {
+  color: rgba(255, 255, 255, .7);
 }
 
 form input:focus {
   background-color: white;
   width: 300px;
-  color: #53e3a6;
+  color: #555;
 }
 
 .common-btn {
-  -webkit-appearance: none;
-     -moz-appearance: none;
-          appearance: none;
   outline: 0;
   background: rgba(61, 201, 179, 1);
   border: 0;
@@ -344,6 +344,10 @@ InfoBox
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
 }
 
+.infobox.multiline {
+  width: 650px;
+}
+
 .header-bar {
   width: 100%;
   height: 50px;
@@ -352,7 +356,7 @@ InfoBox
   font-size: 20px;
   /*background: rgba(236, 155, 59, 0.67);*/
   padding: 13px 10px;
-  margin: 0px 0px 5px 0px;
+  margin: 0px 0px 0px 0px;
   border-top-left-radius: 15px;
   border-top-right-radius: 15px;
 }
@@ -365,7 +369,7 @@ InfoBox
   font-size: 20px;
   /*background: rgba(236, 155, 59, 0.67);*/
   padding: 13px 10px;
-  margin: 5px 0px 5px 0px;
+  margin: 0px 0px 5px 0px;
 }
 
 .infobox span {
@@ -374,9 +378,19 @@ InfoBox
   margin: 5px 10px;
 }
 
-.basic-slide {
-  display: inline-block;
+.basic-slide_line {
+  margin: 10px auto;
   width: 280px;
+  position: relative;
+}
+
+.basic-slide {
+  padding: 10px 0;
+}
+
+.basic-slide_input {
+  width: 100%;
+  display: inline-block;
   padding: 10px 0 10px 0px;
   font-family: "Open Sans", sans;
   font-weight: 400;
@@ -389,7 +403,18 @@ InfoBox
   text-align: center;
 }
 
-.basic-slide + label {
+.multiline .basic-slide {
+  display: flex;
+  justify-content: space-around;
+}
+
+.basic-slide_wrap {
+  display: block;
+  width: 280px;
+  margin: auto;
+}
+
+.basic-slide_label {
   display: inline-block;
   position: absolute;
   top: 0;
@@ -442,6 +467,24 @@ InfoBox
   bottom: 30px;
   font-size: 45%;
   margin-left: 2px;
+}
+
+
+/* video */
+.bg-videosnap,
+.bg-video {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: -100;
+  min-width: 100%;
+  min-height: 100%;
+  background: url('/static/images/helloworld.jpg') no-repeat;
+  background-size: cover;
+  transition: 1s opacity;
 }
 
 /*Bubbles*/
@@ -556,8 +599,13 @@ InfoBox
   }
 }
 
+
 /*Footer
 ========================================================================== */
+.footer {
+  display: flex;
+  justify-content: space-between;
+}
 footer a { color: #a1a9b0; }
 footer { background-color: rgba(0,0,0,0.5); padding: 5px 0 5px; }
 footer p { color: #fff; }
@@ -580,3 +628,5 @@ Waypoints
 .delay-05s { animation-delay: 0.5s; -webkit-animation-delay: 0.5s; }
 .delay-1s { animation-delay: 1s; -webkit-animation-delay: 1s; }
 .wp3 { background: url('/static/images/iphone-bg.png') no-repeat center center; background-position: 200px 10px; height: 100%; }
+
+
