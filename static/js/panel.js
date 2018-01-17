@@ -48,7 +48,12 @@ var Panel = function () {
                     $('#port').val(resp.data.servicePort);
                     $('#pwd').val(resp.data.servicePwd);
                     $('#encrypt').val($('#method').val());
-                    $('#types').val($('#server-type').val());
+                    var serverType = $('#server-type').val();
+                    $('#types').val(serverType);
+                    if (serverType == "SSR") {
+                        $('.infobox').addClass("multiline");
+                        $('#ssr_info').css('display', 'block');
+                    }
 
                     $('#package-limit').html(resp.data.packageLimit + '<up>GB</up>');
                     $('#package-used').html('0<up>GB</up>');
