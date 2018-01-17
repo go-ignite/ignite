@@ -8,7 +8,7 @@
 [![Microbadger Image](https://images.microbadger.com/badges/image/goignite/ignite.svg)](https://microbadger.com/images/goignite/ignite)
 [![DUB](https://img.shields.io/dub/l/vibe-d.svg)](https://github.com/go-ignite/ignite/blob/master/LICENSE)
 
-A SS panel for managing multiple users, powered by Go &amp; Docker.
+A SS(R) panel for managing multiple users, powered by Go &amp; Docker.
 
 * [Overview](#overview)
 * [Features](#features)
