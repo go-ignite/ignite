@@ -61,7 +61,8 @@
                 </form>
                 <div class="boxLoading"></div>
 
-                <div class="infobox{{ if eq .uInfo.ServiceType "SSR" }} multiline {{ end }}" {{ if eq .uInfo.Status 0 }} style="display: none" {{ end }}>
+                <div class='infobox{{ if eq .uInfo.ServiceType "SSR" }} multiline {{ end }}' {{ if eq .uInfo.Status 0 }} style="display: none"
+                    {{ end }}>
                     <div class="header-bar text-left">
                         <div>账户概览
                             <!-- <i id="extend" class="fa fa-angle-double-down pull-right" aria-hidden="true"></i> -->
@@ -91,20 +92,20 @@
                                 <input class="basic-slide_input" id="types" type="text" value="{{ .uInfo.ServiceType }}" readonly />
                                 <label for="name" class="basic-slide_label">类型</label>
                             </div>
-                            {{ if eq .uInfo.ServiceType "SSR" }}
-                            <div class="basic-slide_line">
-                                <input class="basic-slide_input" id="protocol" type="text" value="auth_aes128_md5" readonly />
-                                <label for="name" class="basic-slide_label">协议</label>
+                            <div id="ssr_info" {{ if ne .uInfo.ServiceType "SSR" }} style="display: none" {{ end }}>
+                                <div class="basic-slide_line">
+                                    <input class="basic-slide_input" id="protocol" type="text" value="auth_aes128_md5" readonly />
+                                    <label for="name" class="basic-slide_label">协议</label>
+                                </div>
+                                <div class="basic-slide_line">
+                                    <input class="basic-slide_input" id="protocol-param" type="text" value="32" readonly />
+                                    <label for="name" class="basic-slide_label">协参</label>
+                                </div>
+                                <div class="basic-slide_line">
+                                    <input class="basic-slide_input" id="obfs" type="text" value="tls1.2_ticket_auth_compatible" readonly />
+                                    <label for="name" class="basic-slide_label">混淆</label>
+                                </div>
                             </div>
-                            <div class="basic-slide_line">
-                                <input class="basic-slide_input" id="protocol-param" type="text" value="32" readonly />
-                                <label for="name" class="basic-slide_label">协参</label>
-                            </div>
-                            <div class="basic-slide_line">
-                                <input class="basic-slide_input" id="obfs" type="text" value="tls1.2_ticket_auth_compatible" readonly />
-                                <label for="name" class="basic-slide_label">混淆</label>
-                            </div>
-                            {{ end }}
                         </div>
                     </div>
                     <div class="middle-bar text-left">服务状态</div>
