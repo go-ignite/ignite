@@ -35,5 +35,6 @@ type UserInfo struct {
 	ServicePwd         string
 	ServiceMethod      string
 	ServiceType        string
+	ServiceURL         string
 	Expired            string
 }
