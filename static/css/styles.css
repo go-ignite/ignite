@@ -213,9 +213,6 @@ h2::after { content: " "; border: solid 2px #3dc9b3; display: block; width: 35px
 }
 
 @media (max-width: 768px) {
-  .navbar-fixed-bottom {
-    display: none;
-  }
   .hero,
   .infobox {
     width: 100% !important;
@@ -223,7 +220,7 @@ h2::after { content: " "; border: solid 2px #3dc9b3; display: block; width: 35px
   .basic-slide {
     display: block !important;
     justify-content: space-around;
-    max-height: 200px;
+    max-height: 300px;
     overflow: auto;
   }
   .progressbar {
@@ -237,9 +234,9 @@ Hero
 ========================================================================== */
 .hero {  
     position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%); 
+    top: 70px;
+    left: 0;
+    right: 0;
     height: auto; 
     z-index: 2;
 }
@@ -350,12 +347,11 @@ InfoBox
 
 .header-bar {
   width: 100%;
-  height: 50px;
   background: rgba(61, 201, 179, 0.67);
   color: white;
   font-size: 20px;
   /*background: rgba(236, 155, 59, 0.67);*/
-  padding: 13px 10px;
+  padding: 5px 10px;
   margin: 0px 0px 0px 0px;
   border-top-left-radius: 15px;
   border-top-right-radius: 15px;
@@ -363,7 +359,6 @@ InfoBox
 
 .middle-bar {
   width: 100%;
-  height: 50px;
   background: rgba(61, 201, 179, 0.67);
   color: white;
   font-size: 20px;
@@ -375,7 +370,6 @@ InfoBox
 .infobox span {
   position: relative;
   display: inline-block;
-  margin: 5px 10px;
 }
 
 .basic-slide_line {
@@ -411,7 +405,8 @@ InfoBox
 .basic-slide_wrap {
   display: block;
   width: 280px;
-  margin: auto;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .basic-slide_label {
@@ -578,6 +573,31 @@ InfoBox
   -webkit-animation-delay: 11s;
           animation-delay: 11s;
 }
+
+#icon-qrcode {
+  color: #fff;
+  font-size: 20px;
+  margin-left: 10px;
+  cursor: pointer;
+}
+
+#icon-qrcode .icon-qrcode {
+  font-size: 25px;
+}
+
+.qrcode-wrap {
+  display: none;
+}
+
+.showQR .qrcode-wrap {
+  display: block;
+}
+.showQR .basic-slide_wrap {
+  display: none;
+}
+.showQR .icon-qrcode {
+  color: #7eea19;
+}
 @-webkit-keyframes square {
   0% {
     -webkit-transform: translateY(0);
@@ -600,21 +620,6 @@ InfoBox
 }
 
 
-/*Footer
-========================================================================== */
-.footer {
-  display: flex;
-  justify-content: space-between;
-}
-footer a { color: #a1a9b0; }
-footer { background-color: rgba(0,0,0,0.5); padding: 5px 0 5px; }
-footer p { color: #fff; }
-ul.legals { list-style: none; color: #fff; line-height: 25px; }
-ul.legals li { display: inline-block; }
-ul.legals li::after { content: " |"; }
-ul.legals li:last-child::after { content: ""; }
-.legals { text-align: left; }
-.credit { text-align: right; }
 /* ==========================================================================
 FlexSlider Custom CSS
 ========================================================================== */
@@ -630,3 +635,17 @@ Waypoints
 .wp3 { background: url('/static/images/iphone-bg.png') no-repeat center center; background-position: 200px 10px; height: 100%; }
 
 
+
+/* boostrap reset */
+.popover-content {
+  overflow: auto;
+}
+
+.qrcode-url-line span {
+  display: table-cell;
+  cursor: pointer;
+}
+.qrcode-url-line {
+  width: 80%;
+  margin: auto;
+}

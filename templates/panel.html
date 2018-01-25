@@ -12,7 +12,7 @@
     <link href="/static/css/styles.css" rel="stylesheet">
     <link href="/static/css/animate.css" rel="stylesheet">
     <!-- iconfont -->
-    <link rel="stylesheet" href="//at.alicdn.com/t/font_537943_aej5aeuyfym34n29.css">
+    <link rel="stylesheet" href="//at.alicdn.com/t/font_537943_r17ksfz59woskyb9.css">
     <!-- Toastr -->
     <link href="/static/css/dropdown.css" rel="stylesheet">
     <link href="/static/css/toastr.min.css" rel="stylesheet">
@@ -61,14 +61,21 @@
                 </form>
                 <div class="boxLoading"></div>
 
-                <div class='infobox{{ if eq .uInfo.ServiceType "SSR" }} multiline {{ end }}' {{ if eq .uInfo.Status 0 }} style="display: none"
+                <div class='infobox multiline' {{ if eq .uInfo.Status 0 }} style="display: none"
                     {{ end }}>
                     <div class="header-bar text-left">
-                        <div>账户概览
+                        <span>账户概览<span id="icon-qrcode"><i class="iconfont icon-qrcode"></i></span>
                             <!-- <i id="extend" class="fa fa-angle-double-down pull-right" aria-hidden="true"></i> -->
-                        </div>
+                        </span>
                     </div>
                     <div id="account-detail" class="basic-slide">
+                        <div class="qrcode-wrap">
+                            <div id="qrcode-canvas"></div>
+                            <div class="input-group qrcode-url-line">
+                                <input type="text" id="serviceUrl" class="form-control" placeholder="Recipient's username" aria-describedby="basic-addon2" value="{{.uInfo.ServiceURL}}">
+                                <span class="clipboard input-group-addon" id="basic-addon2" data-clipboard-action="copy" data-clipboard-target="#serviceUrl">点击复制</span>
+                            </div>
+                        </div>
                         <div class="basic-slide_wrap">
                             <div class="basic-slide_line">
                                 <input class="basic-slide_input" id="host" type="text" value="{{ .uInfo.Host }}" readonly />
@@ -117,12 +124,12 @@
                                 <span>运行中</span> {{ end }} {{ if eq .uInfo.Status 2 }}
                                 <div class="led yellow"></div>
                                 <span>已停止</span> {{ end }}
+                                <span>到期: {{ .uInfo.Expired }}</span>
+                                <section class="status">
+                                </section>
                             </section>
                         </div>
                         <div class="col-md-6 text-center">
-                            <section class="status">
-                                <span>到期: {{ .uInfo.Expired }}</span>
-                            </section>
                         </div>
                     </div>
                     <div class="progressbar" data-perc="{{ .uInfo.PackageLeftPercent }}">
@@ -171,13 +178,18 @@
         </ul>
 
         {{ template "footer.html" .}}
+        <script src="https://cdn.bootcss.com/jquery.qrcode/1.0/jquery.qrcode.min.js"></script>
+        <script src="https://cdn.bootcss.com/clipboard.js/1.7.1/clipboard.min.js"></script>
         <script src="/static/js/panel.js"></script>
         <script src="/static/js/header.js"></script>
         <script>
             ssMethods = {{.ss_methods}};
-            ssrMethods = {{.ssr_methods}};
+            srMethods = {{.ssr_methods}};
 
             $(document).ready(function () {
+                new Clipboard('.clipboard');
+                $('[data-toggle="popover"]').popover()
+                $('#qrcode-canvas').qrcode({width: 200,height: 200,text: "{{ .uInfo.ServiceURL }}"});
                 Panel.init();
                 Header.init();
 

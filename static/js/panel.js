@@ -12,14 +12,14 @@ var Panel = function () {
         //         $('#account-detail').slideToggle('slow');
         //     }
         // });
-
+        $('#icon-qrcode').click(function() {
+            $('.infobox').toggleClass('showQR');
+        });
         $('#server-type').on('change', function (e) {
             var methods = [];
             if (this.value == 'SS') {
-                // for ss
                 methods = ssMethods;
             } else if (this.value == "SSR") {
-                // for ssr
                 methods = ssrMethods;
             }
             $("#method").empty();
@@ -44,25 +44,7 @@ var Panel = function () {
             var url = form.attr("action");
             $.post(url, form.serialize(), function (resp) {
                 if (resp.success) {
-                    $('#host').val(resp.data.host);
-                    $('#port').val(resp.data.servicePort);
-                    $('#pwd').val(resp.data.servicePwd);
-                    $('#encrypt').val($('#method').val());
-                    var serverType = $('#server-type').val();
-                    $('#types').val(serverType);
-                    if (serverType == "SSR") {
-                        $('.infobox').addClass("multiline");
-                        $('#ssr_info').css('display', 'block');
-                    }
-
-                    $('#package-limit').html(resp.data.packageLimit + '<up>GB</up>');
-                    $('#package-used').html('0<up>GB</up>');
-                    $('#package-left').html(resp.data.packageLimit + '<up>GB</up>');
-                    $('.progressbar').attr('data-perc', '0');
-                    $('#service-status').html('<div class="led green"></div><span>运行中</span>');
-
-                    $('.boxLoading').css('display', 'none');
-                    $('.infobox').fadeIn(1500);
+                    window.location.href = '/panel/index'
                 } else {
                     $('.boxLoading').css('display', 'block');
                     $('.boxLoading').fadeOut(500);
