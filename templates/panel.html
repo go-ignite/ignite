@@ -2,26 +2,16 @@
 <html lang="en">
 
 <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>ignite</title>
-    <link href="/static/css/fonts.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/4.0.0/css/bootstrap.min.css">
-    <link href="/static/css/styles.css" rel="stylesheet">
-    <link href="/static/css/animate.css" rel="stylesheet">
-    <link rel="stylesheet" href="//at.alicdn.com/t/font_537943_r17ksfz59woskyb9.css">
+    {{ template "commonHeader.html" .}}
     <link href="/static/css/dropdown.css" rel="stylesheet">
-    <link href="/static/css/toastr.min.css" rel="stylesheet">
     <link href="/static/css/progress-bar.css" rel="stylesheet">
     <link href="/static/css/led.css" rel="stylesheet"> {{ if eq .uInfo.Status 0}}
     <link href="/static/css/loading.css" rel="stylesheet"> {{ end }}
-    <link rel="icon" type="image/png" sizes="96x96" href="/static/images/favicon-96x96.png">
 </head>
 
 <body id="top" class="font-hei">
 
-    {{ template "header.html" .}}
+    {{ template "nav.html" .}}
 
     <div class="wrapper">
         <div class="hero">
@@ -163,11 +153,10 @@
             <li></li>
         </ul>
 
-        {{ template "footer.html" .}}
+        {{ template "commonFooter.html" .}}
         <script src="https://cdn.bootcss.com/jquery.qrcode/1.0/jquery.qrcode.min.js"></script>
         <script src="https://cdn.bootcss.com/clipboard.js/1.7.1/clipboard.min.js"></script>
         <script src="/static/js/panel.js"></script>
-        <script src="/static/js/header.js"></script>
         <script>
             ssMethods = {{.ss_methods}};
             srMethods = {{.ssr_methods}};
