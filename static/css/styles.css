@@ -220,7 +220,7 @@ h2::after { content: " "; border: solid 2px #3dc9b3; display: block; width: 35px
   .basic-slide {
     display: block !important;
     justify-content: space-around;
-    max-height: 300px;
+    max-height: 200px;
     overflow: auto;
   }
   .progressbar {
@@ -233,12 +233,12 @@ h2::after { content: " "; border: solid 2px #3dc9b3; display: block; width: 35px
 Hero
 ========================================================================== */
 .hero {  
-    position: absolute;
-    top: 70px;
-    left: 0;
-    right: 0;
-    height: auto; 
-    z-index: 2;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  height: auto;
+  z-index: 2;
 }
 
 .hero h1 { font-size: 40px; letter-spacing: 12px; margin: 10px; color:white}
@@ -251,6 +251,19 @@ Hero
   color: #a1a9b0
 }
 /* ========================================================================== */
+.nav {
+  margin: 0;
+}
+.navbar {
+  background-color: rgba(0,0,0,0.5);
+}
+.navbar
+.nav-link {
+  color: #999;
+}
+.nav-item.active .nav-link {
+  color: #fff;
+}
 
 #signup { padding: 40px 0 0px 0; height: auto; display: none;}
 
@@ -448,7 +461,7 @@ InfoBox
 
 .stat-bar .stat {
   position: relative;
-  font-size: 40px;
+  font-size: 30px;
 }
 
 .stat-bar .stat-value {
@@ -574,7 +587,13 @@ InfoBox
           animation-delay: 11s;
 }
 
+.qrcode-url {
+  cursor: pointer;
+}
+
 #icon-qrcode {
+  text-decoration: none;
+  padding: 0;
   color: #fff;
   font-size: 20px;
   margin-left: 10px;
