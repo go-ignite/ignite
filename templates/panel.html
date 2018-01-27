@@ -7,8 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>ignite</title>
     <link href="/static/css/fonts.css" rel="stylesheet">
-    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/4.0.0/css/bootstrap.min.css">
     <link href="/static/css/styles.css" rel="stylesheet">
     <link href="/static/css/animate.css" rel="stylesheet">
     <!-- iconfont -->
@@ -64,17 +63,13 @@
                 <div class='infobox multiline' {{ if eq .uInfo.Status 0 }} style="display: none"
                     {{ end }}>
                     <div class="header-bar text-left">
-                        <span>账户概览<span id="icon-qrcode"><i class="iconfont icon-qrcode"></i></span>
-                            <!-- <i id="extend" class="fa fa-angle-double-down pull-right" aria-hidden="true"></i> -->
-                        </span>
+                        <span>账户概览</span>
+                        <button type="button" class="btn btn-link btn-sm" id="icon-qrcode"><i class="iconfont icon-qrcode"></i></button>
                     </div>
                     <div id="account-detail" class="basic-slide">
                         <div class="qrcode-wrap">
                             <div id="qrcode-canvas"></div>
-                            <div class="input-group qrcode-url-line">
-                                <input type="text" id="serviceUrl" class="form-control" placeholder="Recipient's username" aria-describedby="basic-addon2" value="{{.uInfo.ServiceURL}}">
-                                <span class="clipboard input-group-addon" id="basic-addon2" data-clipboard-action="copy" data-clipboard-target="#serviceUrl">点击复制</span>
-                            </div>
+                            <span class="clipboard qrcode-url" id="basic-addon2" data-clipboard-action="copy"  data-clipboard-text="{{.uInfo.ServiceURL}}" onClick="toastr.success('复制成功')">点击复制链接</span>
                         </div>
                         <div class="basic-slide_wrap">
                             <div class="basic-slide_line">
