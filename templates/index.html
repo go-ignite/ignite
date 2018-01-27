@@ -1,21 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-      <meta charset="utf-8">
-      <meta http-equiv="X-UA-Compatible" content="IE=edge">
-      <meta name="viewport" content="width=device-width, initial-scale=1">
-      <title>ignite</title>
-      <link href="/static/css/fonts.css" rel="stylesheet">
-      <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/4.0.0/css/bootstrap.min.css">
-      <link href="/static/css/styles.css" rel="stylesheet">
-      <link href="/static/css/animate.css" rel="stylesheet">
-      <link rel="stylesheet" href="//at.alicdn.com/t/font_537943_r17ksfz59woskyb9.css">
-      <link href="/static/css/toastr.min.css" rel="stylesheet">
-      <link rel="icon" type="image/png" sizes="96x96" href="/static/images/favicon-96x96.png">
+      {{template "commonHeader.html" .}}
     </head>
 <body id="top">
 
-  {{template "header.html" .}}
+  {{template "nav.html" .}}
 
   <div class="bg-videosnap"></div>
   <video playsinline autoplay muted loop class="bg-video">
@@ -56,11 +46,9 @@
     </div>
   </section>
 
-  {{ template "footer.html" .}}
-  <script src="/static/js/toastr.min.js"></script>
+  {{ template "commonFooter.html" .}}
   <script src="/static/js/scripts.js"></script>
   <script src="/static/js/user.js"></script>
-  <script src="/static/js/header.js"></script>
 
   <script>
     (function(){
