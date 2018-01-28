@@ -2,36 +2,16 @@
 <html lang="en">
 
 <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>ignite</title>
-    <link href="/static/css/fonts.css" rel="stylesheet">
-    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
-    <link href="/static/css/styles.css" rel="stylesheet">
-    <link href="/static/css/animate.css" rel="stylesheet">
-    <!-- iconfont -->
-    <link rel="stylesheet" href="//at.alicdn.com/t/font_537943_aej5aeuyfym34n29.css">
-    <!-- Toastr -->
+    {{ template "commonHeader.html" .}}
     <link href="/static/css/dropdown.css" rel="stylesheet">
-    <link href="/static/css/toastr.min.css" rel="stylesheet">
     <link href="/static/css/progress-bar.css" rel="stylesheet">
     <link href="/static/css/led.css" rel="stylesheet"> {{ if eq .uInfo.Status 0}}
     <link href="/static/css/loading.css" rel="stylesheet"> {{ end }}
-
-    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
-    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-    <!--[if lt IE 9]>
-        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
-        <![endif]-->
-    <link rel="icon" type="image/png" sizes="96x96" href="/static/images/favicon-96x96.png">
 </head>
 
 <body id="top" class="font-hei">
 
-    {{ template "header.html" .}}
+    {{ template "nav.html" .}}
 
     <div class="wrapper">
         <div class="hero">
@@ -61,14 +41,17 @@
                 </form>
                 <div class="boxLoading"></div>
 
-                <div class='infobox{{ if eq .uInfo.ServiceType "SSR" }} multiline {{ end }}' {{ if eq .uInfo.Status 0 }} style="display: none"
+                <div class='infobox multiline' {{ if eq .uInfo.Status 0 }} style="display: none"
                     {{ end }}>
                     <div class="header-bar text-left">
-                        <div>账户概览
-                            <!-- <i id="extend" class="fa fa-angle-double-down pull-right" aria-hidden="true"></i> -->
-                        </div>
+                        <span>账户概览</span>
+                        <button type="button" class="btn btn-link btn-sm" id="icon-qrcode"><i class="iconfont icon-qrcode"></i></button>
                     </div>
                     <div id="account-detail" class="basic-slide">
+                        <div class="qrcode-wrap">
+                            <div id="qrcode-canvas"></div>
+                            <span class="clipboard qrcode-url" id="basic-addon2" data-clipboard-action="copy"  data-clipboard-text="{{.uInfo.ServiceURL}}" onClick="toastr.success('复制成功')">点击复制链接</span>
+                        </div>
                         <div class="basic-slide_wrap">
                             <div class="basic-slide_line">
                                 <input class="basic-slide_input" id="host" type="text" value="{{ .uInfo.Host }}" readonly />
@@ -110,19 +93,19 @@
                     </div>
                     <div class="middle-bar text-left">服务状态</div>
                     <div class="row">
-                        <div class="col-md-6 text-center">
+                        <div class="offset-md-3 col-md-6 text-center">
                             <section class="status" id="service-status">
                                 {{ if eq .uInfo.Status 1 }}
                                 <div class="led green"></div>
                                 <span>运行中</span> {{ end }} {{ if eq .uInfo.Status 2 }}
                                 <div class="led yellow"></div>
                                 <span>已停止</span> {{ end }}
+                                <span>到期: {{ .uInfo.Expired }}</span>
+                                <section class="status">
+                                </section>
                             </section>
                         </div>
                         <div class="col-md-6 text-center">
-                            <section class="status">
-                                <span>到期: {{ .uInfo.Expired }}</span>
-                            </section>
                         </div>
                     </div>
                     <div class="progressbar" data-perc="{{ .uInfo.PackageLeftPercent }}">
@@ -170,14 +153,18 @@
             <li></li>
         </ul>
 
-        {{ template "footer.html" .}}
+        {{ template "commonFooter.html" .}}
+        <script src="https://cdn.bootcss.com/jquery.qrcode/1.0/jquery.qrcode.min.js"></script>
+        <script src="https://cdn.bootcss.com/clipboard.js/1.7.1/clipboard.min.js"></script>
         <script src="/static/js/panel.js"></script>
-        <script src="/static/js/header.js"></script>
         <script>
             ssMethods = {{.ss_methods}};
             ssrMethods = {{.ssr_methods}};
 
             $(document).ready(function () {
+                new Clipboard('.clipboard');
+                $('[data-toggle="popover"]').popover()
+                $('#qrcode-canvas').qrcode({width: 200,height: 200,text: "{{ .uInfo.ServiceURL }}"});
                 Panel.init();
                 Header.init();
 
