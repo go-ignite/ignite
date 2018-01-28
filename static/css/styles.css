@@ -220,7 +220,7 @@ h2::after { content: " "; border: solid 2px #3dc9b3; display: block; width: 35px
   .basic-slide {
     display: block !important;
     justify-content: space-around;
-    max-height: 200px;
+    max-height: 250px;
     overflow: auto;
   }
   .progressbar {
@@ -393,6 +393,7 @@ InfoBox
 
 .basic-slide {
   padding: 10px 0;
+  min-height: 250px;
 }
 
 .basic-slide_input {
