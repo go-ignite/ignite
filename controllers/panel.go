@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
@@ -132,7 +133,7 @@ func (router *MainRouter) CreateServiceHandler(c *gin.Context) {
 	router.db.Table("user").Cols("service_port").Find(&usedPorts)
 
 	// 1. Create ss service
-	result, err := ss.CreateAndStartContainer(serverType, user.Username, method, &usedPorts)
+	result, err := ss.CreateAndStartContainer(serverType, strings.ToLower(user.Username), method, &usedPorts)
 	if err != nil {
 		log.Println("Create ss service error:", err.Error())
 		resp := models.Response{Success: false, Message: "创建服务失败!"}
