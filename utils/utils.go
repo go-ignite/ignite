@@ -3,8 +3,10 @@ package utils
 import (
 	"crypto/rand"
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"io"
+	"net"
 	"strings"
 )
 
@@ -59,4 +61,24 @@ func ServiceURL(serviceType, host string, port int, method, password string) str
 func ssbase64Encode(s string) string {
 	encoded := base64.URLEncoding.EncodeToString([]byte(s))
 	return strings.TrimRight(encoded, "=")
+}
+
+func GetAvailablePort(usedPorts *[]int) (int, error) {
+	portMap := map[int]int{}
+
+	for _, p := range *usedPorts {
+		portMap[p] = p
+	}
+
+	for port := HOST_From; port <= HOST_To; port++ {
+		if _, exists := portMap[port]; exists {
+			continue
+		}
+		conn, err := net.Dial("tcp", fmt.Sprintf(":%d", port))
+		if err != nil {
+			return port, nil
+		}
+		conn.Close()
+	}
+	return 0, errors.New("no port available")
 }
