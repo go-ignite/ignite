@@ -3,6 +3,8 @@ package ss
 import (
 	"errors"
 	"fmt"
+	"io"
+	"io/ioutil"
 	"log"
 	"os"
 	"time"
@@ -41,7 +43,7 @@ func CreateContainer(serverType, name, method string, port int) (*models.Service
 	default:
 		return nil, errors.New("invalid server type")
 	}
-	PullImage(image)
+	PullImage(image, true)
 	password := utils.NewPasswd(16)
 	portStr := fmt.Sprintf("%d", port)
 	container, err := client.CreateContainer(docker.CreateContainerOptions{
@@ -73,8 +75,14 @@ func StartContainer(id string) error {
 	return client.StartContainer(id, &docker.HostConfig{})
 }
 
-func PullImage(image string) error {
-	return client.PullImage(docker.PullImageOptions{Repository: image, OutputStream: os.Stdout},
+func PullImage(image string, quiet ...bool) error {
+	var output io.Writer
+	output = os.Stdout
+	if len(quiet) > 0 && quiet[0] {
+		output = ioutil.Discard
+	}
+
+	return client.PullImage(docker.PullImageOptions{Repository: image, OutputStream: output},
 		docker.AuthConfiguration{})
 }
 
