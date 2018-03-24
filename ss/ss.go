@@ -3,8 +3,9 @@ package ss
 import (
 	"errors"
 	"fmt"
+	"io"
+	"io/ioutil"
 	"log"
-	"net"
 	"os"
 	"time"
 
@@ -32,7 +33,7 @@ func init() {
 	}
 }
 
-func CreateContainer(serverType, name, method string, usedPorts *[]int) (*models.ServiceResult, error) {
+func CreateContainer(serverType, name, method string, port int) (*models.ServiceResult, error) {
 	image := ""
 	switch serverType {
 	case "SS":
@@ -42,12 +43,8 @@ func CreateContainer(serverType, name, method string, usedPorts *[]int) (*models
 	default:
 		return nil, errors.New("invalid server type")
 	}
-	PullImage(image)
+	PullImage(image, true)
 	password := utils.NewPasswd(16)
-	port, err := getAvailablePort(usedPorts)
-	if err != nil {
-		return nil, err
-	}
 	portStr := fmt.Sprintf("%d", port)
 	container, err := client.CreateContainer(docker.CreateContainerOptions{
 		Name: name,
@@ -78,8 +75,14 @@ func StartContainer(id string) error {
 	return client.StartContainer(id, &docker.HostConfig{})
 }
 
-func PullImage(image string) error {
-	return client.PullImage(docker.PullImageOptions{Repository: image, OutputStream: os.Stdout},
+func PullImage(image string, quiet ...bool) error {
+	var output io.Writer
+	output = os.Stdout
+	if len(quiet) > 0 && quiet[0] {
+		output = ioutil.Discard
+	}
+
+	return client.PullImage(docker.PullImageOptions{Repository: image, OutputStream: output},
 		docker.AuthConfiguration{})
 }
 
@@ -144,32 +147,21 @@ func GetContainerStatsOutNet(id string) (uint64, error) {
 	return stats.Networks["eth0"].TxBytes, nil
 }
 
-func CreateAndStartContainer(serverType, name, method string, usedPorts *[]int) (*models.ServiceResult, error) {
-	r, err := CreateContainer(serverType, name, method, usedPorts)
+func CreateAndStartContainer(serverType, name, method string, port int) (*models.ServiceResult, error) {
+	r, err := CreateContainer(serverType, name, method, port)
 	if err != nil {
 		return nil, err
 	}
 	return r, StartContainer(r.ID)
 }
 
-func getAvailablePort(usedPorts *[]int) (int, error) {
-	portMap := map[int]int{}
-
-	for _, p := range *usedPorts {
-		portMap[p] = p
+func ContainerExist(id string) (bool, error) {
+	_, err := client.InspectContainer(id)
+	if err == nil {
+		return true, nil
 	}
-
-	for port := PortRange[0]; port <= PortRange[1]; port++ {
-		conn, err := net.Dial("tcp", fmt.Sprintf(":%d", port))
-		if err != nil {
-			if _, exists := portMap[port]; !exists {
-				return port, nil
-			} else {
-				continue
-			}
-		}
-		conn.Close()
+	if _, ok := err.(*docker.NoSuchContainer); ok {
+		return false, nil
 	}
-
-	return 0, errors.New("no port available")
+	return false, err
 }
