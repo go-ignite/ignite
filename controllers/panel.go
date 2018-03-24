@@ -133,7 +133,13 @@ func (router *MainRouter) CreateServiceHandler(c *gin.Context) {
 	router.db.Table("user").Cols("service_port").Find(&usedPorts)
 
 	// 1. Create ss service
-	result, err := ss.CreateAndStartContainer(serverType, strings.ToLower(user.Username), method, &usedPorts)
+	port, err := utils.GetAvailablePort(&usedPorts)
+	if err != nil {
+		resp := models.Response{Success: false, Message: "创建服务失败,没有可用端口!"}
+		c.JSON(http.StatusOK, resp)
+		return
+	}
+	result, err := ss.CreateAndStartContainer(serverType, strings.ToLower(user.Username), method, port)
 	if err != nil {
 		log.Println("Create ss service error:", err.Error())
 		resp := models.Response{Success: false, Message: "创建服务失败!"}
