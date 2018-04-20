@@ -1,7 +1,8 @@
 FROM golang:1.9 as builder
+ARG VERSION
 WORKDIR /go/src/github.com/go-ignite/ignite
 COPY . .
-RUN CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -o ignite .
+RUN CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -ldflags "-X main.version=${VERSION}" -o ignite .
 
 
 FROM alpine
@@ -22,4 +23,4 @@ COPY --from=builder /go/src/github.com/go-ignite/ignite/conf ./conf
 RUN mv ./conf/config-temp.toml ./conf/config.toml
 
 EXPOSE 5000
-CMD ["/bin/sh", "-c", "./ignite"]
+ENTRYPOINT ["./ignite"]
