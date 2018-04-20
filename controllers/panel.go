@@ -139,7 +139,7 @@ func (router *MainRouter) CreateServiceHandler(c *gin.Context) {
 		c.JSON(http.StatusOK, resp)
 		return
 	}
-	result, err := ss.CreateAndStartContainer(serverType, strings.ToLower(user.Username), method, port)
+	result, err := ss.CreateAndStartContainer(serverType, strings.ToLower(user.Username), method, "", port)
 	if err != nil {
 		log.Println("Create ss service error:", err.Error())
 		resp := models.Response{Success: false, Message: "创建服务失败!"}
