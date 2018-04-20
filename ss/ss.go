@@ -33,7 +33,7 @@ func init() {
 	}
 }
 
-func CreateContainer(serverType, name, method string, port int) (*models.ServiceResult, error) {
+func CreateContainer(serverType, name, method, password string, port int) (*models.ServiceResult, error) {
 	image := ""
 	switch serverType {
 	case "SS":
@@ -44,7 +44,9 @@ func CreateContainer(serverType, name, method string, port int) (*models.Service
 		return nil, errors.New("invalid server type")
 	}
 	PullImage(image, true)
-	password := utils.NewPasswd(16)
+	if password == "" {
+		password = utils.NewPasswd(16)
+	}
 	portStr := fmt.Sprintf("%d", port)
 	container, err := client.CreateContainer(docker.CreateContainerOptions{
 		Name: name,
@@ -147,8 +149,8 @@ func GetContainerStatsOutNet(id string) (uint64, error) {
 	return stats.Networks["eth0"].TxBytes, nil
 }
 
-func CreateAndStartContainer(serverType, name, method string, port int) (*models.ServiceResult, error) {
-	r, err := CreateContainer(serverType, name, method, port)
+func CreateAndStartContainer(serverType, name, method, password string, port int) (*models.ServiceResult, error) {
+	r, err := CreateContainer(serverType, name, method, password, port)
 	if err != nil {
 		return nil, err
 	}
