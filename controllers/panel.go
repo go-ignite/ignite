@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/go-ignite/ignite/config"
 	"github.com/go-ignite/ignite/models"
@@ -36,23 +35,16 @@ func init() {
 }
 
 func (router *MainRouter) PanelIndexHandler(c *gin.Context) {
-	userID, exists := c.Get("userId")
-
-	if !exists {
-		c.HTML(http.StatusOK, "panel.html", nil)
-		return
-	}
+	userID, _ := c.Get("id")
 
 	user := new(models.User)
-	exists, _ = router.db.Id(userID).Get(user)
+	exists, _ := router.db.Id(userID).Get(user)
 
 	if !exists {
 		//Service has been removed by admininistrator.
-		session := sessions.Default(c)
-		session.Delete("userId")
-		session.Save()
-
-		c.Redirect(http.StatusFound, "/")
+		resp := &models.Response{Success: false, Message: "用户已删除!"}
+		c.JSON(http.StatusOK, resp)
+		return
 	}
 
 	uInfo := &models.UserInfo{
@@ -83,7 +75,7 @@ func (router *MainRouter) PanelIndexHandler(c *gin.Context) {
 		uInfo.PackageLeftPercent = fmt.Sprintf("%.2f", (float32(user.PackageLimit)-user.PackageUsed)/float32(user.PackageLimit)*100)
 	}
 
-	c.HTML(http.StatusOK, "panel.html", gin.H{
+	resp := models.Response{Success: true, Message: "用户信息获取成功!", Data: gin.H{
 		"uInfo":       uInfo,
 		"ss_methods":  ssMethods,
 		"ssr_methods": ssrMethods,
@@ -100,7 +92,7 @@ func (router *MainRouter) LogoutHandler(c *gin.Context) {
 }
 
 func (router *MainRouter) CreateServiceHandler(c *gin.Context) {
-	userID, _ := c.Get("userId")
+	userID, _ := c.Get("id")
 	method := c.PostForm("method")
 	serverType := c.PostForm("server-type")
 

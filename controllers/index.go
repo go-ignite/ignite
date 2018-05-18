@@ -8,8 +8,9 @@ import (
 
 	"golang.org/x/crypto/bcrypt"
 
-	"github.com/gin-contrib/sessions"
+	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
+	"github.com/go-ignite/ignite/config"
 	"github.com/go-ignite/ignite/models"
 )
 
@@ -48,14 +49,19 @@ func (router *MainRouter) LoginHandler(c *gin.Context) {
 		return
 	}
 
-	fmt.Println("Come here...")
-	fmt.Println("userId is:", user.Id)
+	token, err := createToken(config.C.Auth.Secret, user.Id)
+	resp := models.Response{}
+	if err != nil {
+		resp.Success = false
+		resp.Message = "Could not generate token"
+		c.JSON(http.StatusInternalServerError, &resp)
+		return
+	}
 
-	session := sessions.Default(c)
-	session.Set("userId", user.Id)
-	session.Save()
-
-	c.JSON(http.StatusOK, &models.Response{Success: true, Message: "Success!"})
+	resp.Success = true
+	resp.Message = "success"
+	resp.Data = token
+	c.JSON(http.StatusOK, &resp)
 }
 
 func (router *MainRouter) SignupHandler(c *gin.Context) {
@@ -136,10 +142,25 @@ func (router *MainRouter) SignupHandler(c *gin.Context) {
 		return
 	}
 
-	session := sessions.Default(c)
-	session.Set("userId", user.Id)
-	session.Save()
+	token, err := createToken(config.C.Auth.Secret, user.Id)
+	if err != nil {
+		c.JSON(http.StatusOK, &models.Response{Success: false, Message: "Could not generate token"})
+		return
+	}
 
 	fmt.Printf("User %s with invite code: %s", username, inviteCode)
-	c.JSON(http.StatusOK, &models.Response{Success: true, Message: "Success!"})
+	c.JSON(http.StatusOK, &models.Response{Success: true, Message: "Success!", Data: token})
+}
+
+func createToken(secret string, id int64) (string, error) {
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"id":  id,
+		"exp": time.Now().Add(time.Hour * 1).Unix(),
+	})
+
+	tokenStr, err := token.SignedString([]byte(secret))
+	if err != nil {
+		return "", err
+	}
+	return "Bearer " + tokenStr, nil
 }
