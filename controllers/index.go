@@ -14,23 +14,6 @@ import (
 	"github.com/go-ignite/ignite/models"
 )
 
-func (router *MainRouter) IndexHandler(c *gin.Context) {
-	session := sessions.Default(c)
-	v := session.Get("userId")
-	var uInfo *models.UserInfo
-	if v != nil {
-		if uId, ok := v.(int64); ok {
-			uInfo = &models.UserInfo{
-				Id: uId,
-			}
-		}
-	}
-
-	c.HTML(http.StatusOK, "index.html", gin.H{
-		"uInfo": uInfo,
-	})
-}
-
 func (router *MainRouter) LoginHandler(c *gin.Context) {
 	username := c.PostForm("username")
 	pwd := c.PostForm("password")

@@ -80,15 +80,8 @@ func (router *MainRouter) PanelIndexHandler(c *gin.Context) {
 		"ss_methods":  ssMethods,
 		"ssr_methods": ssrMethods,
 		"servers":     servers,
-	})
-}
-
-func (router *MainRouter) LogoutHandler(c *gin.Context) {
-	session := sessions.Default(c)
-	session.Delete("userId")
-	session.Save()
-
-	c.Redirect(http.StatusFound, "/")
+	}}
+	c.JSON(http.StatusOK, resp)
 }
 
 func (router *MainRouter) CreateServiceHandler(c *gin.Context) {

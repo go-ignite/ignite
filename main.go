@@ -28,9 +28,7 @@ func main() {
 
 func initRouter() {
 	r := gin.Default()
-
 	r.Static("/static", "./static")
-	r.LoadHTMLGlob("templates/*")
 
 	mainRouter := &controllers.MainRouter{}
 	mainRouter.Initialize(r)
