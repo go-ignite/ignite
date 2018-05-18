@@ -8,6 +8,8 @@ import (
 	"io"
 	"net"
 	"strings"
+
+	"github.com/go-ignite/ignite/config"
 )
 
 var StdChars = []byte("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789")
@@ -70,7 +72,8 @@ func GetAvailablePort(usedPorts *[]int) (int, error) {
 		portMap[p] = p
 	}
 
-	for port := HOST_From; port <= HOST_To; port++ {
+	from, to := config.C.Host.From, config.C.Host.From
+	for port := from; port <= to; port++ {
 		if _, exists := portMap[port]; exists {
 			continue
 		}

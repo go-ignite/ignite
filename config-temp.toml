@@ -1,5 +1,6 @@
 [app]
 address = ":5000"
+log_level = "INFO"
 
 [db]
 #driver = "mysql"
@@ -11,3 +12,6 @@ connect = "./data/ignite.db"
 address = "localhost"
 from = 5001
 to = 6000
+
+[auth]
+secret = "ignite"

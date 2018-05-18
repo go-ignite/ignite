@@ -8,6 +8,7 @@ import (
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
+	"github.com/go-ignite/ignite/config"
 	"github.com/go-ignite/ignite/models"
 	"github.com/go-ignite/ignite/ss"
 	"github.com/go-ignite/ignite/utils"
@@ -67,7 +68,7 @@ func (router *MainRouter) PanelIndexHandler(c *gin.Context) {
 		ServiceMethod: user.ServiceMethod,
 		ServiceType:   user.ServiceType,
 		Expired:       user.Expired.Format("2006-01-02"),
-		ServiceURL:    utils.ServiceURL(user.ServiceType, utils.HOST_Address, user.ServicePort, user.ServiceMethod, user.ServicePwd),
+		ServiceURL:    utils.ServiceURL(user.ServiceType, config.C.Host.Address, user.ServicePort, user.ServiceMethod, user.ServicePwd),
 	}
 	if uInfo.ServiceMethod == "" {
 		uInfo.ServiceMethod = "aes-256-cfb"
