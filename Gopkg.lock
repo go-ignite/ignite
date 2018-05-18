@@ -29,6 +29,15 @@
   revision = "c6cef34830231743494fe2969284df7b82cc0ad0"
 
 [[projects]]
+  name = "github.com/dgrijalva/jwt-go"
+  packages = [
+    ".",
+    "request"
+  ]
+  revision = "06ea1031745cb8b3dab3f6a236daf2b0aa468b7e"
+  version = "v3.2.0"
+
+[[projects]]
   name = "github.com/docker/docker"
   packages = [
     "api/types",
@@ -72,6 +81,7 @@
   version = "v0.3.3"
 
 [[projects]]
+<<<<<<< HEAD
   branch = "master"
   name = "github.com/fsouza/go-dockerclient"
   packages = ["."]
@@ -85,6 +95,18 @@
     "cookie"
   ]
   revision = "15760a03818fe16125cd735433b57a7398335b13"
+=======
+  name = "github.com/fsnotify/fsnotify"
+  packages = ["."]
+  revision = "c2828203cd70a50dcccfb2761f8b1f8ceef9a8e9"
+  version = "v1.4.7"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/fsouza/go-dockerclient"
+  packages = ["."]
+  revision = "51bd33c0c7792b2566054672a4915b406d988cc6"
+>>>>>>> a1304e9... Add Gopkg files
 
 [[projects]]
   branch = "master"
@@ -139,6 +161,7 @@
   version = "v1.1.0"
 
 [[projects]]
+<<<<<<< HEAD
   name = "github.com/gorilla/context"
   packages = ["."]
   revision = "08b5f424b9271eedf6f9f0ce86cb9396ed337a42"
@@ -155,6 +178,29 @@
   packages = ["."]
   revision = "ca9ada44574153444b00d3fd9c8559e4cc95f896"
   version = "v1.1"
+=======
+  branch = "master"
+  name = "github.com/hashicorp/hcl"
+  packages = [
+    ".",
+    "hcl/ast",
+    "hcl/parser",
+    "hcl/printer",
+    "hcl/scanner",
+    "hcl/strconv",
+    "hcl/token",
+    "json/parser",
+    "json/scanner",
+    "json/token"
+  ]
+  revision = "ef8a98b0bbce4a65b5aa4c368430a80ddc533168"
+
+[[projects]]
+  name = "github.com/magiconair/properties"
+  packages = ["."]
+  revision = "c2353362d570a7bfa228149c62842019201cfb71"
+  version = "v1.8.0"
+>>>>>>> a1304e9... Add Gopkg files
 
 [[projects]]
   name = "github.com/mattn/go-isatty"
@@ -169,6 +215,15 @@
   version = "v1.6.0"
 
 [[projects]]
+<<<<<<< HEAD
+=======
+  branch = "master"
+  name = "github.com/mitchellh/mapstructure"
+  packages = ["."]
+  revision = "bb74f1db0675b241733089d5a1faa5dd8b0ef57b"
+
+[[projects]]
+>>>>>>> a1304e9... Add Gopkg files
   name = "github.com/opencontainers/go-digest"
   packages = ["."]
   revision = "279bed98673dd5bef374d3b6e4b09e2af76183bf"
@@ -211,6 +266,42 @@
   version = "v1.0.5"
 
 [[projects]]
+<<<<<<< HEAD
+=======
+  name = "github.com/spf13/afero"
+  packages = [
+    ".",
+    "mem"
+  ]
+  revision = "63644898a8da0bc22138abf860edaf5277b6102e"
+  version = "v1.1.0"
+
+[[projects]]
+  name = "github.com/spf13/cast"
+  packages = ["."]
+  revision = "8965335b8c7107321228e3e3702cab9832751bac"
+  version = "v1.2.0"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/spf13/jwalterweatherman"
+  packages = ["."]
+  revision = "7c0cea34c8ece3fbeb2b27ab9b59511d360fb394"
+
+[[projects]]
+  name = "github.com/spf13/pflag"
+  packages = ["."]
+  revision = "583c0c0531f06d5278b7d917446061adc344b5cd"
+  version = "v1.0.1"
+
+[[projects]]
+  name = "github.com/spf13/viper"
+  packages = ["."]
+  revision = "b5e8006cbee93ec955a89ab31e0e3ce3204f3736"
+  version = "v1.0.2"
+
+[[projects]]
+>>>>>>> a1304e9... Add Gopkg files
   name = "github.com/ugorji/go"
   packages = ["codec"]
   revision = "b4c50a2b199d93b13dc15e78929cfb23bfdf21ab"
@@ -230,7 +321,7 @@
   branch = "master"
   name = "golang.org/x/net"
   packages = ["context"]
-  revision = "57065200b4b034a1c8ad54ff77069408c2218ae6"
+  revision = "2491c5de3490fced2f6cff376127c667efeed857"
 
 [[projects]]
   branch = "master"
@@ -240,6 +331,19 @@
     "windows"
   ]
   revision = "7c87d13f8e835d2fb3a70a2912c811ed0c1d241b"
+
+[[projects]]
+  name = "golang.org/x/text"
+  packages = [
+    "internal/gen",
+    "internal/triegen",
+    "internal/ucd",
+    "transform",
+    "unicode/cldr",
+    "unicode/norm"
+  ]
+  revision = "f21a4dfb5e38f5895301dc265a8def02365cc3d0"
+  version = "v0.3.0"
 
 [[projects]]
   name = "gopkg.in/go-playground/validator.v8"
@@ -256,6 +360,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "373472de462f6854cbbefee2d3a2ea16c4c4e6ea82f24bf40ba92004f9b90357"
+  inputs-digest = "b6693c4c97bd60a938ae6614ae6f39ca763db5da5d7a5412b955851eb660f043"
   solver-name = "gps-cdcl"
   solver-version = 1

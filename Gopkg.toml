@@ -1,6 +1,6 @@
 # Gopkg.toml example
 #
-# Refer to https://github.com/golang/dep/blob/master/docs/Gopkg.toml.md
+# Refer to https://golang.github.io/dep/docs/Gopkg.toml.html
 # for detailed Gopkg.toml documentation.
 #
 # required = ["github.com/user/thing/cmd/thing"]
@@ -26,12 +26,12 @@
 
 
 [[constraint]]
-  branch = "master"
-  name = "github.com/fsouza/go-dockerclient"
+  name = "github.com/dgrijalva/jwt-go"
+  version = "3.2.0"
 
 [[constraint]]
   branch = "master"
-  name = "github.com/gin-contrib/sessions"
+  name = "github.com/fsouza/go-dockerclient"
 
 [[constraint]]
   name = "github.com/gin-gonic/gin"
@@ -48,10 +48,6 @@
 [[constraint]]
   name = "github.com/mattn/go-sqlite3"
   version = "1.6.0"
-
-[[constraint]]
-  name = "github.com/pelletier/go-toml"
-  version = "1.1.0"
 
 [[constraint]]
   branch = "master"
