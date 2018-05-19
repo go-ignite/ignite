@@ -23,13 +23,6 @@ func main() {
 	}
 	config.Init(*confPath)
 
-	initRouter()
-}
-
-func initRouter() {
-	r := gin.Default()
-	r.Static("/static", "./static")
-
 	mainRouter := &controllers.MainRouter{}
-	mainRouter.Initialize(r)
+	mainRouter.Initialize(gin.Default())
 }
