@@ -42,6 +42,7 @@ func (self *MainRouter) Initialize(r *gin.Engine) {
 		auth.Use(middleware.Auth(config.C.Auth.Secret))
 		{
 			auth.GET("/info", self.PanelIndexHandler)
+			auth.GET("/config", self.PanelIndexHandler)
 			auth.POST("/create", self.CreateServiceHandler)
 		}
 	}

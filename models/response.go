@@ -23,3 +23,9 @@ type ServiceResult struct {
 	Password     string `json:"servicePwd"`
 	PackageLimit int    `json:"packageLimit"`
 }
+
+type ServiceConfig struct {
+	SSMethods  []string `json:"ssMethods"`
+	SSRMethods []string `json:"ssrMethods"`
+	Servers    []string `json:"servers"`
+}

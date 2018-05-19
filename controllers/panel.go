@@ -35,6 +35,26 @@ func init() {
 	serverMethodsMap["SSR"] = ssrMethodMap
 }
 
+// ServiceConfigHandler godoc
+// @Summary get user info
+// @Description get user info
+// @Produce json
+// @Param Authorization header string true "Authentication header"
+// @Success 200 {object} models.ServiceConfig
+// @Router /api/user/auth/service/config [get]
+func (router *MainRouter) ServiceConfigHandler(c *gin.Context) {
+	sc := models.ServiceConfig{
+		SSMethods:  ssMethods,
+		SSRMethods: ssrMethods,
+		Servers:    servers,
+	}
+	c.JSON(http.StatusOK, models.Response{
+		Success: true,
+		Message: "Success!",
+		Data:    sc,
+	})
+}
+
 // PanelIndexHandler godoc
 // @Summary get user info
 // @Description get user info
@@ -84,12 +104,7 @@ func (router *MainRouter) PanelIndexHandler(c *gin.Context) {
 		uInfo.PackageLeftPercent = fmt.Sprintf("%.2f", (float32(user.PackageLimit)-user.PackageUsed)/float32(user.PackageLimit)*100)
 	}
 
-	resp := models.Response{Success: true, Message: "用户信息获取成功!", Data: gin.H{
-		"uInfo":       uInfo,
-		"ss_methods":  ssMethods,
-		"ssr_methods": ssrMethods,
-		"servers":     servers,
-	}}
+	resp := models.Response{Success: true, Message: "用户信息获取成功!", Data: uInfo}
 	c.JSON(http.StatusOK, resp)
 }
 
