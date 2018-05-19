@@ -6,11 +6,12 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/gin-gonic/gin"
 	"github.com/go-ignite/ignite/config"
 	"github.com/go-ignite/ignite/models"
 	"github.com/go-ignite/ignite/ss"
 	"github.com/go-ignite/ignite/utils"
+
+	"github.com/gin-gonic/gin"
 )
 
 var (
@@ -34,6 +35,14 @@ func init() {
 	serverMethodsMap["SSR"] = ssrMethodMap
 }
 
+// PanelIndexHandler godoc
+// @Summary get user info
+// @Description get user info
+// @Produce json
+// @Success 200 {object} models.UserInfo
+// @Param Authorization header string true "Authentication header"
+// @Failure 200 {string} json "{"success":false,"message":"error message"}"
+// @Router /api/user/auth/info [get]
 func (router *MainRouter) PanelIndexHandler(c *gin.Context) {
 	userID, _ := c.Get("id")
 
@@ -84,14 +93,25 @@ func (router *MainRouter) PanelIndexHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
+// CreateServiceHandler godoc
+// @Summary create service
+// @Description create service
+// @Accept x-www-form-urlencoded
+// @Produce json
+// @Param Authorization header string true "Authentication header"
+// @Param method formData string true "method"
+// @Param server-type formData string true "server-type"
+// @Success 200 {object} models.ServiceResult
+// @Failure 200 {string} json "{"success":false,"message":"error message"}"
+// @Router /api/user/auth/service/create [post]
 func (router *MainRouter) CreateServiceHandler(c *gin.Context) {
 	userID, _ := c.Get("id")
 	method := c.PostForm("method")
 	serverType := c.PostForm("server-type")
 
-	fmt.Println("UserID", userID)
-	fmt.Println("ServerType:", serverType)
-	fmt.Println("Method:", method)
+	// fmt.Println("UserID", userID)
+	// fmt.Println("ServerType:", serverType)
+	// fmt.Println("Method:", method)
 
 	methodMap, ok := serverMethodsMap[serverType]
 	if !ok {

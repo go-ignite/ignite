@@ -4,12 +4,15 @@ import (
 	"log"
 
 	"github.com/go-ignite/ignite/config"
+	_ "github.com/go-ignite/ignite/docs"
 	"github.com/go-ignite/ignite/middleware"
 	"github.com/go-ignite/ignite/ss"
 	"github.com/go-ignite/ignite/utils"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-xorm/xorm"
+	"github.com/swaggo/gin-swagger"
+	"github.com/swaggo/gin-swagger/swaggerFiles"
 )
 
 type MainRouter struct {
@@ -23,6 +26,10 @@ func (self *MainRouter) Initialize(r *gin.Engine) {
 
 	self.router = r
 	self.db = utils.InitDB(config.C.DB.Driver, config.C.DB.Connect)
+
+	if gin.Mode() == gin.DebugMode {
+		self.router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	}
 
 	api := self.router.Group("/api")
 

@@ -1,0 +1,187 @@
+definitions:
+  models.ServiceConfig:
+    properties:
+      servers:
+        items:
+          type: string
+        type: array
+      ssMethods:
+        items:
+          type: string
+        type: array
+      ssrMethods:
+        items:
+          type: string
+        type: array
+    type: object
+  models.ServiceResult:
+    properties:
+      host:
+        type: string
+      packageLimit:
+        type: integer
+      serviceId:
+        type: string
+      servicePort:
+        type: integer
+      servicePwd:
+        type: string
+    type: object
+  models.UserInfo:
+    properties:
+      expired:
+        type: string
+      host:
+        type: string
+      id:
+        type: integer
+      packageLeft:
+        type: string
+      packageLeftPercent:
+        type: string
+      packageLimit:
+        type: integer
+      packageUsed:
+        type: string
+      serviceMethod:
+        type: string
+      servicePort:
+        type: integer
+      servicePwd:
+        type: string
+      serviceType:
+        type: string
+      serviceURL:
+        type: string
+      status:
+        type: integer
+      username:
+        type: string
+    type: object
+info:
+  contact: {}
+  license: {}
+paths:
+  /api/user/auth/info:
+    get:
+      description: get user info
+      parameters:
+      - description: Authentication header
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":false,"message":"error message"}'
+          schema:
+            type: string
+      summary: get user info
+  /api/user/auth/service/config:
+    get:
+      description: get user info
+      parameters:
+      - description: Authentication header
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ServiceConfig'
+            type: object
+      summary: get user info
+  /api/user/auth/service/create:
+    post:
+      consumes:
+      - application/x-www-form-urlencoded
+      description: create service
+      parameters:
+      - description: Authentication header
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: method
+        in: formData
+        name: method
+        required: true
+        type: file
+      - description: server-type
+        in: formData
+        name: server-type
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":false,"message":"error message"}'
+          schema:
+            type: string
+      summary: create service
+  /api/user/login:
+    post:
+      consumes:
+      - application/x-www-form-urlencoded
+      description: user login
+      parameters:
+      - description: username
+        in: formData
+        name: username
+        required: true
+        type: file
+      - description: password
+        in: formData
+        name: password
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":false,"message":"error message"}'
+          schema:
+            type: string
+      summary: user login
+  /api/user/signup:
+    post:
+      consumes:
+      - application/x-www-form-urlencoded
+      description: user signup
+      parameters:
+      - description: invite-code
+        in: formData
+        name: invite-code
+        required: true
+        type: file
+      - description: username
+        in: formData
+        name: username
+        required: true
+        type: file
+      - description: password
+        in: formData
+        name: password
+        required: true
+        type: file
+      - description: confirm-password
+        in: formData
+        name: confirm-password
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":false,"message":"error message"}'
+          schema:
+            type: string
+      summary: user signup
+swagger: "2.0"

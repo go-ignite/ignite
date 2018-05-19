@@ -14,6 +14,16 @@ import (
 	"github.com/go-ignite/ignite/models"
 )
 
+// LoginHandler godoc
+// @Summary user login
+// @Description user login
+// @Accept application/x-www-form-urlencoded
+// @Produce json
+// @Param username formData string true "username"
+// @Param password formData string true "password"
+// @Success 200 {string} json "{"success":true,"message":"Success!","data":"Bearer xxxx"}"
+// @Failure 200 {string} json "{"success":false,"message":"error message"}"
+// @Router /api/user/login [post]
 func (router *MainRouter) LoginHandler(c *gin.Context) {
 	username := c.PostForm("username")
 	pwd := c.PostForm("password")
@@ -47,6 +57,18 @@ func (router *MainRouter) LoginHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, &resp)
 }
 
+// SignupHandler godoc
+// @Summary user signup
+// @Description user signup
+// @Accept application/x-www-form-urlencoded
+// @Produce json
+// @Param invite-code formData string true "invite-code"
+// @Param username formData string true "username"
+// @Param password formData string true "password"
+// @Param confirm-password formData string true "confirm-password"
+// @Success 200 {string} json "{"success":true,"message":"Success!","data":"Bearer xxxx"}"
+// @Failure 200 {string} json "{"success":false,"message":"error message"}"
+// @Router /api/user/signup [post]
 func (router *MainRouter) SignupHandler(c *gin.Context) {
 	inviteCode := c.PostForm("invite-code")
 	username := c.PostForm("username")
