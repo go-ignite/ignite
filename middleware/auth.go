@@ -19,7 +19,7 @@ func Auth(secret string) gin.HandlerFunc {
 			return
 		}
 		if !token.Valid {
-			c.AbortWithError(401, fmt.Errorf("token valid"))
+			c.AbortWithError(401, fmt.Errorf("token is invalid"))
 			return
 		}
 		claims := token.Claims.(jwt.MapClaims)
