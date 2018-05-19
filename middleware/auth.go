@@ -16,9 +16,11 @@ func Auth(secret string) gin.HandlerFunc {
 		})
 		if err != nil {
 			c.AbortWithError(401, err)
+			return
 		}
 		if !token.Valid {
 			c.AbortWithError(401, fmt.Errorf("token valid"))
+			return
 		}
 		claims := token.Claims.(jwt.MapClaims)
 		c.Set("id", claims["id"])
