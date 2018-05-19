@@ -9,6 +9,7 @@ import (
 	"github.com/go-ignite/ignite/ss"
 	"github.com/go-ignite/ignite/utils"
 
+	"github.com/gin-gonic/contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/go-xorm/xorm"
 	"github.com/swaggo/gin-swagger"
@@ -29,6 +30,9 @@ func (self *MainRouter) Initialize(r *gin.Engine) {
 
 	if gin.Mode() == gin.DebugMode {
 		self.router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+		self.router.Use(cors.New(cors.Config{
+			AllowAllOrigins: true,
+		}))
 	}
 
 	api := self.router.Group("/api")
