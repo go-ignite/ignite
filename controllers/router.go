@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/gin-contrib/sessions"
+	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
 	"github.com/go-ignite/ignite/ss"
 	"github.com/go-ignite/ignite/utils"
@@ -20,7 +21,7 @@ func (self *MainRouter) Initialize(r *gin.Engine) {
 	ss.PortRange = []int{utils.HOST_From, utils.HOST_To}
 
 	//Init session store
-	store := sessions.NewCookieStore([]byte("secret"))
+	store := cookie.NewStore([]byte("secret"))
 	r.Use(sessions.Sessions("ignite", store))
 
 	self.router = r
