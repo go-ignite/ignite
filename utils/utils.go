@@ -8,7 +8,9 @@ import (
 	"io"
 	"net"
 	"strings"
+	"time"
 
+	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/go-ignite/ignite/config"
 )
 
@@ -84,4 +86,17 @@ func GetAvailablePort(usedPorts *[]int) (int, error) {
 		conn.Close()
 	}
 	return 0, errors.New("no port available")
+}
+
+func CreateToken(secret string, id int64) (string, error) {
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"id":  id,
+		"exp": time.Now().Add(time.Hour * 1).Unix(),
+	})
+
+	tokenStr, err := token.SignedString([]byte(secret))
+	if err != nil {
+		return "", err
+	}
+	return "Bearer " + tokenStr, nil
 }
