@@ -4,10 +4,10 @@ import (
 	"log"
 
 	"github.com/go-ignite/ignite/config"
+	"github.com/go-ignite/ignite/db"
 	_ "github.com/go-ignite/ignite/docs"
 	"github.com/go-ignite/ignite/middleware"
 	"github.com/go-ignite/ignite/ss"
-	"github.com/go-ignite/ignite/utils"
 
 	"github.com/gin-gonic/contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -26,7 +26,7 @@ func (self *MainRouter) Initialize(r *gin.Engine) {
 	ss.PortRange = []int{config.C.Host.From, config.C.Host.To}
 
 	self.router = r
-	self.db = utils.InitDB(config.C.DB.Driver, config.C.DB.Connect)
+	self.db = db.GetDB(config.C.DB.Driver, config.C.DB.Connect)
 
 	if gin.Mode() == gin.DebugMode {
 		self.router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
@@ -43,10 +43,10 @@ func (self *MainRouter) Initialize(r *gin.Engine) {
 		user.POST("/signup", self.SignupHandler)
 
 		auth := user.Group("/auth")
-		auth.Use(middleware.Auth(config.C.Auth.Secret))
+		auth.Use(middleware.Auth(config.C.Secret.User))
 		{
-			auth.GET("/info", self.PanelIndexHandler)
-			auth.GET("/config", self.PanelIndexHandler)
+			auth.GET("/info", self.UserInfoHandler)
+			auth.GET("/config", self.ServiceConfigHandler)
 			auth.POST("/create", self.CreateServiceHandler)
 		}
 	}

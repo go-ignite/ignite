@@ -2,14 +2,15 @@ package controllers
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"strings"
 
 	"github.com/go-ignite/ignite/config"
+	"github.com/go-ignite/ignite/db"
 	"github.com/go-ignite/ignite/models"
 	"github.com/go-ignite/ignite/ss"
 	"github.com/go-ignite/ignite/utils"
+	"github.com/sirupsen/logrus"
 
 	"github.com/gin-gonic/gin"
 )
@@ -63,16 +64,24 @@ func (router *MainRouter) ServiceConfigHandler(c *gin.Context) {
 // @Param Authorization header string true "Authentication header"
 // @Failure 200 {string} json "{"success":false,"message":"error message"}"
 // @Router /api/user/auth/info [get]
-func (router *MainRouter) PanelIndexHandler(c *gin.Context) {
+func (router *MainRouter) UserInfoHandler(c *gin.Context) {
 	userID, _ := c.Get("id")
+	logrus.WithField("userID", userID).Debug("get user info")
 
-	user := new(models.User)
-	exists, _ := router.db.Id(userID).Get(user)
+	user := new(db.User)
+	exists, err := router.db.Id(userID).Get(user)
+	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"userID": userID,
+			"err":    err,
+		}).Error("get user info error")
+		c.JSON(http.StatusInternalServerError, models.NewErrorResp("获取用户信息失败！"))
+		return
+	}
 
 	if !exists {
 		//Service has been removed by admininistrator.
-		resp := &models.Response{Success: false, Message: "用户已删除!"}
-		c.JSON(http.StatusOK, resp)
+		c.JSON(http.StatusOK, models.NewErrorResp("用户已删除！"))
 		return
 	}
 
@@ -104,8 +113,8 @@ func (router *MainRouter) PanelIndexHandler(c *gin.Context) {
 		uInfo.PackageLeftPercent = fmt.Sprintf("%.2f", (float32(user.PackageLimit)-user.PackageUsed)/float32(user.PackageLimit)*100)
 	}
 
-	resp := models.Response{Success: true, Message: "用户信息获取成功!", Data: uInfo}
-	c.JSON(http.StatusOK, resp)
+	logrus.WithField("userID", userID).Info("get info successful")
+	c.JSON(http.StatusOK, models.NewSuccessResp(uInfo, "获取用户信息成功！"))
 }
 
 // CreateServiceHandler godoc
@@ -124,49 +133,82 @@ func (router *MainRouter) CreateServiceHandler(c *gin.Context) {
 	method := c.PostForm("method")
 	serverType := c.PostForm("server-type")
 
-	// fmt.Println("UserID", userID)
-	// fmt.Println("ServerType:", serverType)
-	// fmt.Println("Method:", method)
+	logrus.WithFields(logrus.Fields{
+		"userID":     userID,
+		"method":     method,
+		"serverType": serverType,
+	}).Debug("create service")
 
 	methodMap, ok := serverMethodsMap[serverType]
 	if !ok {
-		resp := models.Response{Success: false, Message: "服务类型配置错误!"}
-		c.JSON(http.StatusOK, resp)
+		c.JSON(http.StatusOK, models.NewErrorResp("服务类型配置错误！"))
 		return
 	}
 
 	if !methodMap[method] {
-		resp := models.Response{Success: false, Message: "加密方法配置错误!"}
-		c.JSON(http.StatusOK, resp)
+		c.JSON(http.StatusOK, models.NewErrorResp("加密方法配置错误！"))
 		return
 	}
 
-	user := new(models.User)
-	router.db.Id(userID).Get(user)
+	user := new(db.User)
+	exists, err := router.db.Id(userID).Get(user)
+	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"userID": userID,
+			"err":    err,
+		}).Error("get user error")
+		c.JSON(http.StatusInternalServerError, models.NewErrorResp("获取用户信息失败！"))
+		return
+	}
+
+	if !exists {
+		//Service has been removed by admininistrator.
+		c.JSON(http.StatusOK, models.NewErrorResp("用户已删除！"))
+		return
+	}
 	if user.ServiceId != "" {
-		resp := models.Response{Success: false, Message: "服务已创建!"}
-		c.JSON(http.StatusOK, resp)
+		c.JSON(http.StatusOK, models.NewErrorResp("服务已创建！"))
 		return
 	}
 
 	//Get all used ports.
 	var usedPorts []int
-	router.db.Table("user").Cols("service_port").Find(&usedPorts)
+	if err := router.db.Table("user").Cols("service_port").Find(&usedPorts); err != nil {
+		logrus.WithFields(logrus.Fields{
+			"userID": userID,
+			"err":    err,
+		}).Error("get used ports error")
+		c.JSON(http.StatusInternalServerError, models.NewErrorResp("获取用户服务端口失败！"))
+	}
+	logrus.WithField("usedPorts", usedPorts).Debug()
 
 	// 1. Create ss service
 	port, err := utils.GetAvailablePort(&usedPorts)
 	if err != nil {
-		resp := models.Response{Success: false, Message: "创建服务失败,没有可用端口!"}
-		c.JSON(http.StatusOK, resp)
+		c.JSON(http.StatusInternalServerError, models.NewErrorResp("创建服务失败，未能获取可用端口！"))
 		return
 	}
+	logrus.WithField("port", port).Debug()
 	result, err := ss.CreateAndStartContainer(serverType, strings.ToLower(user.Username), method, "", port)
 	if err != nil {
-		log.Println("Create ss service error:", err.Error())
-		resp := models.Response{Success: false, Message: "创建服务失败!"}
-		c.JSON(http.StatusOK, resp)
+		logrus.WithFields(logrus.Fields{
+			"userID":     userID,
+			"serverType": serverType,
+			"method":     method,
+			"port":       port,
+			"err":        err,
+		}).Error("create service error")
+		c.JSON(http.StatusInternalServerError, models.NewErrorResp("创建服务失败！"))
 		return
 	}
+	logrus.WithFields(logrus.Fields{
+		"userID":     userID,
+		"serverType": serverType,
+		"method":     method,
+		"port":       result.Port,
+		"password":   result.Password,
+		"serviceID":  result.ID,
+	}).Info("create service success")
 
 	// 2. Update user info
 	user.Status = 1
@@ -177,21 +219,25 @@ func (router *MainRouter) CreateServiceHandler(c *gin.Context) {
 	user.ServiceType = serverType
 	affected, err := router.db.Id(userID).Cols("status", "service_port", "service_pwd", "service_id", "service_method", "service_type").Update(user)
 	if affected == 0 || err != nil {
-		if err != nil {
-			log.Println("Update user info error:", err.Error())
-		}
+		logrus.WithFields(logrus.Fields{
+			"userID": userID,
+			"err":    err,
+		}).Error("update user service info error")
 
 		//Force remove created container
-		ss.RemoveContainer(result.ID)
+		if err := ss.RemoveContainer(result.ID); err != nil {
+			logrus.WithFields(logrus.Fields{
+				"userID":    userID,
+				"serviceID": result.ID,
+			}).Error("remove service error")
+		}
 
-		resp := models.Response{Success: false, Message: "更新用户信息失败!"}
-		c.JSON(http.StatusOK, resp)
+		c.JSON(http.StatusInternalServerError, models.NewErrorResp("更新用户信息失败！"))
 		return
 	}
 
 	result.PackageLimit = user.PackageLimit
 	result.Host = ss.Host
-	resp := models.Response{Success: true, Message: "服务创建成功!", Data: result}
 
-	c.JSON(http.StatusOK, resp)
+	c.JSON(http.StatusOK, models.NewSuccessResp(result, "服务创建成功！"))
 }
