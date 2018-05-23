@@ -1,6 +1,8 @@
-package models
+package db
 
-import "time"
+import (
+	"time"
+)
 
 type User struct {
 	Id              int64 `xorm:"pk autoincr notnull"`
@@ -22,19 +24,8 @@ type User struct {
 	Expired         time.Time  `xorm:"expired"`
 }
 
-type UserInfo struct {
-	Id                 int64
-	Host               string
-	Username           string
-	Status             int
-	PackageLimit       int
-	PackageUsed        string
-	PackageLeft        string
-	PackageLeftPercent string
-	ServicePort        int
-	ServicePwd         string
-	ServiceMethod      string
-	ServiceType        string
-	ServiceURL         string
-	Expired            string
+func GetUserByUsername(username string) (*User, error) {
+	user := new(User)
+	_, err := engine.Where("username = ?", username).Get(user)
+	return user, err
 }

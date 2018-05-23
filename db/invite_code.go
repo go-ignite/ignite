@@ -1,6 +1,8 @@
-package models
+package db
 
-import "time"
+import (
+	"time"
+)
 
 type InviteCode struct {
 	Id             int64     `xorm:"pk autoincr notnull"`
@@ -10,4 +12,10 @@ type InviteCode struct {
 	AvailableLimit int       `xorm:"not null default 1"` //unit: month
 	Created        time.Time `xorm:"created"`
 	Updated        time.Time `xorm:"updated"`
+}
+
+func GetAvailableInviteCode(inviteCode string) (*InviteCode, error) {
+	iv := new(InviteCode)
+	_, err := engine.Where("invite_code = ? AND available = 1", inviteCode).Get(iv)
+	return iv, err
 }
