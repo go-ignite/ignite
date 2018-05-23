@@ -13,5 +13,10 @@ address = "localhost"
 from = 5001
 to = 6000
 
-[auth]
-secret = "ignite"
+[secret]
+user = "ignite-user"
+admin = "ignite-admin"
+
+[admin]
+username = "admin"
+password = "123"

@@ -2,6 +2,7 @@ package config
 
 import (
 	"log"
+	"strings"
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
@@ -25,9 +26,14 @@ type Config struct {
 		From    int    `mapstructure:"from"`
 		To      int    `mapstructure:"to"`
 	} `mapstructure:"db"`
-	Auth struct {
-		Secret string `mapstructure:"secret"`
-	} `mapstructure:"auth"`
+	Secret struct {
+		User  string `mapstructure:"user"`
+		Admin string `mapstructure:"admin"`
+	} `mapstructure:"secret"`
+	Admin struct {
+		Username string `mapstructure:"username"`
+		Password string `mapstructure:"password"`
+	}
 }
 
 func Init(path string) {
@@ -48,16 +54,17 @@ func Init(path string) {
 	viper.SetDefault("host.address", "localhost")
 	viper.SetDefault("host.from", "5001")
 	viper.SetDefault("host.to", "6000")
-	// auth
-	viper.SetDefault("auth.secret", "ignite")
+	// secret
+	viper.SetDefault("secret.user", "ignite-user")
+	viper.SetDefault("secret.admin", "ignite-admin")
+	// admin
+	viper.SetDefault("admin.username", "admin")
+	viper.SetDefault("admin.password", "changeme")
 
+	// bind envs
 	viper.SetEnvPrefix("ignite")
-	viper.BindEnv("log_level")
-	viper.BindEnv("db_driver")
-	viper.BindEnv("host_address")
-	viper.BindEnv("host_from")
-	viper.BindEnv("host_to")
-	viper.BindEnv("auth_secret")
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+	viper.AutomaticEnv()
 
 	if err := viper.ReadInConfig(); err != nil {
 		log.Fatalf("viper.ReadInConfig error: %v\n", err)
