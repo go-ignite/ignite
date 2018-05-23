@@ -36,17 +36,10 @@ type Config struct {
 	}
 }
 
-func Init(path string) {
-	viper.SetConfigName("config")
-	viper.SetConfigType("toml")
-	if path == "" {
-		viper.AddConfigPath(".")
-	}
-	viper.AddConfigPath(path)
-
+func Init() {
 	// app
 	viper.SetDefault("app.log_level", "INFO")
-	viper.SetDefault("app.port", "5000")
+	viper.SetDefault("app.address", ":5000")
 	// db
 	viper.SetDefault("db.driver", "sqlite3")
 	viper.SetDefault("db.connect", "./data/ignite.db")
@@ -65,10 +58,6 @@ func Init(path string) {
 	viper.SetEnvPrefix("ignite")
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	viper.AutomaticEnv()
-
-	if err := viper.ReadInConfig(); err != nil {
-		log.Fatalf("viper.ReadInConfig error: %v\n", err)
-	}
 
 	if err := viper.Unmarshal(&C); err != nil {
 		log.Fatalf("viper.Unmarshal error: %v\n", err)

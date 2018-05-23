@@ -21,7 +21,7 @@ func main() {
 		fmt.Println(version)
 		return
 	}
-	config.Init(*confPath)
+	config.Init()
 
 	mainRouter := &controllers.MainRouter{}
 	mainRouter.Initialize(gin.Default())
