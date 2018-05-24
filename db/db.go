@@ -3,6 +3,7 @@ package db
 import (
 	"sync"
 
+	"github.com/go-ignite/ignite/config"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/go-xorm/xorm"
 	_ "github.com/mattn/go-sqlite3"
@@ -14,16 +15,16 @@ var (
 	once   sync.Once
 )
 
-func GetDB(driver, connect string) *xorm.Engine {
+func GetDB() *xorm.Engine {
 	//Init DB connection
 	once.Do(func() {
-		switch driver {
+		switch config.C.DB.Driver {
 		case "mysql", "sqlite3":
 		default:
-			logrus.WithField("driver", driver).Fatal("driver is invalid")
+			logrus.WithField("driver", config.C.DB.Driver).Fatal("driver is invalid")
 		}
 		var err error
-		if engine, err = xorm.NewEngine(driver, connect); err != nil {
+		if engine, err = xorm.NewEngine(config.C.DB.Driver, config.C.DB.Connect); err != nil {
 			logrus.WithField("err", err).Fatal("new engine error")
 		}
 
