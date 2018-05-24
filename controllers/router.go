@@ -46,8 +46,8 @@ func (self *MainRouter) Initialize(r *gin.Engine) {
 		auth.Use(middleware.Auth(config.C.Secret.User))
 		{
 			auth.GET("/info", self.UserInfoHandler)
-			auth.GET("/config", self.ServiceConfigHandler)
-			auth.POST("/create", self.CreateServiceHandler)
+			auth.GET("/service/config", self.ServiceConfigHandler)
+			auth.POST("/service/create", self.CreateServiceHandler)
 		}
 	}
 	admin := api.Group("/admin")
