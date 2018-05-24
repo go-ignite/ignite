@@ -26,7 +26,7 @@ func (self *MainRouter) Initialize(r *gin.Engine) {
 	ss.PortRange = []int{config.C.Host.From, config.C.Host.To}
 
 	self.router = r
-	self.db = db.GetDB(config.C.DB.Driver, config.C.DB.Connect)
+	self.db = db.GetDB()
 
 	if gin.Mode() == gin.DebugMode {
 		self.router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
@@ -48,6 +48,26 @@ func (self *MainRouter) Initialize(r *gin.Engine) {
 			auth.GET("/info", self.UserInfoHandler)
 			auth.GET("/config", self.ServiceConfigHandler)
 			auth.POST("/create", self.CreateServiceHandler)
+		}
+	}
+	admin := api.Group("/admin")
+	{
+		admin.POST("/login", self.PanelLoginHandler)
+		auth := admin.Group("/auth")
+		auth.Use(middleware.Auth(config.C.Secret.Admin))
+		{
+			//user account related operations
+			auth.GET("/status_list", self.PanelStatusListHandler)
+			auth.PUT("/:id/reset", self.ResetAccountHandler)
+			auth.PUT("/:id/destroy", self.DestroyAccountHandler)
+			auth.PUT("/:id/stop", self.StopServiceHandler)
+			auth.PUT("/:id/start", self.StartServiceHandler)
+			auth.PUT("/:id/renew", self.RenewServiceHandler)
+
+			//invite code related operations
+			auth.GET("/code_list", self.InviteCodeListHandler)
+			auth.PUT("/:id/remove", self.RemoveInviteCodeHandler)
+			auth.POST("/code_generate", self.GenerateInviteCodeHandler)
 		}
 	}
 
