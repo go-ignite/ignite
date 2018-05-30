@@ -1,4 +1,4 @@
-package jobs
+package task
 
 import (
 	"fmt"
@@ -14,10 +14,10 @@ const (
 )
 
 //instantStats: Instant task, check & update used bandwidth, stop containers which exceeded the package limit.
-func (ctx *CronJob) InstantStats() {
+func (t *Task) InstantStats() {
+	t.Lock()
+	defer t.Unlock()
 
-	ctx.mux.Lock()
-	defer ctx.mux.Unlock()
 	// 1. Load all service from user
 	users := []db.User{}
 	err := db.GetDB().Where("service_id != ''").Find(&users)

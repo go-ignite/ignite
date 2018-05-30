@@ -1,22 +1,17 @@
-package jobs
+package task
 
 import (
 	"log"
-	"sync"
 	"time"
 
 	"github.com/go-ignite/ignite/db"
 	"github.com/go-ignite/ignite/ss"
 )
 
-type CronJob struct {
-	mux sync.Mutex
-}
-
 //dailyStats: Daily task, check & stop expired containers.
-func (ctx *CronJob) DailyStats() {
-	ctx.mux.Lock()
-	defer ctx.mux.Unlock()
+func (t *Task) DailyStats() {
+	t.Lock()
+	defer t.Unlock()
 
 	//1. Load all services from users
 	users := []db.User{}

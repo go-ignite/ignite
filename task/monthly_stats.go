@@ -1,4 +1,4 @@
-package jobs
+package task
 
 import (
 	"log"
@@ -9,10 +9,9 @@ import (
 )
 
 //monthlyStats: Restart stopped containers and restore the bandwidth.
-func (ctx *CronJob) MonthlyStats() {
-
-	ctx.mux.Lock()
-	defer ctx.mux.Unlock()
+func (t *Task) MonthlyStats() {
+	t.Lock()
+	defer t.Unlock()
 
 	log.Println("In MonthlyStats")
 	log.Println("Load all stopped services from users")
