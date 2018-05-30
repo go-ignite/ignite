@@ -1,4 +1,4 @@
-package jobs
+package main
 
 import (
 	"fmt"
@@ -17,7 +17,7 @@ var (
 	crossSymbol = fmt.Sprintf("\x1b[0;31m%s\x1b[0m", "\u2716")
 )
 
-func RecoverTask() {
+func main() {
 	// Check for the existence of user's container
 	users := []*db.User{}
 	if err := db.GetDB().Where("service_id!=''").Find(&users); err != nil {
