@@ -1,4 +1,4 @@
-package controllers
+package handler
 
 import (
 	"log"
@@ -11,22 +11,22 @@ import (
 	"github.com/go-ignite/ignite/utils"
 )
 
-func (router *MainRouter) InviteCodeListHandler(c *gin.Context) {
+func (ah *AdminHandler) InviteCodeListHandler(c *gin.Context) {
 	pageIndex, _ := strconv.Atoi(c.Query("pageIndex"))
 	pageSize, _ := strconv.Atoi(c.Query("pageSize"))
 
 	codes := new([]*db.InviteCode)
-	router.db.Desc("created").Where("available = 1").Limit(pageSize, pageSize*(pageIndex-1)).Find(codes)
+	db.GetDB().Desc("created").Where("available = 1").Limit(pageSize, pageSize*(pageIndex-1)).Find(codes)
 
 	code := new(db.InviteCode)
-	total, _ := router.db.Where("available = 1").Count(code)
+	total, _ := db.GetDB().Where("available = 1").Count(code)
 
 	pd := models.PageData{Total: total, PageSize: pageSize, PageIndex: pageIndex, Data: codes}
 	resp := models.Response{Success: true, Message: "success", Data: pd}
 	c.JSON(http.StatusOK, resp)
 }
 
-func (router *MainRouter) RemoveInviteCodeHandler(c *gin.Context) {
+func (ah *AdminHandler) RemoveInviteCodeHandler(c *gin.Context) {
 	cid, err := strconv.Atoi(c.Param("id"))
 
 	if err != nil {
@@ -36,7 +36,7 @@ func (router *MainRouter) RemoveInviteCodeHandler(c *gin.Context) {
 	}
 
 	code := new(db.InviteCode)
-	_, err = router.db.Id(cid).Delete(code)
+	_, err = db.GetDB().Id(cid).Delete(code)
 
 	if err != nil {
 		resp := models.Response{Success: false, Message: "邀请码删除失败"}
@@ -48,7 +48,7 @@ func (router *MainRouter) RemoveInviteCodeHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
-func (router *MainRouter) GenerateInviteCodeHandler(c *gin.Context) {
+func (ah *AdminHandler) GenerateInviteCodeHandler(c *gin.Context) {
 	generateCodeEntity := struct {
 		Amount    int `json:"amount"`
 		Limit     int `json:"limit"`
@@ -75,7 +75,7 @@ func (router *MainRouter) GenerateInviteCodeHandler(c *gin.Context) {
 		})
 	}
 	resp := models.Response{}
-	if _, err := router.db.Insert(&codes); err != nil {
+	if _, err := db.GetDB().Insert(&codes); err != nil {
 		log.Println("Save code error: ", err.Error())
 		resp.Message = "Save codes error..."
 	} else {

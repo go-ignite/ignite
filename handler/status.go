@@ -1,4 +1,4 @@
-package controllers
+package handler
 
 import (
 	"net/http"
@@ -9,13 +9,13 @@ import (
 	"github.com/go-ignite/ignite/models"
 )
 
-func (router *MainRouter) PanelStatusListHandler(c *gin.Context) {
+func (ah *AdminHandler) PanelStatusListHandler(c *gin.Context) {
 	pageIndex, _ := strconv.Atoi(c.Query("pageIndex"))
 	pageSize, _ := strconv.Atoi(c.Query("pageSize"))
 	kw := c.Query("keyword")
 
 	users := new([]*db.User)
-	router.db.Desc("created").Where("username like ?", "%"+kw+"%").Limit(pageSize, pageSize*(pageIndex-1)).Find(users)
+	db.GetDB().Desc("created").Where("username like ?", "%"+kw+"%").Limit(pageSize, pageSize*(pageIndex-1)).Find(users)
 	for _, user := range *users {
 		if user.ServiceType == "" {
 			if user.ServiceId != "" {
@@ -27,7 +27,7 @@ func (router *MainRouter) PanelStatusListHandler(c *gin.Context) {
 	}
 
 	user := new(db.User)
-	total, _ := router.db.Count(user)
+	total, _ := db.GetDB().Count(user)
 
 	pd := models.PageData{Total: total, PageSize: pageSize, PageIndex: pageIndex, Data: users}
 	resp := models.Response{Success: true, Message: "success", Data: pd}

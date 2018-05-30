@@ -1,4 +1,4 @@
-package controllers
+package handler
 
 import (
 	"fmt"
@@ -43,7 +43,7 @@ func init() {
 // @Param Authorization header string true "Authentication header"
 // @Success 200 {object} models.ServiceConfig
 // @Router /api/user/auth/service/config [get]
-func (router *MainRouter) ServiceConfigHandler(c *gin.Context) {
+func (uh *UserHandler) ServiceConfigHandler(c *gin.Context) {
 	sc := models.ServiceConfig{
 		SSMethods:  ssMethods,
 		SSRMethods: ssrMethods,
@@ -64,12 +64,12 @@ func (router *MainRouter) ServiceConfigHandler(c *gin.Context) {
 // @Param Authorization header string true "Authentication header"
 // @Failure 200 {string} json "{"success":false,"message":"error message"}"
 // @Router /api/user/auth/info [get]
-func (router *MainRouter) UserInfoHandler(c *gin.Context) {
+func (uh *UserHandler) UserInfoHandler(c *gin.Context) {
 	userID, _ := c.Get("id")
 	logrus.WithField("userID", userID).Debug("get user info")
 
 	user := new(db.User)
-	exists, err := router.db.Id(userID).Get(user)
+	exists, err := db.GetDB().Id(userID).Get(user)
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"userID": userID,
@@ -128,7 +128,7 @@ func (router *MainRouter) UserInfoHandler(c *gin.Context) {
 // @Success 200 {object} models.ServiceResult
 // @Failure 200 {string} json "{"success":false,"message":"error message"}"
 // @Router /api/user/auth/service/create [post]
-func (router *MainRouter) CreateServiceHandler(c *gin.Context) {
+func (uh *UserHandler) CreateServiceHandler(c *gin.Context) {
 	userID, _ := c.Get("id")
 	method := c.PostForm("method")
 	serverType := c.PostForm("server-type")
@@ -151,7 +151,7 @@ func (router *MainRouter) CreateServiceHandler(c *gin.Context) {
 	}
 
 	user := new(db.User)
-	exists, err := router.db.Id(userID).Get(user)
+	exists, err := db.GetDB().Id(userID).Get(user)
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"userID": userID,
@@ -173,7 +173,7 @@ func (router *MainRouter) CreateServiceHandler(c *gin.Context) {
 
 	//Get all used ports.
 	var usedPorts []int
-	if err := router.db.Table("user").Cols("service_port").Find(&usedPorts); err != nil {
+	if err := db.GetDB().Table("user").Cols("service_port").Find(&usedPorts); err != nil {
 		logrus.WithFields(logrus.Fields{
 			"userID": userID,
 			"err":    err,
@@ -217,7 +217,7 @@ func (router *MainRouter) CreateServiceHandler(c *gin.Context) {
 	user.ServicePwd = result.Password
 	user.ServiceMethod = method
 	user.ServiceType = serverType
-	affected, err := router.db.Id(userID).Cols("status", "service_port", "service_pwd", "service_id", "service_method", "service_type").Update(user)
+	affected, err := db.GetDB().Id(userID).Cols("status", "service_port", "service_pwd", "service_id", "service_method", "service_type").Update(user)
 	if affected == 0 || err != nil {
 		logrus.WithFields(logrus.Fields{
 			"userID": userID,

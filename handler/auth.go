@@ -1,4 +1,4 @@
-package controllers
+package handler
 
 import (
 	"net/http"
@@ -11,7 +11,7 @@ import (
 	"github.com/go-ignite/ignite/ss"
 )
 
-func (router *MainRouter) ResetAccountHandler(c *gin.Context) {
+func (ah *AdminHandler) ResetAccountHandler(c *gin.Context) {
 	uid, err := strconv.Atoi(c.Param("id"))
 
 	if err != nil {
@@ -23,12 +23,12 @@ func (router *MainRouter) ResetAccountHandler(c *gin.Context) {
 	user := new(db.User)
 	user.PackageUsed = 0
 
-	router.db.Id(uid).Cols("package_used").Update(user)
+	db.GetDB().Id(uid).Cols("package_used").Update(user)
 	resp := models.Response{Success: true, Message: "success"}
 	c.JSON(http.StatusOK, resp)
 }
 
-func (router *MainRouter) DestroyAccountHandler(c *gin.Context) {
+func (ah *AdminHandler) DestroyAccountHandler(c *gin.Context) {
 	uid, err := strconv.Atoi(c.Param("id"))
 
 	if err != nil {
@@ -38,7 +38,7 @@ func (router *MainRouter) DestroyAccountHandler(c *gin.Context) {
 	}
 
 	user := new(db.User)
-	router.db.Id(uid).Get(user)
+	db.GetDB().Id(uid).Get(user)
 
 	//1. Destroy user's container
 	if user.ServiceId != "" {
@@ -52,7 +52,7 @@ func (router *MainRouter) DestroyAccountHandler(c *gin.Context) {
 	}
 
 	//2. Delete user's account
-	_, err = router.db.Id(uid).Delete(new(db.User))
+	_, err = db.GetDB().Id(uid).Delete(new(db.User))
 	if err != nil {
 		resp := models.Response{Success: false, Message: "删除用户失败!"}
 		c.JSON(http.StatusOK, resp)
@@ -63,7 +63,7 @@ func (router *MainRouter) DestroyAccountHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
-func (router *MainRouter) StopServiceHandler(c *gin.Context) {
+func (ah *AdminHandler) StopServiceHandler(c *gin.Context) {
 	uid, err := strconv.Atoi(c.Param("id"))
 
 	if err != nil {
@@ -73,7 +73,7 @@ func (router *MainRouter) StopServiceHandler(c *gin.Context) {
 	}
 
 	user := new(db.User)
-	router.db.Id(uid).Get(user)
+	db.GetDB().Id(uid).Get(user)
 
 	//1. Stop user's container
 	if ss.IsContainerRunning(user.ServiceId) {
@@ -87,14 +87,14 @@ func (router *MainRouter) StopServiceHandler(c *gin.Context) {
 
 		//2. Update service status
 		user.Status = 2
-		router.db.Id(uid).Cols("status").Update(user)
+		db.GetDB().Id(uid).Cols("status").Update(user)
 	}
 
 	resp := models.Response{Success: true, Message: "success"}
 	c.JSON(http.StatusOK, resp)
 }
 
-func (router *MainRouter) StartServiceHandler(c *gin.Context) {
+func (ah *AdminHandler) StartServiceHandler(c *gin.Context) {
 	uid, err := strconv.Atoi(c.Param("id"))
 
 	if err != nil {
@@ -104,7 +104,7 @@ func (router *MainRouter) StartServiceHandler(c *gin.Context) {
 	}
 
 	user := new(db.User)
-	router.db.Id(uid).Get(user)
+	db.GetDB().Id(uid).Get(user)
 
 	//1. Start user's container
 	if !ss.IsContainerRunning(user.ServiceId) {
@@ -118,17 +118,17 @@ func (router *MainRouter) StartServiceHandler(c *gin.Context) {
 
 		//2. Update service status
 		user.Status = 1
-		router.db.Id(uid).Cols("status").Update(user)
+		db.GetDB().Id(uid).Cols("status").Update(user)
 	} else if user.Status == 2 {
 		user.Status = 1
-		router.db.Id(uid).Cols("status").Update(user)
+		db.GetDB().Id(uid).Cols("status").Update(user)
 	}
 
 	resp := models.Response{Success: true, Message: "success"}
 	c.JSON(http.StatusOK, resp)
 }
 
-func (router *MainRouter) RenewServiceHandler(c *gin.Context) {
+func (ah *AdminHandler) RenewServiceHandler(c *gin.Context) {
 	uid, err := strconv.Atoi(c.Param("id"))
 
 	if err != nil {
@@ -148,7 +148,7 @@ func (router *MainRouter) RenewServiceHandler(c *gin.Context) {
 	}
 
 	user := new(db.User)
-	router.db.Id(uid).Get(user)
+	db.GetDB().Id(uid).Get(user)
 	if user.Id == 0 {
 		resp := models.Response{Success: false, Message: "获取用户失败!"}
 		c.JSON(http.StatusOK, &resp)
@@ -174,7 +174,7 @@ func (router *MainRouter) RenewServiceHandler(c *gin.Context) {
 	}
 	user.Expired = expired
 
-	if _, err := router.db.Id(uid).Cols("expired", "status").Update(user); err != nil {
+	if _, err := db.GetDB().Id(uid).Cols("expired", "status").Update(user); err != nil {
 		resp := models.Response{Success: false, Message: "更新过期时间失败!"}
 		c.JSON(http.StatusOK, &resp)
 		return

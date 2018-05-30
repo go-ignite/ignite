@@ -1,4 +1,4 @@
-package controllers
+package handler
 
 import (
 	"fmt"
@@ -9,9 +9,20 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-ignite/ignite/config"
 	"github.com/go-ignite/ignite/models"
+	"github.com/sirupsen/logrus"
 )
 
-func (router *MainRouter) PanelLoginHandler(c *gin.Context) {
+type AdminHandler struct {
+	*logrus.Logger
+}
+
+func NewAdminHandler(l *logrus.Logger) *AdminHandler {
+	return &AdminHandler{
+		Logger: l,
+	}
+}
+
+func (router *AdminHandler) PanelLoginHandler(c *gin.Context) {
 	loginEntity := struct {
 		Username string `json:"username"`
 		Password string `json:"password"`

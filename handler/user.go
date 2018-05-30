@@ -1,4 +1,4 @@
-package controllers
+package handler
 
 import (
 	"net/http"
@@ -15,6 +15,16 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+type UserHandler struct {
+	*logrus.Logger
+}
+
+func NewUserHandler(l *logrus.Logger) *UserHandler {
+	return &UserHandler{
+		Logger: l,
+	}
+}
+
 // LoginHandler godoc
 // @Summary user login
 // @Description user login
@@ -25,18 +35,18 @@ import (
 // @Success 200 {string} json "{"success":true,"message":"Success!","data":"Bearer xxxx"}"
 // @Failure 200 {string} json "{"success":false,"message":"error message"}"
 // @Router /api/user/login [post]
-func (router *MainRouter) LoginHandler(c *gin.Context) {
+func (uh *UserHandler) LoginHandler(c *gin.Context) {
 	username := c.PostForm("username")
 	pwd := c.PostForm("password")
 
-	logrus.WithFields(logrus.Fields{
+	uh.WithFields(logrus.Fields{
 		"username": username,
 		"pwd":      pwd,
 	}).Debug()
 
 	user, err := db.GetUserByUsername(username)
 	if err != nil {
-		logrus.WithFields(logrus.Fields{
+		uh.WithFields(logrus.Fields{
 			"username": username,
 			"err":      err,
 		}).Error("get user error")
@@ -55,7 +65,7 @@ func (router *MainRouter) LoginHandler(c *gin.Context) {
 
 	token, err := utils.CreateToken(config.C.Secret.User, user.Id)
 	if err != nil {
-		logrus.WithFields(logrus.Fields{
+		uh.WithFields(logrus.Fields{
 			"userID": user.Id,
 			"err":    err,
 		}).Error("generate token error")
@@ -63,7 +73,7 @@ func (router *MainRouter) LoginHandler(c *gin.Context) {
 		return
 	}
 
-	logrus.WithField("userID", user.Id).Info("login successful")
+	uh.WithField("userID", user.Id).Info("login successful")
 	c.JSON(http.StatusOK, models.NewSuccessResp(token))
 }
 
@@ -79,13 +89,13 @@ func (router *MainRouter) LoginHandler(c *gin.Context) {
 // @Success 200 {string} json "{"success":true,"message":"Success!","data":"Bearer xxxx"}"
 // @Failure 200 {string} json "{"success":false,"message":"error message"}"
 // @Router /api/user/signup [post]
-func (router *MainRouter) SignupHandler(c *gin.Context) {
+func (uh *UserHandler) SignupHandler(c *gin.Context) {
 	inviteCode := c.PostForm("invite-code")
 	username := c.PostForm("username")
 	pwd := c.PostForm("password")
 	confirmPwd := c.PostForm("confirm-password")
 
-	logrus.WithFields(logrus.Fields{
+	uh.WithFields(logrus.Fields{
 		"inviteCode": inviteCode,
 		"username":   username,
 		"pwd":        pwd,
@@ -105,7 +115,7 @@ func (router *MainRouter) SignupHandler(c *gin.Context) {
 
 	iv, err := db.GetAvailableInviteCode(inviteCode)
 	if err != nil {
-		logrus.WithFields(logrus.Fields{
+		uh.WithFields(logrus.Fields{
 			"inviteCode": inviteCode,
 			"err":        err,
 		}).Error("get invite code error")
@@ -116,10 +126,10 @@ func (router *MainRouter) SignupHandler(c *gin.Context) {
 		c.JSON(http.StatusOK, models.NewErrorResp("邀请码不存在！"))
 		return
 	}
-	logrus.WithField("inviteCodeID", iv.Id).Debug()
+	uh.WithField("inviteCodeID", iv.Id).Debug()
 
 	user := new(db.User)
-	count, err := router.db.Where("username = ?", username).Count(user)
+	count, err := db.GetDB().Where("username = ?", username).Count(user)
 	if err != nil {
 		c.JSON(http.StatusOK, models.NewErrorResp("检查用户名失败！"))
 		return
@@ -131,7 +141,7 @@ func (router *MainRouter) SignupHandler(c *gin.Context) {
 	}
 
 	//Create user account
-	trans := router.db.NewSession()
+	trans := db.GetDB().NewSession()
 	defer trans.Close()
 
 	trans.Begin()
@@ -147,7 +157,7 @@ func (router *MainRouter) SignupHandler(c *gin.Context) {
 	affected, err := trans.Insert(user)
 	if err != nil || affected == 0 {
 		trans.Rollback()
-		logrus.WithFields(logrus.Fields{
+		uh.WithFields(logrus.Fields{
 			"err":      err,
 			"affected": affected,
 		}).Error("user insert error")
@@ -161,7 +171,7 @@ func (router *MainRouter) SignupHandler(c *gin.Context) {
 
 	if err != nil || affected == 0 {
 		trans.Rollback()
-		logrus.WithFields(logrus.Fields{
+		uh.WithFields(logrus.Fields{
 			"err":      err,
 			"affected": affected,
 		}).Error("update inviteCode status error")
@@ -170,14 +180,14 @@ func (router *MainRouter) SignupHandler(c *gin.Context) {
 	}
 
 	if err := trans.Commit(); err != nil {
-		logrus.WithField("err", err).Error("trans commit error")
+		uh.WithField("err", err).Error("trans commit error")
 		c.JSON(http.StatusInternalServerError, models.NewErrorResp("用户注册失败！"))
 		return
 	}
 
 	token, err := utils.CreateToken(config.C.Secret.User, user.Id)
 	if err != nil {
-		logrus.WithFields(logrus.Fields{
+		uh.WithFields(logrus.Fields{
 			"userID": user.Id,
 			"err":    err,
 		}).Error("generate token error")
@@ -185,7 +195,7 @@ func (router *MainRouter) SignupHandler(c *gin.Context) {
 		return
 	}
 
-	logrus.WithFields(logrus.Fields{
+	uh.WithFields(logrus.Fields{
 		"username":     username,
 		"userID":       user.Id,
 		"inviteCode":   inviteCode,
