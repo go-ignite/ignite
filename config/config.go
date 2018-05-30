@@ -13,7 +13,7 @@ var (
 )
 
 type Config struct {
-	APP struct {
+	App struct {
 		Address  string `mapstructure:"address"`
 		LogLevel string `mapstructure:"log_level"`
 	} `mapstructure:"app"`
@@ -64,7 +64,7 @@ func Init() {
 	}
 
 	// log
-	lv, err := logrus.ParseLevel(C.APP.LogLevel)
+	lv, err := logrus.ParseLevel(C.App.LogLevel)
 	if err != nil {
 		log.Fatalf("logrus.ParseLevel error: %v\n", err)
 	}
