@@ -25,7 +25,7 @@ type Config struct {
 		Address string `mapstructure:"address"`
 		From    int    `mapstructure:"from"`
 		To      int    `mapstructure:"to"`
-	} `mapstructure:"db"`
+	} `mapstructure:"host"`
 	Secret struct {
 		User  string `mapstructure:"user"`
 		Admin string `mapstructure:"admin"`
@@ -33,7 +33,7 @@ type Config struct {
 	Admin struct {
 		Username string `mapstructure:"username"`
 		Password string `mapstructure:"password"`
-	}
+	} `mapstructure:"admin"`
 }
 
 func Init() {
