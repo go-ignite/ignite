@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"fmt"
+	"time"
 
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/dgrijalva/jwt-go/request"
@@ -23,6 +24,12 @@ func Auth(secret string) gin.HandlerFunc {
 			return
 		}
 		claims := token.Claims.(jwt.MapClaims)
+		if !claims.VerifyExpiresAt(time.Now().Unix(), true) {
+			c.AbortWithError(401, fmt.Errorf("token is expired"))
+			return
+		}
+
 		c.Set("id", claims["id"])
+		c.Set("token", token.Raw)
 	}
 }
