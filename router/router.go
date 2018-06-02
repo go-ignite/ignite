@@ -70,6 +70,9 @@ func (r *Router) InitAdmin(l *logrus.Logger) {
 			authRouter.GET("/code_list", adminHandler.InviteCodeListHandler)
 			authRouter.PUT("/:id/remove", adminHandler.RemoveInviteCodeHandler)
 			authRouter.POST("/code_generate", adminHandler.GenerateInviteCodeHandler)
+
+			// node
+			authRouter.POST("/node", adminHandler.AddNodeHandler)
 		}
 	}
 }
