@@ -63,7 +63,7 @@ func (uh *UserHandler) LoginHandler(c *gin.Context) {
 		return
 	}
 
-	token, err := utils.CreateToken(config.C.Secret.User, user.Id)
+	token, err := utils.CreateToken(config.C.App.Secret, user.Id)
 	if err != nil {
 		uh.WithFields(logrus.Fields{
 			"userID": user.Id,
@@ -185,7 +185,7 @@ func (uh *UserHandler) SignupHandler(c *gin.Context) {
 		return
 	}
 
-	token, err := utils.CreateToken(config.C.Secret.User, user.Id)
+	token, err := utils.CreateToken(config.C.App.Secret, user.Id)
 	if err != nil {
 		uh.WithFields(logrus.Fields{
 			"userID": user.Id,

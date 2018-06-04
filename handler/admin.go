@@ -37,7 +37,7 @@ func (ah *AdminHandler) PanelLoginHandler(c *gin.Context) {
 		return
 	}
 	// Create the token
-	token, err := utils.CreateToken(config.C.Secret.Admin, -1)
+	token, err := utils.CreateToken(config.C.App.Secret, -1)
 	if err != nil {
 		logrus.WithField("err", err).Error("generate token error")
 		c.JSON(http.StatusInternalServerError, models.NewErrorResp("登录失败！"))
