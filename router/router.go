@@ -1,11 +1,9 @@
 package router
 
 import (
-	"github.com/go-ignite/ignite/config"
 	_ "github.com/go-ignite/ignite/docs"
 	"github.com/go-ignite/ignite/handler"
 	"github.com/go-ignite/ignite/middleware"
-	"github.com/sirupsen/logrus"
 
 	"github.com/gin-gonic/contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -15,15 +13,11 @@ import (
 
 type Router struct {
 	*gin.Engine
+	*handler.UserHandler
+	*handler.AdminHandler
 }
 
-func New(engine *gin.Engine) *Router {
-	return &Router{
-		Engine: engine,
-	}
-}
-
-func (r *Router) InitGeneral() {
+func (r *Router) Init() {
 	if gin.Mode() == gin.DebugMode {
 		r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
@@ -31,48 +25,48 @@ func (r *Router) InitGeneral() {
 			AllowAllOrigins: true,
 		}))
 	}
-}
 
-func (r *Router) InitUser(l *logrus.Logger) {
-	userHandler := handler.NewUserHandler(l)
 	userRouter := r.Group("/api/user")
 	{
-		userRouter.POST("/login", userHandler.LoginHandler)
-		userRouter.POST("/signup", userHandler.SignupHandler)
+		userRouter.POST("/login", r.LoginHandler)
+		userRouter.POST("/signup", r.SignupHandler)
 
 		authRouter := userRouter.Group("/auth")
-		authRouter.Use(middleware.Auth(config.C.Secret.User))
+		authRouter.Use(middleware.Auth(false))
 		{
-			authRouter.GET("/info", userHandler.UserInfoHandler)
-			authRouter.GET("/service/config", userHandler.ServiceConfigHandler)
-			authRouter.POST("/service/create", userHandler.CreateServiceHandler)
+			authRouter.GET("/info", r.UserInfoHandler)
+			authRouter.GET("/service/config", r.ServiceConfigHandler)
+			authRouter.POST("/service/create", r.CreateServiceHandler)
+
+			// nodes
+			authRouter.GET("/nodes", r.UserHandler.ListNodes)
 		}
 	}
-}
 
-func (r *Router) InitAdmin(l *logrus.Logger) {
-	adminHandler := handler.NewAdminHandler(l)
 	adminRouter := r.Group("/api/admin")
 	{
-		adminRouter.POST("/login", adminHandler.PanelLoginHandler)
+		adminRouter.POST("/login", r.PanelLoginHandler)
 		authRouter := adminRouter.Group("/auth")
-		authRouter.Use(middleware.Auth(config.C.Secret.Admin))
+		authRouter.Use(middleware.Auth(true))
 		{
 			//user account related operations
-			authRouter.GET("/status_list", adminHandler.PanelStatusListHandler)
-			authRouter.PUT("/:id/reset", adminHandler.ResetAccountHandler)
-			authRouter.PUT("/:id/destroy", adminHandler.DestroyAccountHandler)
-			authRouter.PUT("/:id/stop", adminHandler.StopServiceHandler)
-			authRouter.PUT("/:id/start", adminHandler.StartServiceHandler)
-			authRouter.PUT("/:id/renew", adminHandler.RenewServiceHandler)
+			authRouter.GET("/status_list", r.PanelStatusListHandler)
+			authRouter.PUT("/:id/reset", r.ResetAccountHandler)
+			authRouter.PUT("/:id/destroy", r.DestroyAccountHandler)
+			authRouter.PUT("/:id/stop", r.StopServiceHandler)
+			authRouter.PUT("/:id/start", r.StartServiceHandler)
+			authRouter.PUT("/:id/renew", r.RenewServiceHandler)
 
 			//invite code related operations
-			authRouter.GET("/code_list", adminHandler.InviteCodeListHandler)
-			authRouter.PUT("/:id/remove", adminHandler.RemoveInviteCodeHandler)
-			authRouter.POST("/code_generate", adminHandler.GenerateInviteCodeHandler)
+			authRouter.GET("/code_list", r.InviteCodeListHandler)
+			authRouter.PUT("/:id/remove", r.RemoveInviteCodeHandler)
+			authRouter.POST("/code_generate", r.GenerateInviteCodeHandler)
 
-			// node
-			authRouter.POST("/node", adminHandler.AddNodeHandler)
+			// nodes
+			authRouter.GET("/nodes", r.AdminHandler.ListNodes)
+			authRouter.POST("/nodes", r.AddNode)
+			authRouter.PUT("/nodes/:id", r.UpdateNode)
+			authRouter.DELETE("/nodes/:id", r.DeleteNode)
 		}
 	}
 }

@@ -19,6 +19,13 @@ func GetAllNodes() ([]*Node, error) {
 	return nodes, engine.Find(&nodes)
 }
 
-func CreateNode(node *Node) (int64, error) {
-	return engine.Insert(node)
+func UpsertNode(node *Node) (int64, error) {
+	if node.Id == 0 {
+		return engine.Insert(node)
+	}
+	return engine.Id(node.Id).Cols("name").Update(node)
+}
+
+func DeleteNode(id int64) (int64, error) {
+	return engine.Id(id).Delete(new(Node))
 }
