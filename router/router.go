@@ -51,15 +51,15 @@ func (r *Router) Init() {
 		{
 			//user account related operations
 			authRouter.GET("/status_list", r.PanelStatusListHandler)
-			authRouter.PUT("/:id/reset", r.ResetAccountHandler)
-			authRouter.PUT("/:id/destroy", r.DestroyAccountHandler)
-			authRouter.PUT("/:id/stop", r.StopServiceHandler)
-			authRouter.PUT("/:id/start", r.StartServiceHandler)
-			authRouter.PUT("/:id/renew", r.RenewServiceHandler)
+			// authRouter.PUT("/:id/reset", r.ResetAccountHandler)
+			// authRouter.PUT("/:id/destroy", r.DestroyAccountHandler)
+			// authRouter.PUT("/:id/stop", r.StopServiceHandler)
+			// authRouter.PUT("/:id/start", r.StartServiceHandler)
+			// authRouter.PUT("/:id/renew", r.RenewServiceHandler)
 
 			//invite code related operations
 			authRouter.GET("/code_list", r.InviteCodeListHandler)
-			authRouter.PUT("/:id/remove", r.RemoveInviteCodeHandler)
+			// authRouter.PUT("/:id/remove", r.RemoveInviteCodeHandler)
 			authRouter.POST("/code_generate", r.GenerateInviteCodeHandler)
 
 			// nodes
