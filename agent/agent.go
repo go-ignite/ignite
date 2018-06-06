@@ -7,6 +7,7 @@ import (
 )
 
 type Client struct {
+	*grpc.ClientConn
 	pb.AgentServiceClient
 	Address string
 }
@@ -20,6 +21,7 @@ func (client *Client) Dial() error {
 	if err != nil {
 		return err
 	}
+	client.ClientConn = conn
 	client.AgentServiceClient = pb.NewAgentServiceClient(conn)
 	return nil
 }
@@ -30,6 +32,7 @@ func Dial(address string) (*Client, error) {
 		return nil, err
 	}
 	client := &Client{
+		ClientConn:         conn,
 		Address:            address,
 		AgentServiceClient: pb.NewAgentServiceClient(conn),
 	}

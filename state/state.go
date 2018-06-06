@@ -26,12 +26,14 @@ type Loader struct {
 
 type NodeStatus struct {
 	*agent.Client
+	watching  bool
 	available bool
 }
 
-func NewNodeStatus(client *agent.Client) *NodeStatus {
+func NewNodeStatus(client *agent.Client, available bool) *NodeStatus {
 	return &NodeStatus{
-		Client: client,
+		Client:    client,
+		available: available,
 	}
 }
 
@@ -79,7 +81,7 @@ func (loader *Loader) Load() error {
 	}
 	for _, node := range nodes {
 		client := agent.NewClient(node.Address)
-		ns := NewNodeStatus(client)
+		ns := NewNodeStatus(client, false)
 		go loader.WatchNode(ns)
 		loader.nodeMap[node.Id] = ns
 	}
@@ -87,7 +89,8 @@ func (loader *Loader) Load() error {
 }
 
 func (loader *Loader) WatchNode(ns *NodeStatus) {
-	for {
+	ns.watching = true
+	for ns.watching {
 		if err := ns.Heartbeat(); err != nil {
 			loader.WithError(err).Error()
 			time.Sleep(5 * time.Second)
@@ -95,18 +98,27 @@ func (loader *Loader) WatchNode(ns *NodeStatus) {
 	}
 }
 
-func (loader *Loader) GetNode(id int64) *NodeStatus {
+func (loader *Loader) GetNodeAvailable(id int64) bool {
 	loader.nodeMutex.RLock()
 	defer loader.nodeMutex.RUnlock()
 
-	return loader.nodeMap[id]
+	node := loader.nodeMap[id]
+	if node == nil {
+		return false
+	}
+	return node.available
 }
 
 func (loader *Loader) DelNode(id int64) {
 	loader.nodeMutex.Lock()
 	defer loader.nodeMutex.Unlock()
 
-	delete(loader.nodeMap, id)
+	ns := loader.nodeMap[id]
+	if ns != nil {
+		ns.watching = false
+		ns.Client.Close()
+		delete(loader.nodeMap, id)
+	}
 }
 
 func (loader *Loader) AddNode(id int64, ns *NodeStatus) {
