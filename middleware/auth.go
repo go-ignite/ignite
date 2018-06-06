@@ -31,7 +31,7 @@ func Auth(admin bool) gin.HandlerFunc {
 			c.AbortWithError(401, fmt.Errorf("token is expired"))
 			return
 		}
-		id, ok := claims["id"].(int64)
+		id, ok := claims["id"].(float64)
 		if !ok {
 			c.AbortWithError(401, fmt.Errorf("token'id is invalid"))
 			return
