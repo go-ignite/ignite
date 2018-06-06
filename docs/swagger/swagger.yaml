@@ -1,4 +1,20 @@
 definitions:
+  models.AddNodeReq:
+    properties:
+      address:
+        type: string
+      name:
+        type: string
+    type: object
+  models.NodeResp:
+    properties:
+      address:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
   models.ServiceConfig:
     properties:
       servers:
@@ -25,6 +41,11 @@ definitions:
       servicePort:
         type: integer
       servicePwd:
+        type: string
+    type: object
+  models.UpdateNodeReq:
+    properties:
+      name:
         type: string
     type: object
   models.UserInfo:
@@ -62,6 +83,86 @@ info:
   contact: {}
   license: {}
 paths:
+  /api/admin/auth/nodes:
+    get:
+      description: get node list
+      parameters:
+      - description: Authentication header
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":false,"message":"error message"}'
+          schema:
+            type: string
+      summary: get node list
+    post:
+      description: add node
+      parameters:
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.AddNodeReq'
+          type: object
+      - description: Authentication header
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":false,"message":"error message"}'
+          schema:
+            type: string
+      summary: add node
+  /api/admin/auth/nodes/:
+    delete:
+      description: delete a node
+      parameters:
+      - description: Authentication header
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":false,"message":"error message"}'
+          schema:
+            type: string
+      summary: delete a node
+    put:
+      description: update a node
+      parameters:
+      - description: Authentication header
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateNodeReq'
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":false,"message":"error message"}'
+          schema:
+            type: string
+      summary: update a node
   /api/user/auth/info:
     get:
       description: get user info
