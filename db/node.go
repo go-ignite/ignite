@@ -6,9 +6,9 @@ import (
 
 type Node struct {
 	Id        int64     `xorm:"pk autoincr notnull"`
-	Name      string    `xorm:"notnull unique"`
-	Comment   string    `xorm:"notnull"`
-	Address   string    `xorm:"notnull"`
+	Name      string    `xorm:"default '' unique"`
+	Comment   string    `xorm:"default ''"`
+	Address   string    `xorm:"default ''"`
 	Services  int       `xorm:"default 0"` // Number of running containers
 	Bandwidth float32   // total bandwidth used (for all containers), unit: GB
 	Created   time.Time `xorm:"created"`
