@@ -100,3 +100,33 @@ func CreateToken(secret string, id int64) (string, error) {
 	}
 	return "Bearer " + tokenStr, nil
 }
+
+func VerifyToken(tokenString string, isAdmin *bool) bool {
+	tokenString = tokenString[7:]
+	token, err := jwt.ParseWithClaims(tokenString, jwt.MapClaims{}, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("Unexpected siging method")
+		}
+		return []byte(config.C.App.Secret), nil
+	})
+	if err != nil {
+		return false
+	}
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		return false
+	}
+	if !token.Valid {
+		return false
+	}
+	if isAdmin != nil {
+		id, ok := claims["id"].(float64)
+		if !ok {
+			return false
+		}
+		if (*isAdmin && id != -1) || (!*isAdmin && id <= 0) {
+			return false
+		}
+	}
+	return claims.VerifyExpiresAt(time.Now().Unix(), true)
+}

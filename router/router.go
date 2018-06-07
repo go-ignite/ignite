@@ -1,14 +1,20 @@
 package router
 
 import (
+	"encoding/json"
+	"time"
+
 	_ "github.com/go-ignite/ignite/docs"
 	"github.com/go-ignite/ignite/handler"
 	"github.com/go-ignite/ignite/middleware"
+	"github.com/go-ignite/ignite/state"
+	"github.com/go-ignite/ignite/utils"
 
 	"github.com/gin-gonic/contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/swaggo/gin-swagger"
 	"github.com/swaggo/gin-swagger/swaggerFiles"
+	melody "gopkg.in/olahol/melody.v1"
 )
 
 type Router struct {
@@ -25,6 +31,24 @@ func (r *Router) Init() {
 			AllowAllOrigins: true,
 		}))
 	}
+
+	m := melody.New()
+	r.GET("/api/ws/nodes", func(c *gin.Context) {
+		m.HandleRequest(c.Writer, c.Request)
+	})
+	m.HandleMessage(func(s *melody.Session, msg []byte) {
+		if !utils.VerifyToken(string(msg), nil) {
+			return
+		}
+		for {
+			nam := state.GetLoader().GetNodeAvailableMap()
+			msg, _ := json.Marshal(nam)
+			if err := s.Write(msg); err != nil {
+				break
+			}
+			time.Sleep(3 * time.Second)
+		}
+	})
 
 	userRouter := r.Group("/api/user")
 	{

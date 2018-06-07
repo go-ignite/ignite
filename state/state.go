@@ -109,6 +109,17 @@ func (loader *Loader) GetNodeAvailable(id int64) bool {
 	return node.available
 }
 
+func (loader *Loader) GetNodeAvailableMap() map[int64]bool {
+	loader.nodeMutex.RLock()
+	defer loader.nodeMutex.RUnlock()
+
+	nam := map[int64]bool{}
+	for id, ns := range loader.nodeMap {
+		nam[id] = ns.available
+	}
+	return nam
+}
+
 func (loader *Loader) DelNode(id int64) {
 	loader.nodeMutex.Lock()
 	defer loader.nodeMutex.Unlock()
