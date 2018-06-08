@@ -32,9 +32,12 @@ func (ah *AdminHandler) AddNode(c *gin.Context) {
 		return
 	}
 	ah.WithFields(logrus.Fields{
-		"name":    nodeEntity.Name,
-		"comment": nodeEntity.Comment,
-		"address": nodeEntity.Address,
+		"name":       nodeEntity.Name,
+		"comment":    nodeEntity.Comment,
+		"address":    nodeEntity.Address,
+		"connect_ip": nodeEntity.ConnectIP,
+		"port_from":  nodeEntity.PortFrom,
+		"port_to":    nodeEntity.PortTo,
 	}).Debug()
 
 	agentClient, err := agent.Dial(nodeEntity.Address)
@@ -66,7 +69,7 @@ func (ah *AdminHandler) AddNode(c *gin.Context) {
 		return
 	}
 
-	go state.GetLoader().AddNode(node.Id, state.NewNodeStatus(agentClient, true))
+	go state.GetLoader().AddNode(node.Id, state.NewNodeStatus(agentClient, true, map[int]bool{}))
 	nodeResp := &models.NodeResp{}
 	copier.Copy(nodeResp, node)
 	nodeResp.Available = true
@@ -146,9 +149,12 @@ func (ah *AdminHandler) UpdateNode(c *gin.Context) {
 		return
 	}
 	ah.WithFields(logrus.Fields{
-		"id":      id,
-		"name":    nodeEntity.Name,
-		"comment": nodeEntity.Comment,
+		"id":         id,
+		"name":       nodeEntity.Name,
+		"comment":    nodeEntity.Comment,
+		"connect_ip": nodeEntity.ConnectIP,
+		"port_from":  nodeEntity.PortFrom,
+		"port_to":    nodeEntity.PortTo,
 	}).Debug("update node")
 
 	node := &db.Node{}
