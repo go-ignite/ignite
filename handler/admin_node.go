@@ -69,7 +69,7 @@ func (ah *AdminHandler) AddNode(c *gin.Context) {
 		return
 	}
 
-	go state.GetLoader().AddNode(node.Id, state.NewNodeStatus(agentClient, true, map[int]bool{}))
+	go state.GetLoader().AddNode(node.Id, state.NewNodeStatus(agentClient, true))
 	nodeResp := &models.NodeResp{}
 	copier.Copy(nodeResp, node)
 	nodeResp.Available = true
