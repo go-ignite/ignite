@@ -45,7 +45,7 @@ func CreateContainer(serverType, name, method, password string, port int) (*mode
 	}
 	PullImage(image, true)
 	if password == "" {
-		password = utils.NewPasswd(16)
+		password = utils.RandString(16)
 	}
 	portStr := fmt.Sprintf("%d", port)
 	container, err := client.CreateContainer(docker.CreateContainerOptions{
