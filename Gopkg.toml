@@ -53,6 +53,10 @@
   branch = "master"
   name = "golang.org/x/crypto"
 
+[[constraint]]
+  branch = "master"
+  name = "github.com/go-ignite/ignite-agent"
+
 [prune]
   go-tests = true
   unused-packages = true

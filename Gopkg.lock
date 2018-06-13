@@ -130,7 +130,7 @@
   branch = "master"
   name = "github.com/go-ignite/ignite-agent"
   packages = ["protos"]
-  revision = "63fe9b6b89282eb13627780452dc69837661b0c8"
+  revision = "9b119661cc529aca028edd2997fa8b993070f0a2"
 
 [[projects]]
   branch = "master"
@@ -478,6 +478,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "45055ba5d96490868866875ac3eb97611a161557e1a6bf2265d7394ef9bd33d1"
+  inputs-digest = "c7f02076b0bf9ec9ce66be94040864cf707750dec58b53b10e2f8e77ced33556"
   solver-name = "gps-cdcl"
   solver-version = 1
