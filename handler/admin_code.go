@@ -68,7 +68,7 @@ func (ah *AdminHandler) GenerateInviteCodeHandler(c *gin.Context) {
 	codes := []db.InviteCode{}
 	for i := 0; i < generateCodeEntity.Amount; i++ {
 		codes = append(codes, db.InviteCode{
-			InviteCode:     utils.NewPasswd(16),
+			InviteCode:     utils.RandString(16),
 			PackageLimit:   generateCodeEntity.Limit,
 			AvailableLimit: generateCodeEntity.Available,
 			Available:      true,

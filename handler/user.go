@@ -11,6 +11,7 @@ import (
 	"github.com/go-ignite/ignite/utils"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-ignite/ignite/db/api"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -44,7 +45,7 @@ func (uh *UserHandler) LoginHandler(c *gin.Context) {
 		"pwd":      pwd,
 	}).Debug()
 
-	user, err := db.GetUserByUsername(username)
+	user, err := api.NewAPI().GetUserByUsername(username)
 	if err != nil {
 		uh.WithFields(logrus.Fields{
 			"username": username,

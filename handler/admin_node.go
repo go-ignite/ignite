@@ -12,6 +12,7 @@ import (
 	"github.com/go-ignite/ignite/state"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-ignite/ignite/db/api"
 	"github.com/jinzhu/copier"
 	"github.com/sirupsen/logrus"
 )
@@ -59,7 +60,7 @@ func (ah *AdminHandler) AddNode(c *gin.Context) {
 
 	node := &db.Node{}
 	copier.Copy(node, nodeEntity)
-	affected, err := db.UpsertNode(node)
+	affected, err := api.NewAPI().UpsertNode(node)
 	if err != nil || affected == 0 {
 		ah.WithFields(logrus.Fields{
 			"error":    err,
@@ -69,7 +70,7 @@ func (ah *AdminHandler) AddNode(c *gin.Context) {
 		return
 	}
 
-	go state.GetLoader().AddNode(node.Id, state.NewNodeStatus(agentClient, true))
+	go state.GetLoader().AddNode(node.Id, state.NewNodeStatus(node, agentClient, true, nil))
 	nodeResp := &models.NodeResp{}
 	copier.Copy(nodeResp, node)
 	nodeResp.Available = true
@@ -85,7 +86,7 @@ func (ah *AdminHandler) AddNode(c *gin.Context) {
 // @Failure 200 {string} json "{"success":false,"message":"error message"}"
 // @Router /api/admin/auth/nodes [get]
 func (ah *AdminHandler) ListNodes(c *gin.Context) {
-	nodes, err := db.GetAllNodes()
+	nodes, err := api.NewAPI().GetAllNodes()
 	if err != nil {
 		ah.WithError(err).Error("list nodes error")
 		c.JSON(http.StatusInternalServerError, models.NewErrorResp("获取节点列表失败！"))
@@ -115,7 +116,7 @@ func (ah *AdminHandler) DeleteNode(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, models.NewErrorResp("id is invalid"))
 		return
 	}
-	affected, err := db.DeleteNode(id)
+	affected, err := api.NewAPI().DeleteNode(id)
 	if err != nil || affected == 0 {
 		ah.WithFields(logrus.Fields{
 			"error":    err,
@@ -157,13 +158,18 @@ func (ah *AdminHandler) UpdateNode(c *gin.Context) {
 		"port_to":    nodeEntity.PortTo,
 	}).Debug("update node")
 
-	node := &db.Node{}
+	node := &db.Node{Id: id}
 	copier.Copy(node, nodeEntity)
-	node.Id = id
-	if _, err = db.UpsertNode(node); err != nil {
+	if _, err = api.NewAPI().UpsertNode(node); err != nil {
 		ah.WithError(err).Error("update node error")
 		c.JSON(http.StatusInternalServerError, models.NewErrorResp("更新节点失败！"))
 		return
 	}
+	go func() {
+		ns := state.GetLoader().GetNode(id)
+		ns.Lock()
+		defer ns.Unlock()
+		copier.Copy(ns.Node, nodeEntity)
+	}()
 	c.JSON(http.StatusOK, models.NewSuccessResp(nil))
 }
