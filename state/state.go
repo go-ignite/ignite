@@ -1,14 +1,12 @@
 package state
 
 import (
-	"context"
 	"fmt"
 	"sync"
 	"time"
 
-	pb "github.com/go-ignite/ignite-agent/protos"
 	"github.com/go-ignite/ignite/agent"
-	"github.com/go-ignite/ignite/db"
+	"github.com/go-ignite/ignite/db/api"
 
 	"github.com/sirupsen/logrus"
 )
@@ -24,44 +22,6 @@ type Loader struct {
 	*logrus.Logger
 }
 
-type NodeStatus struct {
-	*agent.Client
-	watching  bool
-	available bool
-}
-
-func NewNodeStatus(client *agent.Client, available bool) *NodeStatus {
-	return &NodeStatus{
-		Client:    client,
-		available: available,
-	}
-}
-
-func (ns *NodeStatus) Heartbeat() error {
-	if ns.Client.AgentServiceClient == nil {
-		if err := ns.Client.Dial(); err != nil {
-			return err
-		}
-	}
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-	streamClient, err := ns.Client.NodeHeartbeat(ctx, &pb.GeneralRequest{})
-	if err != nil {
-		return err
-	}
-	for {
-		_, err := streamClient.Recv()
-		if err != nil {
-			ns.Client.AgentServiceClient = nil
-			ns.available = false
-			return err
-		} else {
-			ns.available = true
-		}
-	}
-	return nil
-}
-
 func GetLoader() *Loader {
 	no.Do(func() {
 		l = &Loader{
@@ -75,16 +35,32 @@ func (loader *Loader) Load() error {
 	loader.nodeMutex.Lock()
 	defer loader.nodeMutex.Unlock()
 
-	nodes, err := db.GetAllNodes()
+	nodes, err := api.NewAPI().GetAllNodes()
 	if err != nil {
 		return fmt.Errorf("db.GetAllNodes error: %v", err)
 	}
+	services, err := api.NewAPI().GetAllServices()
+	if err != nil {
+		return fmt.Errorf("db.GetAllServices error: %v", err)
+	}
+
+	nodePortMap := map[int64]map[int]bool{}
+	for _, service := range services {
+		portMap, ok := nodePortMap[service.NodeId]
+		if !ok {
+			portMap = map[int]bool{}
+			nodePortMap[service.NodeId] = portMap
+		}
+		portMap[service.Port] = true
+	}
+
 	for _, node := range nodes {
 		client := agent.NewClient(node.Address)
-		ns := NewNodeStatus(client, false)
+		ns := NewNodeStatus(node, client, false, nodePortMap[node.Id])
 		go loader.WatchNode(ns)
 		loader.nodeMap[node.Id] = ns
 	}
+
 	return nil
 }
 
@@ -138,4 +114,11 @@ func (loader *Loader) AddNode(id int64, ns *NodeStatus) {
 
 	go loader.WatchNode(ns)
 	loader.nodeMap[id] = ns
+}
+
+func (loader *Loader) GetNode(id int64) *NodeStatus {
+	loader.nodeMutex.Lock()
+	defer loader.nodeMutex.Unlock()
+
+	return loader.nodeMap[id]
 }
