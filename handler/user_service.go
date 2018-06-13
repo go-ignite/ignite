@@ -1,18 +1,25 @@
 package handler
 
 import (
+	"context"
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 
+	pb "github.com/go-ignite/ignite-agent/protos"
+	"github.com/go-ignite/ignite/agent"
 	"github.com/go-ignite/ignite/config"
 	"github.com/go-ignite/ignite/db"
 	"github.com/go-ignite/ignite/models"
 	"github.com/go-ignite/ignite/ss"
+	"github.com/go-ignite/ignite/state"
 	"github.com/go-ignite/ignite/utils"
-	"github.com/sirupsen/logrus"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-ignite/ignite/db/api"
+	"github.com/jinzhu/copier"
+	"github.com/sirupsen/logrus"
 )
 
 // GetServiceConfigs godoc
@@ -97,117 +104,157 @@ func (uh *UserHandler) UserInfoHandler(c *gin.Context) {
 // @Param server-type formData string true "server-type"
 // @Success 200 {object} models.ServiceResult
 // @Failure 200 {string} json "{"success":false,"message":"error message"}"
-// @Router /api/user/auth/service/create [post]
+// @Router /api/user/auth/nodes/:id/services [post]
 func (uh *UserHandler) CreateServiceHandler(c *gin.Context) {
-	userID, _ := c.Get("id")
-	method := c.PostForm("method")
-	serverType := c.PostForm("server-type")
-
-	logrus.WithFields(logrus.Fields{
-		"userID":     userID,
-		"method":     method,
-		"serverType": serverType,
-	}).Debug("create service")
-
-	methodMap, ok := serverMethodsMap[serverType]
-	if !ok {
-		c.JSON(http.StatusOK, models.NewErrorResp("服务类型配置错误！"))
-		return
-	}
-
-	if !methodMap[method] {
-		c.JSON(http.StatusOK, models.NewErrorResp("加密方法配置错误！"))
-		return
-	}
-
-	user := new(db.User)
-	exists, err := db.GetDB().Id(userID).Get(user)
+	userID := int64(c.GetFloat64("id"))
+	dbAPI := api.NewAPI()
+	user, err := dbAPI.GetUserByID(userID)
 	if err != nil {
-		logrus.WithFields(logrus.Fields{
-			"userID": userID,
-			"err":    err,
-		}).Error("get user error")
-		c.JSON(http.StatusInternalServerError, models.NewErrorResp("获取用户信息失败！"))
+		c.JSON(http.StatusOK, models.NewErrorResp("获取用户失败！"))
 		return
 	}
-
-	if !exists {
-		//Service has been removed by admininistrator.
+	if user.Id == 0 {
 		c.JSON(http.StatusOK, models.NewErrorResp("用户已删除！"))
 		return
 	}
-	if user.ServiceId != "" {
-		c.JSON(http.StatusOK, models.NewErrorResp("服务已创建！"))
+
+	req := &models.CreateServiceReq{}
+	if err := c.BindJSON(req); err != nil {
+		c.JSON(http.StatusBadRequest, models.NewErrorResp(err.Error()))
 		return
 	}
+	if strings.TrimSpace(req.Password) == "" {
+		req.Password = utils.RandString(10)
+	}
 
-	//Get all used ports.
-	var usedPorts []int
-	if err := db.GetDB().Table("user").Cols("service_port").Find(&usedPorts); err != nil {
-		logrus.WithFields(logrus.Fields{
+	if req.NodeID, err = strconv.ParseInt(c.Param("id"), 10, 64); err != nil {
+		c.JSON(http.StatusBadRequest, models.NewErrorResp(err.Error()))
+		return
+	}
+	uh.WithFields(logrus.Fields{
+		"userID":   userID,
+		"nodeID":   req.NodeID,
+		"type":     req.Type,
+		"method":   req.Method,
+		"password": req.Password,
+	}).Debug("create service")
+
+	typeProto := pb.ServiceType_NOT_SET
+	serviceConfigs := agent.GetServiceConfigs()
+	for _, serviceConfig := range serviceConfigs {
+		if serviceConfig.Type == req.Type {
+			typeProto = serviceConfig.TypeProto
+			findMethod := false
+			for _, method := range serviceConfig.Methods {
+				if method == req.Method {
+					findMethod = true
+				}
+			}
+			if !findMethod {
+				c.JSON(http.StatusOK, models.NewErrorResp("服务加密方法错误！"))
+				return
+			}
+			break
+		}
+	}
+	if typeProto == pb.ServiceType_NOT_SET {
+		c.JSON(http.StatusOK, models.NewErrorResp("服务类型错误！"))
+		return
+	}
+	if exists, err := dbAPI.CheckServiceExists(userID, req.NodeID); err != nil || exists {
+		uh.WithFields(logrus.Fields{
 			"userID": userID,
-			"err":    err,
-		}).Error("get used ports error")
-		c.JSON(http.StatusInternalServerError, models.NewErrorResp("获取用户服务端口失败！"))
+			"nodeID": req.NodeID,
+			"exists": exists,
+			"error":  err,
+		}).Error("service has been created")
+		c.JSON(http.StatusOK, models.NewErrorResp("重复创建服务！"))
+		return
 	}
-	logrus.WithField("usedPorts", usedPorts).Debug()
 
-	// 1. Create ss service
-	port, err := utils.GetAvailablePort(&usedPorts)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, models.NewErrorResp("创建服务失败，未能获取可用端口！"))
+	ns := state.GetLoader().GetNode(req.NodeID)
+	if ns == nil {
+		c.JSON(http.StatusOK, models.NewErrorResp("节点不存在！"))
 		return
 	}
-	logrus.WithField("port", port).Debug()
-	result, err := ss.CreateAndStartContainer(serverType, strings.ToLower(user.Username), method, "", port)
-	if err != nil {
-		logrus.WithFields(logrus.Fields{
-			"userID":     userID,
-			"serverType": serverType,
-			"method":     method,
-			"port":       port,
-			"err":        err,
-		}).Error("create service error")
-		c.JSON(http.StatusInternalServerError, models.NewErrorResp("创建服务失败！"))
+	if !ns.Available() {
+		c.JSON(http.StatusOK, models.NewErrorResp("节点暂不可用！"))
 		return
 	}
+
+	// get available port from agent
+	token := c.GetString("token")
+	port, err := func() (int, error) {
+		ns.Lock()
+		defer ns.Unlock()
+		req := &pb.GetAvailablePortRequest{
+			Token:     token,
+			UsedPorts: ns.GetUsedPorts(),
+			PortFrom:  int32(ns.Node.PortFrom),
+			PortTo:    int32(ns.Node.PortTo),
+		}
+		resp, err := ns.GetAvailablePort(context.Background(), req)
+		if err != nil {
+			return 0, err
+		}
+		ns.UsedPortMap[int(resp.Port)] = true
+		return int(resp.Port), nil
+	}()
+	if err != nil {
+		c.JSON(http.StatusOK, models.NewErrorResp("获取节点可用端口失败！"))
+		return
+	}
+	logrus.WithField("port", port).Debug("agent available port")
+
+	// create service from agent
+	agentResp, err := ns.CreateService(context.Background(), &pb.CreateServiceRequest{
+		Token:    token,
+		Port:     int32(port),
+		Type:     typeProto,
+		Method:   req.Method,
+		Password: req.Password,
+		Name:     user.Username,
+	})
+	if err != nil {
+		go ns.RemovePortFromUsedMap(port)
+		logrus.WithError(err).Error("create service error")
+		c.JSON(http.StatusOK, models.NewErrorResp("创建服务失败！"))
+		return
+	}
+
 	logrus.WithFields(logrus.Fields{
-		"userID":     userID,
-		"serverType": serverType,
-		"method":     method,
-		"port":       result.Port,
-		"password":   result.Password,
-		"serviceID":  result.ID,
+		"userID":    userID,
+		"serviceID": agentResp.ServiceId,
 	}).Info("create service success")
 
-	// 2. Update user info
-	user.Status = 1
-	user.ServiceId = result.ID
-	user.ServicePort = result.Port
-	user.ServicePwd = result.Password
-	user.ServiceMethod = method
-	user.ServiceType = serverType
-	affected, err := db.GetDB().Id(userID).Cols("status", "service_port", "service_pwd", "service_id", "service_method", "service_type").Update(user)
-	if affected == 0 || err != nil {
+	service := &db.Service{
+		ServiceId: agentResp.ServiceId,
+		UserId:    userID,
+		NodeId:    ns.Node.Id,
+		Type:      int(typeProto),
+		Port:      int(port),
+		Password:  req.Password,
+		Method:    req.Method,
+		Status:    1, // TODO change to enum
+	}
+	if affected, err := dbAPI.CreateService(service); err != nil || affected == 0 {
+		go func() {
+			ns.RemovePortFromUsedMap(port)
+			ns.RemoveService(context.Background(), &pb.RemoveServiceRequest{
+				ServiceId: service.ServiceId,
+			})
+		}()
 		logrus.WithFields(logrus.Fields{
-			"userID": userID,
-			"err":    err,
-		}).Error("update user service info error")
-
-		//Force remove created container
-		if err := ss.RemoveContainer(result.ID); err != nil {
-			logrus.WithFields(logrus.Fields{
-				"userID":    userID,
-				"serviceID": result.ID,
-			}).Error("remove service error")
-		}
-
-		c.JSON(http.StatusInternalServerError, models.NewErrorResp("更新用户信息失败！"))
+			"affected": affected,
+			"error":    err,
+		}).Error("create service error")
+		c.JSON(http.StatusInternalServerError, models.NewErrorResp("保存服务失败！"))
 		return
 	}
 
-	result.PackageLimit = user.PackageLimit
-	result.Host = ss.Host
-
-	c.JSON(http.StatusOK, models.NewSuccessResp(result, "服务创建成功！"))
+	resp := &models.CreateServiceResp{
+		Port: int(port),
+	}
+	copier.Copy(resp, req)
+	c.JSON(http.StatusOK, models.NewSuccessResp(resp, "创建服务成功！"))
 }

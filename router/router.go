@@ -14,7 +14,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/swaggo/gin-swagger"
 	"github.com/swaggo/gin-swagger/swaggerFiles"
-	melody "gopkg.in/olahol/melody.v1"
+	"gopkg.in/olahol/melody.v1"
 )
 
 type Router struct {
@@ -66,6 +66,7 @@ func (r *Router) Init() {
 
 			// services
 			authRouter.GET("/services/config", r.GetServiceConfig)
+			authRouter.POST("/nodes/:id/services", r.CreateServiceHandler)
 		}
 	}
 
