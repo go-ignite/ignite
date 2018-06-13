@@ -23,9 +23,4 @@ type User struct {
 	ServiceMethod   string     //Encryption method for SS
 	LastStatsResult uint64     //Last time stats result,unit: byte
 	LastStatsTime   *time.Time //Last time stats time
-
-func GetUserByUsername(username string) (*User, error) {
-	user := new(User)
-	_, err := engine.Where("username = ?", username).Get(user)
-	return user, err
 }

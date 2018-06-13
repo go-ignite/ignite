@@ -17,19 +17,3 @@ type Node struct {
 	Created   time.Time `xorm:"created"`
 	Updated   time.Time `xorm:"updated"`
 }
-
-func GetAllNodes() ([]*Node, error) {
-	nodes := []*Node{}
-	return nodes, engine.Find(&nodes)
-}
-
-func UpsertNode(node *Node) (int64, error) {
-	if node.Id == 0 {
-		return engine.Insert(node)
-	}
-	return engine.Id(node.Id).Cols("name", "comment").Update(node)
-}
-
-func DeleteNode(id int64) (int64, error) {
-	return engine.Id(id).Delete(new(Node))
-}

@@ -32,7 +32,7 @@ func GetDB() *xorm.Engine {
 			logrus.WithField("err", err).Fatal("engine Ping error")
 		}
 
-		if err := engine.Sync2(new(User), new(InviteCode), new(Node)); err != nil {
+		if err := engine.Sync2(new(User), new(InviteCode), new(Node), new(Service)); err != nil {
 			logrus.WithField("err", err).Fatal("models sync error")
 		}
 	})
