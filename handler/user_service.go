@@ -15,45 +15,15 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var (
-	servers          = []string{"SS", "SSR"}
-	ssMethods        = []string{"aes-256-cfb", "aes-128-gcm", "aes-192-gcm", "aes-256-gcm", "chacha20-ietf-poly1305"}
-	ssrMethods       = []string{"aes-256-cfb", "aes-256-ctr", "chacha20", "chacha20-ietf"}
-	serverMethodsMap = map[string]map[string]bool{}
-)
-
-func init() {
-	ssMethodMap := map[string]bool{}
-	for _, method := range ssMethods {
-		ssMethodMap[method] = true
-	}
-	ssrMethodMap := map[string]bool{}
-	for _, method := range ssrMethods {
-		ssrMethodMap[method] = true
-	}
-
-	serverMethodsMap["SS"] = ssMethodMap
-	serverMethodsMap["SSR"] = ssrMethodMap
-}
-
-// ServiceConfigHandler godoc
-// @Summary get user info
-// @Description get user info
+// GetServiceConfigs godoc
+// @Summary get service configs
+// @Description get service configs
 // @Produce json
 // @Param Authorization header string true "Authentication header"
 // @Success 200 {object} models.ServiceConfig
-// @Router /api/user/auth/service/config [get]
-func (uh *UserHandler) ServiceConfigHandler(c *gin.Context) {
-	sc := models.ServiceConfig{
-		SSMethods:  ssMethods,
-		SSRMethods: ssrMethods,
-		Servers:    servers,
-	}
-	c.JSON(http.StatusOK, models.Response{
-		Success: true,
-		Message: "Success!",
-		Data:    sc,
-	})
+// @Router /api/user/auth/services/config [get]
+func (uh *UserHandler) GetServiceConfig(c *gin.Context) {
+	c.JSON(http.StatusOK, models.NewSuccessResp(agent.GetServiceConfigs()))
 }
 
 // PanelIndexHandler godoc

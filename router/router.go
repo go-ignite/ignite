@@ -59,11 +59,13 @@ func (r *Router) Init() {
 		authRouter.Use(middleware.Auth(false))
 		{
 			authRouter.GET("/info", r.UserInfoHandler)
-			authRouter.GET("/service/config", r.ServiceConfigHandler)
 			authRouter.POST("/service/create", r.CreateServiceHandler)
 
 			// nodes
 			authRouter.GET("/nodes", r.UserHandler.ListNodes)
+
+			// services
+			authRouter.GET("/services/config", r.GetServiceConfig)
 		}
 	}
 

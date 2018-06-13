@@ -40,12 +40,6 @@ type ServiceResult struct {
 	PackageLimit int    `json:"packageLimit"`
 }
 
-type ServiceConfig struct {
-	SSMethods  []string `json:"ssMethods"`
-	SSRMethods []string `json:"ssrMethods"`
-	Servers    []string `json:"servers"`
-}
-
 type UserInfo struct {
 	Id                 int64
 	Host               string
