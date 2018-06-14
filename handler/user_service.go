@@ -2,17 +2,14 @@ package handler
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
 
 	pb "github.com/go-ignite/ignite-agent/protos"
 	"github.com/go-ignite/ignite/agent"
-	"github.com/go-ignite/ignite/config"
 	"github.com/go-ignite/ignite/db"
 	"github.com/go-ignite/ignite/models"
-	"github.com/go-ignite/ignite/ss"
 	"github.com/go-ignite/ignite/state"
 	"github.com/go-ignite/ignite/utils"
 
@@ -31,67 +28,6 @@ import (
 // @Router /api/user/auth/services/config [get]
 func (uh *UserHandler) GetServiceConfig(c *gin.Context) {
 	c.JSON(http.StatusOK, models.NewSuccessResp(agent.GetServiceConfigs()))
-}
-
-// PanelIndexHandler godoc
-// @Summary get user info
-// @Description get user info
-// @Produce json
-// @Success 200 {object} models.UserInfo
-// @Param Authorization header string true "Authentication header"
-// @Failure 200 {string} json "{"success":false,"message":"error message"}"
-// @Router /api/user/auth/info [get]
-func (uh *UserHandler) UserInfoHandler(c *gin.Context) {
-	userID, _ := c.Get("id")
-	logrus.WithField("userID", userID).Debug("get user info")
-
-	user := new(db.User)
-	exists, err := db.GetDB().Id(userID).Get(user)
-	if err != nil {
-		logrus.WithFields(logrus.Fields{
-			"userID": userID,
-			"err":    err,
-		}).Error("get user info error")
-		c.JSON(http.StatusInternalServerError, models.NewErrorResp("获取用户信息失败！"))
-		return
-	}
-
-	if !exists {
-		//Service has been removed by admininistrator.
-		c.JSON(http.StatusOK, models.NewErrorResp("用户已删除！"))
-		return
-	}
-
-	uInfo := &models.UserInfo{
-		Id:            user.Id,
-		Host:          ss.Host,
-		Username:      user.Username,
-		Status:        user.Status,
-		PackageUsed:   fmt.Sprintf("%.2f", user.PackageUsed),
-		PackageLimit:  user.PackageLimit,
-		PackageLeft:   fmt.Sprintf("%.2f", float32(user.PackageLimit)-user.PackageUsed),
-		ServicePort:   user.ServicePort,
-		ServicePwd:    user.ServicePwd,
-		ServiceMethod: user.ServiceMethod,
-		ServiceType:   user.ServiceType,
-		Expired:       user.Expired.Format("2006-01-02"),
-		ServiceURL:    utils.ServiceURL(user.ServiceType, config.C.Host.Address, user.ServicePort, user.ServiceMethod, user.ServicePwd),
-	}
-	if uInfo.ServiceMethod == "" {
-		uInfo.ServiceMethod = "aes-256-cfb"
-	}
-	if uInfo.ServiceType == "" {
-		uInfo.ServiceType = "SS"
-	}
-
-	if user.PackageLimit == 0 {
-		uInfo.PackageLeftPercent = "0"
-	} else {
-		uInfo.PackageLeftPercent = fmt.Sprintf("%.2f", (float32(user.PackageLimit)-user.PackageUsed)/float32(user.PackageLimit)*100)
-	}
-
-	logrus.WithField("userID", userID).Info("get info successful")
-	c.JSON(http.StatusOK, models.NewSuccessResp(uInfo, "获取用户信息成功！"))
 }
 
 // CreateServiceHandler godoc

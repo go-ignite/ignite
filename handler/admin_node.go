@@ -92,7 +92,7 @@ func (ah *AdminHandler) ListNodes(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, models.NewErrorResp("获取节点列表失败！"))
 		return
 	}
-	nodeResps := []*models.NodeResp{}
+	var nodeResps []*models.NodeResp
 	for _, node := range nodes {
 		nodeResp := &models.NodeResp{}
 		copier.Copy(nodeResp, node)

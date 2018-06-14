@@ -3,12 +3,12 @@ package handler
 import (
 	"net/http"
 
+	"github.com/go-ignite/ignite/db/api"
 	"github.com/go-ignite/ignite/models"
 	"github.com/go-ignite/ignite/state"
-	"github.com/jinzhu/copier"
 
 	"github.com/gin-gonic/gin"
-	"github.com/go-ignite/ignite/db/api"
+	"github.com/jinzhu/copier"
 )
 
 // UserListNodes godoc
