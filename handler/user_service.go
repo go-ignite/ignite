@@ -241,6 +241,7 @@ func (uh *UserHandler) CreateServiceHandler(c *gin.Context) {
 		go func() {
 			ns.RemovePortFromUsedMap(port)
 			ns.RemoveService(context.Background(), &pb.RemoveServiceRequest{
+				Token:     token,
 				ServiceId: service.ServiceId,
 			})
 		}()
