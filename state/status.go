@@ -6,6 +6,7 @@ import (
 	pb "github.com/go-ignite/ignite-agent/protos"
 	"github.com/go-ignite/ignite/agent"
 	"github.com/go-ignite/ignite/db"
+	"github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
 )
 
@@ -14,9 +15,10 @@ type NodeStatus struct {
 	UsedPortMap map[int]bool
 	available   bool
 
-	sync.RWMutex
-	*agent.Client
 	watching bool
+	*agent.Client
+	sync.RWMutex
+	*logrus.Logger
 }
 
 func NewNodeStatus(node *db.Node, client *agent.Client, available bool, usedPortMap map[int]bool) *NodeStatus {

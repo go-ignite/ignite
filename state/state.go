@@ -57,6 +57,7 @@ func (loader *Loader) Load() error {
 	for _, node := range nodes {
 		client := agent.NewClient(node.Address)
 		ns := NewNodeStatus(node, client, false, nodePortMap[node.Id])
+		ns.Logger = loader.Logger
 		go loader.WatchNode(ns)
 		loader.nodeMap[node.Id] = ns
 	}
@@ -112,6 +113,7 @@ func (loader *Loader) AddNode(id int64, ns *NodeStatus) {
 	loader.nodeMutex.Lock()
 	defer loader.nodeMutex.Unlock()
 
+	ns.Logger = loader.Logger
 	go loader.WatchNode(ns)
 	loader.nodeMap[id] = ns
 }
