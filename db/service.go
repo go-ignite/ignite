@@ -6,7 +6,7 @@ import (
 
 type Service struct {
 	Id              int64 `xorm:"pk autoincr notnull"`
-	ServiceId       string
+	ServiceID       string
 	UserId          int64      `xorm:"notnull"`
 	NodeId          int64      `xorm:"notnull"`
 	Type            int        // SS/SSR

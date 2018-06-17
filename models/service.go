@@ -1,6 +1,10 @@
 package models
 
-import pb "github.com/go-ignite/ignite-agent/protos"
+import (
+	"time"
+
+	pb "github.com/go-ignite/ignite-agent/protos"
+)
 
 type ServiceConfig struct {
 	Type      string              `json:"type"`
@@ -15,9 +19,13 @@ type CreateServiceReq struct {
 	NodeID   int64  `json:"-"`
 }
 
-type CreateServiceResp struct {
-	Type     string `json:"type"`
-	Method   string `json:"method"`
-	Password string `json:"password"`
-	Port     int    `json:"port"`
+type ServiceInfoResp struct {
+	Id       int64     `json:"id"`
+	NodeId   int64     `json:"node_id"`
+	Type     int       `json:"type"`
+	Port     int       `json:"port"`
+	Password string    `json:"password"`
+	Method   string    `json:"method"`
+	Status   int       `json:"status"`
+	Created  time.Time `json:"created"`
 }
