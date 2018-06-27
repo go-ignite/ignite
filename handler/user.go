@@ -10,6 +10,7 @@ import (
 	"github.com/go-ignite/ignite/db"
 	"github.com/go-ignite/ignite/models"
 	"github.com/go-ignite/ignite/ss"
+	"github.com/go-ignite/ignite/state"
 	"github.com/go-ignite/ignite/utils"
 
 	"github.com/gin-gonic/gin"
@@ -26,6 +27,22 @@ func NewUserHandler(l *logrus.Logger) *UserHandler {
 	return &UserHandler{
 		Logger: l,
 	}
+}
+
+func (uh *UserHandler) verifyUser(dbAPI *api.API, userID int64) (*db.User, error) {
+	user, err := verifyUser(dbAPI, userID)
+	if err != nil {
+		uh.WithFields(logrus.Fields{
+			"error":  err,
+			"userID": userID,
+		}).Error("get user error")
+		return nil, err
+	}
+	return user, nil
+}
+
+func (uh *UserHandler) verifyNode(nodeID int64) (*state.NodeStatus, error) {
+	return verifyNode(nodeID)
 }
 
 // LoginHandler godoc

@@ -65,9 +65,10 @@ func (r *Router) Init() {
 
 			// services
 			authRouter.GET("/services/config", r.GetServiceConfig)
-			authRouter.GET("/nodes/services", r.ListServices)
-			authRouter.POST("/nodes/:id/services", r.CreateService)
-			authRouter.DELETE("/nodes/:nodeID/services/:id", r.RemoveService)
+
+			authRouter.GET("/services", r.UserHandler.ListServices)
+			authRouter.DELETE("/services/:id", r.UserHandler.RemoveService)
+			authRouter.POST("/nodes/:nodeID/services", r.CreateService)
 		}
 	}
 
@@ -95,6 +96,10 @@ func (r *Router) Init() {
 			authRouter.POST("/nodes", r.AddNode)
 			authRouter.PUT("/nodes/:id", r.UpdateNode)
 			authRouter.DELETE("/nodes/:id", r.DeleteNode)
+
+			// services
+			authRouter.GET("/services", r.AdminHandler.ListServices)
+			authRouter.DELETE("/services/:id", r.AdminHandler.RemoveService)
 		}
 	}
 }

@@ -7,16 +7,15 @@ import (
 )
 
 type ServiceConfig struct {
-	Type      string              `json:"type"`
-	TypeProto pb.ServiceType_Enum `json:"-"`
-	Methods   []string            `json:"methods"`
+	Type    pb.ServiceType_Enum `json:"type"`
+	Methods []string            `json:"methods"`
 }
 
 type CreateServiceReq struct {
-	Type     string `json:"type"`
-	Method   string `json:"method"`
-	Password string `json:"password"`
-	NodeID   int64  `json:"-"`
+	Type     pb.ServiceType_Enum `json:"type"`
+	Method   string              `json:"method"`
+	Password string              `json:"password"`
+	NodeID   int64               `json:"-"`
 }
 
 type ServiceInfoResp struct {

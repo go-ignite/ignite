@@ -11,7 +11,6 @@ import (
 	"github.com/go-ignite/ignite/db"
 	"github.com/go-ignite/ignite/db/api"
 	"github.com/go-ignite/ignite/models"
-	"github.com/go-ignite/ignite/state"
 	"github.com/go-ignite/ignite/utils"
 
 	"github.com/gin-gonic/gin"
@@ -25,31 +24,16 @@ func (uh *UserHandler) GetServiceConfig(c *gin.Context) {
 
 func (uh *UserHandler) ListServices(c *gin.Context) {
 	userID := int64(c.GetFloat64("id"))
-	dbAPI := api.NewAPI()
-	services, err := dbAPI.GetServicesByUserID(userID)
-	if err != nil {
-		c.JSON(http.StatusOK, models.NewErrorResp("获取服务列表失败！"))
-		return
-	}
-	servicesInfo := make([]*models.ServiceInfoResp, 0, len(services))
-	for _, service := range services {
-		sir := new(models.ServiceInfoResp)
-		copier.Copy(sir, service)
-		servicesInfo = append(servicesInfo, sir)
-	}
-	c.JSON(http.StatusOK, models.NewSuccessResp(servicesInfo, "获取服务列表成功！"))
+	listServices(c, userID, 0, uh.Logger)
 }
 
 func (uh *UserHandler) CreateService(c *gin.Context) {
 	userID := int64(c.GetFloat64("id"))
 	dbAPI := api.NewAPI()
-	user, err := dbAPI.GetUserByID(userID)
+
+	user, err := uh.verifyUser(dbAPI, userID)
 	if err != nil {
-		c.JSON(http.StatusOK, models.NewErrorResp("获取用户失败！"))
-		return
-	}
-	if user.Id == 0 {
-		c.JSON(http.StatusOK, models.NewErrorResp("用户已删除！"))
+		c.JSON(http.StatusOK, models.NewErrorResp(err))
 		return
 	}
 
@@ -62,7 +46,7 @@ func (uh *UserHandler) CreateService(c *gin.Context) {
 		req.Password = utils.RandString(10)
 	}
 
-	if req.NodeID, err = strconv.ParseInt(c.Param("id"), 10, 64); err != nil {
+	if req.NodeID, err = strconv.ParseInt(c.Param("nodeID"), 10, 64); err != nil {
 		c.JSON(http.StatusBadRequest, models.NewErrorResp(err.Error()))
 		return
 	}
@@ -71,7 +55,7 @@ func (uh *UserHandler) CreateService(c *gin.Context) {
 	serviceConfigs := agent.GetServiceConfigs()
 	for _, serviceConfig := range serviceConfigs {
 		if serviceConfig.Type == req.Type {
-			typeProto = serviceConfig.TypeProto
+			typeProto = serviceConfig.Type
 			findMethod := false
 			for _, method := range serviceConfig.Methods {
 				if method == req.Method {
@@ -108,13 +92,9 @@ func (uh *UserHandler) CreateService(c *gin.Context) {
 		return
 	}
 
-	ns := state.GetLoader().GetNode(req.NodeID)
-	if ns == nil {
-		c.JSON(http.StatusOK, models.NewErrorResp("节点不存在！"))
-		return
-	}
-	if !ns.Available() {
-		c.JSON(http.StatusOK, models.NewErrorResp("节点暂不可用！"))
+	ns, err := verifyNode(req.NodeID)
+	if err != nil {
+		c.JSON(http.StatusOK, models.NewErrorResp(err))
 		return
 	}
 
@@ -197,73 +177,5 @@ func (uh *UserHandler) CreateService(c *gin.Context) {
 }
 
 func (uh *UserHandler) RemoveService(c *gin.Context) {
-	userID := int64(c.GetFloat64("id"))
-	dbAPI := api.NewAPI()
-	user, err := dbAPI.GetUserByID(userID)
-	if err != nil {
-		c.JSON(http.StatusOK, models.NewErrorResp("获取用户失败！"))
-		return
-	}
-	if user.Id == 0 {
-		c.JSON(http.StatusOK, models.NewErrorResp("用户已删除！"))
-		return
-	}
-	nodeID, err := strconv.ParseInt(c.Param("nodeID"), 10, 64)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, models.NewErrorResp(err.Error()))
-		return
-	}
-	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, models.NewErrorResp(err.Error()))
-		return
-	}
-
-	ns := state.GetLoader().GetNode(nodeID)
-	if ns == nil {
-		c.JSON(http.StatusOK, models.NewErrorResp("节点不存在！"))
-		return
-	}
-	if !ns.Available() {
-		c.JSON(http.StatusOK, models.NewErrorResp("节点暂不可用！"))
-		return
-	}
-	uh.WithFields(logrus.Fields{
-		"userID": userID,
-		"nodeID": nodeID,
-		"id":     id,
-	}).Info("remove service")
-
-	api := api.NewAPI()
-	service, err := api.GetServiceByIDAndUserIDAndNodeID(id, userID, nodeID)
-	if err != nil {
-		uh.WithError(err).Error("get service error")
-		c.JSON(http.StatusInternalServerError, models.NewErrorResp("获取服务失败！"))
-		return
-	}
-	if service.Id == 0 {
-		c.JSON(http.StatusOK, models.NewErrorResp("服务不存在！"))
-		return
-	}
-
-	if service.ServiceID != "" {
-		if _, err := ns.RemoveService(context.Background(), &pb.RemoveServiceRequest{
-			Token:     c.GetString("token"),
-			ServiceId: service.ServiceID,
-		}); err != nil {
-			ns.WithFields(logrus.Fields{
-				"error":     err,
-				"serviceID": service.ServiceID,
-			}).Error("remove service error")
-			c.JSON(http.StatusOK, models.NewErrorResp("删除代理服务失败！"))
-			return
-		}
-	}
-	if _, err := api.RemoveServiceByID(id); err != nil {
-		uh.WithError(err).Error("remove service error")
-		c.JSON(http.StatusInternalServerError, models.NewErrorResp("删除服务失败！"))
-		return
-	}
-	go ns.RemovePortFromUsedMap(service.Port)
-	c.JSON(http.StatusOK, models.NewSuccessResp(nil, "删除服务成功！"))
+	removeService(c, uh.Logger)
 }

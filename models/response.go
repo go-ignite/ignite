@@ -1,5 +1,7 @@
 package models
 
+import "fmt"
+
 //Response struct for http response
 type Response struct {
 	Success bool        `json:"success"`
@@ -7,7 +9,16 @@ type Response struct {
 	Data    interface{} `json:"data"`
 }
 
-func NewErrorResp(message string) *Response {
+func NewErrorResp(err interface{}) *Response {
+	var message string
+	switch e := err.(type) {
+	case error:
+		message = e.Error()
+	case string:
+		message = e
+	default:
+		message = fmt.Sprintf("%v", e)
+	}
 	return &Response{Message: message}
 }
 
