@@ -2,20 +2,20 @@ package api
 
 import (
 	"github.com/go-ignite/ignite/db"
-	"github.com/go-xorm/xorm"
 )
 
 type API struct {
-	engine  *xorm.Engine
-	session *xorm.Session
+	db.Engine
 }
 
-func NewAPI(session ...*xorm.Session) *API {
-	api := &API{
-		engine: db.GetDB(),
+func NewAPI(engine ...db.Engine) *API {
+	var e db.Engine
+	if len(engine) > 0 {
+		e = engine[0]
+	} else {
+		e = db.GetDB()
 	}
-	if len(session) > 0 {
-		api.session = session[0]
+	return &API{
+		Engine: e,
 	}
-	return api
 }

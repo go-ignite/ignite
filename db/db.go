@@ -1,6 +1,7 @@
 package db
 
 import (
+	"database/sql"
 	"sync"
 
 	"github.com/go-ignite/ignite/config"
@@ -14,6 +15,26 @@ var (
 	engine *xorm.Engine
 	once   sync.Once
 )
+
+// Engine represents a xorm engine or session.
+type Engine interface {
+	Table(tableNameOrBean interface{}) *xorm.Session
+	Count(...interface{}) (int64, error)
+	Decr(column string, arg ...interface{}) *xorm.Session
+	Delete(interface{}) (int64, error)
+	Exec(string, ...interface{}) (sql.Result, error)
+	Find(interface{}, ...interface{}) error
+	Get(interface{}) (bool, error)
+	ID(interface{}) *xorm.Session
+	In(string, ...interface{}) *xorm.Session
+	Incr(column string, arg ...interface{}) *xorm.Session
+	Insert(...interface{}) (int64, error)
+	InsertOne(interface{}) (int64, error)
+	Iterate(interface{}, xorm.IterFunc) error
+	Join(joinOperator string, tablename interface{}, condition string, args ...interface{}) *xorm.Session
+	SQL(interface{}, ...interface{}) *xorm.Session
+	Where(interface{}, ...interface{}) *xorm.Session
+}
 
 func GetDB() *xorm.Engine {
 	//Init DB connection
