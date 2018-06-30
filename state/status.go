@@ -15,10 +15,10 @@ type NodeStatus struct {
 	UsedPortMap map[int]bool
 	available   bool
 
+	Logger   *logrus.Logger
+	Client   *agent.Client
 	watching bool
-	*agent.Client
 	sync.RWMutex
-	*logrus.Logger
 }
 
 func NewNodeStatus(node *db.Node, client *agent.Client, available bool, usedPortMap map[int]bool) *NodeStatus {
@@ -79,7 +79,7 @@ func (ns *NodeStatus) AddPortToUsedMap(port int) {
 
 func (ns *NodeStatus) RemovePortFromUsedMap(port int) {
 	ns.Lock()
-	defer ns.Lock()
+	defer ns.Unlock()
 
 	delete(ns.UsedPortMap, port)
 }
