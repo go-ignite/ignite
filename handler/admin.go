@@ -11,12 +11,12 @@ import (
 )
 
 type AdminHandler struct {
-	*logrus.Logger
+	logger *logrus.Logger
 }
 
 func NewAdminHandler(l *logrus.Logger) *AdminHandler {
 	return &AdminHandler{
-		Logger: l,
+		logger: l,
 	}
 }
 
@@ -30,7 +30,7 @@ func (ah *AdminHandler) PanelLoginHandler(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, models.NewErrorResp("parse json data error"))
 		return
 	}
-	ah.WithField("loginEntity", loginEntity).Debug()
+	ah.logger.WithField("loginEntity", loginEntity).Debug()
 
 	if loginEntity.Username != config.C.Admin.Username || loginEntity.Password != config.C.Admin.Password {
 		c.JSON(http.StatusOK, models.NewErrorResp("用户名或密码错误！"))

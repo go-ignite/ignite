@@ -19,7 +19,7 @@ var (
 type Loader struct {
 	nodeMutex sync.RWMutex
 	nodeMap   map[int64]*NodeStatus
-	*logrus.Logger
+	Logger    *logrus.Logger
 }
 
 func GetLoader() *Loader {
@@ -69,7 +69,7 @@ func (loader *Loader) WatchNode(ns *NodeStatus) {
 	ns.watching = true
 	for ns.watching {
 		if err := ns.Heartbeat(); err != nil {
-			loader.WithError(err).Error()
+			loader.Logger.WithError(err).Error()
 			time.Sleep(5 * time.Second)
 		}
 	}

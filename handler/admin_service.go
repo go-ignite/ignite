@@ -9,7 +9,7 @@ import (
 )
 
 func (ah *AdminHandler) RemoveService(c *gin.Context) {
-	removeService(c, ah.Logger)
+	removeService(c, ah.logger)
 }
 
 func (ah *AdminHandler) ListServices(c *gin.Context) {
@@ -30,5 +30,5 @@ func (ah *AdminHandler) ListServices(c *gin.Context) {
 		}
 	}
 
-	listServices(c, userID, nodeID, ah.Logger)
+	listServices(c, userID, nodeID, ah.logger)
 }

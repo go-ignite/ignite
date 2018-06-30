@@ -22,7 +22,7 @@ import (
 func (uh *UserHandler) ListNodes(c *gin.Context) {
 	nodes, err := api.NewAPI().GetAllNodes()
 	if err != nil {
-		uh.WithError(err).Error("list nodes error")
+		uh.logger.WithError(err).Error("list nodes error")
 		c.JSON(http.StatusInternalServerError, models.NewErrorResp("获取节点列表失败！"))
 		return
 	}

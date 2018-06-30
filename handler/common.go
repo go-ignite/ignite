@@ -6,14 +6,14 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/gin-gonic/gin"
 	pb "github.com/go-ignite/ignite-agent/protos"
 	"github.com/go-ignite/ignite/db"
 	"github.com/go-ignite/ignite/db/api"
 	"github.com/go-ignite/ignite/models"
 	"github.com/go-ignite/ignite/state"
-	"github.com/jinzhu/copier"
 
-	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/copier"
 	"github.com/sirupsen/logrus"
 )
 
@@ -79,11 +79,11 @@ func removeService(c *gin.Context, logger *logrus.Logger) {
 	}).Info("remove service")
 
 	if service.ServiceID != "" {
-		if _, err := ns.RemoveService(context.Background(), &pb.RemoveServiceRequest{
+		if _, err := ns.Client.RemoveService(context.Background(), &pb.RemoveServiceRequest{
 			Token:     c.GetString("token"),
 			ServiceId: service.ServiceID,
 		}); err != nil {
-			ns.WithFields(logrus.Fields{
+			ns.Logger.WithFields(logrus.Fields{
 				"error":     err,
 				"serviceID": service.ServiceID,
 			}).Error("remove service error")
@@ -96,7 +96,9 @@ func removeService(c *gin.Context, logger *logrus.Logger) {
 		c.JSON(http.StatusInternalServerError, models.NewErrorResp("删除服务失败！"))
 		return
 	}
-	go ns.RemovePortFromUsedMap(service.Port)
+	ns.Logger.Info(1111111)
+	ns.RemovePortFromUsedMap(service.Port)
+	ns.Logger.Info(2222222)
 	c.JSON(http.StatusOK, models.NewSuccessResp(nil, "删除服务成功！"))
 }
 

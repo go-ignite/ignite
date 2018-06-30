@@ -24,7 +24,7 @@ func (uh *UserHandler) GetServiceConfig(c *gin.Context) {
 
 func (uh *UserHandler) ListServices(c *gin.Context) {
 	userID := int64(c.GetFloat64("id"))
-	listServices(c, userID, 0, uh.Logger)
+	listServices(c, userID, 0, uh.logger)
 }
 
 func (uh *UserHandler) CreateService(c *gin.Context) {
@@ -73,7 +73,7 @@ func (uh *UserHandler) CreateService(c *gin.Context) {
 		c.JSON(http.StatusOK, models.NewErrorResp("服务类型错误！"))
 		return
 	}
-	uh.WithFields(logrus.Fields{
+	uh.logger.WithFields(logrus.Fields{
 		"userID":   userID,
 		"nodeID":   req.NodeID,
 		"type":     req.Type,
@@ -83,7 +83,7 @@ func (uh *UserHandler) CreateService(c *gin.Context) {
 
 	exists, err := dbAPI.CheckServiceExists(userID, req.NodeID)
 	if err != nil {
-		uh.WithError(err).Error("check service error")
+		uh.logger.WithError(err).Error("check service error")
 		c.JSON(http.StatusInternalServerError, models.NewErrorResp("检查服务失败！"))
 		return
 	}
@@ -109,7 +109,7 @@ func (uh *UserHandler) CreateService(c *gin.Context) {
 			PortFrom:  int32(ns.Node.PortFrom),
 			PortTo:    int32(ns.Node.PortTo),
 		}
-		resp, err := ns.GetAvailablePort(context.Background(), req)
+		resp, err := ns.Client.GetAvailablePort(context.Background(), req)
 		if err != nil {
 			return 0, err
 		}
@@ -117,15 +117,16 @@ func (uh *UserHandler) CreateService(c *gin.Context) {
 		ns.UsedPortMap[port] = true
 		return port, nil
 	}()
+	ns.Logger.Info(1111)
 	if err != nil {
-		ns.WithError(err).Error("get available port error")
+		ns.Logger.WithError(err).Error("get available port error")
 		c.JSON(http.StatusOK, models.NewErrorResp("获取节点可用端口失败！"))
 		return
 	}
-	uh.WithField("port", port).Info("agent available port")
+	uh.logger.WithField("port", port).Info("agent available port")
 
 	// create service from agent
-	agentResp, err := ns.CreateService(context.Background(), &pb.CreateServiceRequest{
+	agentResp, err := ns.Client.CreateService(context.Background(), &pb.CreateServiceRequest{
 		Token:    token,
 		Port:     int32(port),
 		Type:     typeProto,
@@ -135,12 +136,12 @@ func (uh *UserHandler) CreateService(c *gin.Context) {
 	})
 	if err != nil {
 		go ns.RemovePortFromUsedMap(port)
-		ns.WithError(err).Error("create service error")
+		ns.Logger.WithError(err).Error("create service error")
 		c.JSON(http.StatusOK, models.NewErrorResp("创建代理服务失败！"))
 		return
 	}
 
-	uh.WithFields(logrus.Fields{
+	uh.logger.WithFields(logrus.Fields{
 		"userID":    userID,
 		"serviceID": agentResp.ServiceId,
 	}).Info("create service success")
@@ -158,12 +159,12 @@ func (uh *UserHandler) CreateService(c *gin.Context) {
 	if affected, err := dbAPI.CreateService(service); err != nil || affected == 0 {
 		go func() {
 			ns.RemovePortFromUsedMap(port)
-			ns.RemoveService(context.Background(), &pb.RemoveServiceRequest{
+			ns.Client.RemoveService(context.Background(), &pb.RemoveServiceRequest{
 				Token:     token,
 				ServiceId: service.ServiceID,
 			})
 		}()
-		uh.WithFields(logrus.Fields{
+		uh.logger.WithFields(logrus.Fields{
 			"affected": affected,
 			"error":    err,
 		}).Error("create service error")
@@ -177,5 +178,5 @@ func (uh *UserHandler) CreateService(c *gin.Context) {
 }
 
 func (uh *UserHandler) RemoveService(c *gin.Context) {
-	removeService(c, uh.Logger)
+	removeService(c, uh.logger)
 }

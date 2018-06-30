@@ -32,7 +32,7 @@ func (ah *AdminHandler) AddNode(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, models.NewErrorResp(err.Error()))
 		return
 	}
-	ah.WithFields(logrus.Fields{
+	ah.logger.WithFields(logrus.Fields{
 		"name":       nodeEntity.Name,
 		"comment":    nodeEntity.Comment,
 		"address":    nodeEntity.Address,
@@ -43,7 +43,7 @@ func (ah *AdminHandler) AddNode(c *gin.Context) {
 
 	agentClient, err := agent.Dial(nodeEntity.Address)
 	if err != nil {
-		ah.WithError(err).Error("agent dial error")
+		ah.logger.WithError(err).Error("agent dial error")
 		c.JSON(http.StatusOK, models.NewErrorResp("不能与节点建立连接！"))
 		return
 	}
@@ -53,7 +53,7 @@ func (ah *AdminHandler) AddNode(c *gin.Context) {
 	}
 	if _, err = agentClient.Init(context.Background(), req); err != nil {
 		agentClient.Close()
-		ah.WithError(err).Error("agent init error")
+		ah.logger.WithError(err).Error("agent init error")
 		c.JSON(http.StatusOK, models.NewErrorResp("节点初始化失败！"))
 		return
 	}
@@ -62,7 +62,7 @@ func (ah *AdminHandler) AddNode(c *gin.Context) {
 	copier.Copy(node, nodeEntity)
 	affected, err := api.NewAPI().UpsertNode(node)
 	if err != nil || affected == 0 {
-		ah.WithFields(logrus.Fields{
+		ah.logger.WithFields(logrus.Fields{
 			"error":    err,
 			"affected": affected,
 		}).Error("add node error")
@@ -88,7 +88,7 @@ func (ah *AdminHandler) AddNode(c *gin.Context) {
 func (ah *AdminHandler) ListNodes(c *gin.Context) {
 	nodes, err := api.NewAPI().GetAllNodes()
 	if err != nil {
-		ah.WithError(err).Error("list nodes error")
+		ah.logger.WithError(err).Error("list nodes error")
 		c.JSON(http.StatusInternalServerError, models.NewErrorResp("获取节点列表失败！"))
 		return
 	}
@@ -118,7 +118,7 @@ func (ah *AdminHandler) DeleteNode(c *gin.Context) {
 	}
 	affected, err := api.NewAPI().DeleteNode(id)
 	if err != nil || affected == 0 {
-		ah.WithFields(logrus.Fields{
+		ah.logger.WithFields(logrus.Fields{
 			"error":    err,
 			"affected": affected,
 		}).Error("delete node error")
@@ -149,7 +149,7 @@ func (ah *AdminHandler) UpdateNode(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, models.NewErrorResp("id is invalid"))
 		return
 	}
-	ah.WithFields(logrus.Fields{
+	ah.logger.WithFields(logrus.Fields{
 		"id":         id,
 		"name":       nodeEntity.Name,
 		"comment":    nodeEntity.Comment,
@@ -161,7 +161,7 @@ func (ah *AdminHandler) UpdateNode(c *gin.Context) {
 	node := &db.Node{Id: id}
 	copier.Copy(node, nodeEntity)
 	if _, err = api.NewAPI().UpsertNode(node); err != nil {
-		ah.WithError(err).Error("update node error")
+		ah.logger.WithError(err).Error("update node error")
 		c.JSON(http.StatusInternalServerError, models.NewErrorResp("更新节点失败！"))
 		return
 	}

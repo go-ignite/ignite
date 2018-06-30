@@ -20,19 +20,19 @@ import (
 )
 
 type UserHandler struct {
-	*logrus.Logger
+	logger *logrus.Logger
 }
 
 func NewUserHandler(l *logrus.Logger) *UserHandler {
 	return &UserHandler{
-		Logger: l,
+		logger: l,
 	}
 }
 
 func (uh *UserHandler) verifyUser(dbAPI *api.API, userID int64) (*db.User, error) {
 	user, err := verifyUser(dbAPI, userID)
 	if err != nil {
-		uh.WithFields(logrus.Fields{
+		uh.logger.WithFields(logrus.Fields{
 			"error":  err,
 			"userID": userID,
 		}).Error("get user error")
@@ -59,14 +59,14 @@ func (uh *UserHandler) LoginHandler(c *gin.Context) {
 	username := c.PostForm("username")
 	pwd := c.PostForm("password")
 
-	uh.WithFields(logrus.Fields{
+	uh.logger.WithFields(logrus.Fields{
 		"username": username,
 		"pwd":      pwd,
 	}).Debug()
 
 	user, err := api.NewAPI().GetUserByUsername(username)
 	if err != nil {
-		uh.WithFields(logrus.Fields{
+		uh.logger.WithFields(logrus.Fields{
 			"username": username,
 			"err":      err,
 		}).Error("get user error")
@@ -85,7 +85,7 @@ func (uh *UserHandler) LoginHandler(c *gin.Context) {
 
 	token, err := utils.CreateToken(config.C.App.Secret, user.Id)
 	if err != nil {
-		uh.WithFields(logrus.Fields{
+		uh.logger.WithFields(logrus.Fields{
 			"userID": user.Id,
 			"err":    err,
 		}).Error("generate token error")
@@ -93,7 +93,7 @@ func (uh *UserHandler) LoginHandler(c *gin.Context) {
 		return
 	}
 
-	uh.WithField("userID", user.Id).Info("login successful")
+	uh.logger.WithField("userID", user.Id).Info("login successful")
 	c.JSON(http.StatusOK, models.NewSuccessResp(token))
 }
 
@@ -115,7 +115,7 @@ func (uh *UserHandler) SignupHandler(c *gin.Context) {
 	pwd := c.PostForm("password")
 	confirmPwd := c.PostForm("confirm-password")
 
-	uh.WithFields(logrus.Fields{
+	uh.logger.WithFields(logrus.Fields{
 		"inviteCode": inviteCode,
 		"username":   username,
 		"pwd":        pwd,
@@ -135,7 +135,7 @@ func (uh *UserHandler) SignupHandler(c *gin.Context) {
 
 	iv, err := db.GetAvailableInviteCode(inviteCode)
 	if err != nil {
-		uh.WithFields(logrus.Fields{
+		uh.logger.WithFields(logrus.Fields{
 			"inviteCode": inviteCode,
 			"err":        err,
 		}).Error("get invite code error")
@@ -146,7 +146,7 @@ func (uh *UserHandler) SignupHandler(c *gin.Context) {
 		c.JSON(http.StatusOK, models.NewErrorResp("邀请码不存在！"))
 		return
 	}
-	uh.WithField("inviteCodeID", iv.Id).Debug()
+	uh.logger.WithField("inviteCodeID", iv.Id).Debug()
 
 	user := new(db.User)
 	count, err := db.GetDB().Where("username = ?", username).Count(user)
@@ -177,7 +177,7 @@ func (uh *UserHandler) SignupHandler(c *gin.Context) {
 	affected, err := trans.Insert(user)
 	if err != nil || affected == 0 {
 		trans.Rollback()
-		uh.WithFields(logrus.Fields{
+		uh.logger.WithFields(logrus.Fields{
 			"err":      err,
 			"affected": affected,
 		}).Error("user insert error")
@@ -191,7 +191,7 @@ func (uh *UserHandler) SignupHandler(c *gin.Context) {
 
 	if err != nil || affected == 0 {
 		trans.Rollback()
-		uh.WithFields(logrus.Fields{
+		uh.logger.WithFields(logrus.Fields{
 			"err":      err,
 			"affected": affected,
 		}).Error("update inviteCode status error")
@@ -200,14 +200,14 @@ func (uh *UserHandler) SignupHandler(c *gin.Context) {
 	}
 
 	if err := trans.Commit(); err != nil {
-		uh.WithField("err", err).Error("trans commit error")
+		uh.logger.WithField("err", err).Error("trans commit error")
 		c.JSON(http.StatusInternalServerError, models.NewErrorResp("用户注册失败！"))
 		return
 	}
 
 	token, err := utils.CreateToken(config.C.App.Secret, user.Id)
 	if err != nil {
-		uh.WithFields(logrus.Fields{
+		uh.logger.WithFields(logrus.Fields{
 			"userID": user.Id,
 			"err":    err,
 		}).Error("generate token error")
@@ -215,7 +215,7 @@ func (uh *UserHandler) SignupHandler(c *gin.Context) {
 		return
 	}
 
-	uh.WithFields(logrus.Fields{
+	uh.logger.WithFields(logrus.Fields{
 		"username":     username,
 		"userID":       user.Id,
 		"inviteCode":   inviteCode,
