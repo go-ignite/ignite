@@ -45,16 +45,6 @@ func (uh *UserHandler) verifyNode(nodeID int64) (*state.NodeStatus, error) {
 	return verifyNode(nodeID)
 }
 
-// LoginHandler godoc
-// @Summary user login
-// @Description user login
-// @Accept application/x-www-form-urlencoded
-// @Produce json
-// @Param username formData string true "username"
-// @Param password formData string true "password"
-// @Success 200 {string} json "{"success":true,"message":"Success!","data":"Bearer xxxx"}"
-// @Failure 200 {string} json "{"success":false,"message":"error message"}"
-// @Router /api/user/login [post]
 func (uh *UserHandler) LoginHandler(c *gin.Context) {
 	username := c.PostForm("username")
 	pwd := c.PostForm("password")
@@ -97,18 +87,6 @@ func (uh *UserHandler) LoginHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, models.NewSuccessResp(token))
 }
 
-// SignupHandler godoc
-// @Summary user signup
-// @Description user signup
-// @Accept application/x-www-form-urlencoded
-// @Produce json
-// @Param invite-code formData string true "invite-code"
-// @Param username formData string true "username"
-// @Param password formData string true "password"
-// @Param confirm-password formData string true "confirm-password"
-// @Success 200 {string} json "{"success":true,"message":"Success!","data":"Bearer xxxx"}"
-// @Failure 200 {string} json "{"success":false,"message":"error message"}"
-// @Router /api/user/signup [post]
 func (uh *UserHandler) SignupHandler(c *gin.Context) {
 	inviteCode := c.PostForm("invite-code")
 	username := c.PostForm("username")
@@ -224,14 +202,6 @@ func (uh *UserHandler) SignupHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, models.NewSuccessResp(token))
 }
 
-// PanelIndexHandler godoc
-// @Summary get user info
-// @Description get user info
-// @Produce json
-// @Success 200 {object} models.UserInfo
-// @Param Authorization header string true "Authentication header"
-// @Failure 200 {string} json "{"success":false,"message":"error message"}"
-// @Router /api/user/auth/info [get]
 func (uh *UserHandler) UserInfoHandler(c *gin.Context) {
 	userID, _ := c.Get("id")
 	logrus.WithField("userID", userID).Debug("get user info")

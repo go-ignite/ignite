@@ -17,15 +17,6 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// AddNode godoc
-// @Summary add node
-// @Description add node
-// @Produce json
-// @Param body body models.AddNodeReq true "请求参数"
-// @Success 200 {object} models.NodeResp
-// @Param Authorization header string true "Authentication header"
-// @Failure 200 {string} json "{"success":false,"message":"error message"}"
-// @Router /api/admin/auth/nodes [post]
 func (ah *AdminHandler) AddNode(c *gin.Context) {
 	nodeEntity := &models.AddNodeReq{}
 	if err := c.BindJSON(nodeEntity); err != nil {
@@ -77,14 +68,6 @@ func (ah *AdminHandler) AddNode(c *gin.Context) {
 	c.JSON(http.StatusOK, models.NewSuccessResp(nodeResp))
 }
 
-// AdminListNodes godoc
-// @Summary get node list
-// @Description get node list
-// @Produce json
-// @Success 200 {object} models.NodeResp
-// @Param Authorization header string true "Authentication header"
-// @Failure 200 {string} json "{"success":false,"message":"error message"}"
-// @Router /api/admin/auth/nodes [get]
 func (ah *AdminHandler) ListNodes(c *gin.Context) {
 	nodes, err := api.NewAPI().GetAllNodes()
 	if err != nil {
@@ -102,14 +85,6 @@ func (ah *AdminHandler) ListNodes(c *gin.Context) {
 	c.JSON(http.StatusOK, models.NewSuccessResp(nodeResps))
 }
 
-// DeleteNode godoc
-// @Summary delete a node
-// @Description delete a node
-// @Produce json
-// @Param Authorization header string true "Authentication header"
-// @Success 200 {string} json "{"success":true, "message":"Success"}"
-// @Failure 200 {string} json "{"success":false,"message":"error message"}"
-// @Router /api/admin/auth/nodes/:id [delete]
 func (ah *AdminHandler) DeleteNode(c *gin.Context) {
 	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
@@ -129,15 +104,6 @@ func (ah *AdminHandler) DeleteNode(c *gin.Context) {
 	c.JSON(http.StatusOK, models.NewSuccessResp(nil))
 }
 
-// UpdateNode godoc
-// @Summary update a node
-// @Description update a node
-// @Produce json
-// @Param Authorization header string true "Authentication header"
-// @Param body body models.UpdateNodeReq true "请求参数"
-// @Success 200 {string} json "{"success":true, "message":"Success"}"
-// @Failure 200 {string} json "{"success":false,"message":"error message"}"
-// @Router /api/admin/auth/nodes/:id [put]
 func (ah *AdminHandler) UpdateNode(c *gin.Context) {
 	nodeEntity := &models.UpdateNodeReq{}
 	if err := c.BindJSON(nodeEntity); err != nil {

@@ -11,14 +11,6 @@ import (
 	"github.com/jinzhu/copier"
 )
 
-// UserListNodes godoc
-// @Summary get node list
-// @Description get node list
-// @Produce json
-// @Success 200 {object} models.NodeResp
-// @Param Authorization header string true "Authentication header"
-// @Failure 200 {string} json "{"success":false,"message":"error message"}"
-// @Router /api/admin/auth/nodes [get]
 func (uh *UserHandler) ListNodes(c *gin.Context) {
 	nodes, err := api.NewAPI().GetAllNodes()
 	if err != nil {
