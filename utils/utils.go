@@ -8,15 +8,19 @@ import (
 	"io"
 	"net"
 	"strings"
+	"time"
+
+	jwt "github.com/dgrijalva/jwt-go"
+	"github.com/go-ignite/ignite/config"
 )
 
 var StdChars = []byte("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789")
 
-func NewPasswd(length int) string {
-	return rand_char(length, StdChars)
+func RandString(length int) string {
+	return randChar(length, StdChars)
 }
 
-func rand_char(length int, chars []byte) string {
+func randChar(length int, chars []byte) string {
 	new_pword := make([]byte, length)
 	random_data := make([]byte, length+(length/4)) // storage for random bytes.
 	clen := byte(len(chars))
@@ -70,7 +74,8 @@ func GetAvailablePort(usedPorts *[]int) (int, error) {
 		portMap[p] = p
 	}
 
-	for port := HOST_From; port <= HOST_To; port++ {
+	from, to := config.C.Host.From, config.C.Host.From
+	for port := from; port <= to; port++ {
 		if _, exists := portMap[port]; exists {
 			continue
 		}
@@ -81,4 +86,47 @@ func GetAvailablePort(usedPorts *[]int) (int, error) {
 		conn.Close()
 	}
 	return 0, errors.New("no port available")
+}
+
+func CreateToken(secret string, id int64) (string, error) {
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"id":  id,
+		"exp": time.Now().Add(time.Hour * 1).Unix(),
+	})
+
+	tokenStr, err := token.SignedString([]byte(secret))
+	if err != nil {
+		return "", err
+	}
+	return "Bearer " + tokenStr, nil
+}
+
+func VerifyToken(tokenString string, isAdmin *bool) bool {
+	tokenString = tokenString[7:]
+	token, err := jwt.ParseWithClaims(tokenString, jwt.MapClaims{}, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("Unexpected siging method")
+		}
+		return []byte(config.C.App.Secret), nil
+	})
+	if err != nil {
+		return false
+	}
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		return false
+	}
+	if !token.Valid {
+		return false
+	}
+	if isAdmin != nil {
+		id, ok := claims["id"].(float64)
+		if !ok {
+			return false
+		}
+		if (*isAdmin && id != -1) || (!*isAdmin && id <= 0) {
+			return false
+		}
+	}
+	return claims.VerifyExpiresAt(time.Now().Unix(), true)
 }
