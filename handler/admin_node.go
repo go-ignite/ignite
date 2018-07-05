@@ -36,7 +36,7 @@ func (ah *AdminHandler) AddNode(c *gin.Context) {
 		"name":       nodeEntity.Name,
 		"comment":    nodeEntity.Comment,
 		"address":    nodeEntity.Address,
-		"connect_ip": nodeEntity.ConnectIP,
+		"connection": nodeEntity.Connection,
 		"port_from":  nodeEntity.PortFrom,
 		"port_to":    nodeEntity.PortTo,
 	}).Debug()
@@ -153,7 +153,7 @@ func (ah *AdminHandler) UpdateNode(c *gin.Context) {
 		"id":         id,
 		"name":       nodeEntity.Name,
 		"comment":    nodeEntity.Comment,
-		"connect_ip": nodeEntity.ConnectIP,
+		"connection": nodeEntity.Connection,
 		"port_from":  nodeEntity.PortFrom,
 		"port_to":    nodeEntity.PortTo,
 	}).Debug("update node")

@@ -96,9 +96,7 @@ func removeService(c *gin.Context, logger *logrus.Logger) {
 		c.JSON(http.StatusInternalServerError, models.NewErrorResp("删除服务失败！"))
 		return
 	}
-	ns.Logger.Info(1111111)
 	ns.RemovePortFromUsedMap(service.Port)
-	ns.Logger.Info(2222222)
 	c.JSON(http.StatusOK, models.NewSuccessResp(nil, "删除服务成功！"))
 }
 
@@ -114,6 +112,7 @@ func listServices(c *gin.Context, userID, nodeID int64, logger *logrus.Logger) {
 	for _, service := range services {
 		sir := new(models.ServiceInfoResp)
 		copier.Copy(sir, service)
+		sir.Created = service.Created.Unix()
 		servicesInfo = append(servicesInfo, sir)
 	}
 	c.JSON(http.StatusOK, models.NewSuccessResp(servicesInfo, "获取服务列表成功！"))
