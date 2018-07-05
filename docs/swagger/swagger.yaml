@@ -1,288 +1,539 @@
+swagger: '2.0'
+info:
+  title: "ignite API"
+  version: "2.0.0"
+paths:
+# admin
+  /api/admin/login/:
+    post:
+      tags: 
+        - login
+        - admin
+      description: "管理员登录"
+      produces:
+        - application/json
+      summary: admin login
+      parameters: 
+        - description: request body
+          name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/models.AdminLoginReq'
+      responses:
+        '200':
+          description: 'success'
+          schema:
+            type: string
+            example: '{"success":true,"message":"success",data:"Bearer eyJhbGciOiJIUzI1..."}'
+        '500':
+          description: "server error"
+          schema:
+            type: string
+            example: '{"success":false,"message":"error message"}'
+            
+  /api/admin/auth/nodes/:
+    parameters:
+    - type: string
+      description: Authentication header
+      name: Authorization
+      in: header
+      required: true
+    get:
+      tags: 
+        - node
+        - admin      
+      description: "获取节点列表"
+      produces:
+        - application/json
+      summary: get node list
+      responses:
+        '200':
+          description: 'success'
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/models.NodeResp'
+        '500':
+          description: "server error"
+          schema:
+            type: string
+            example: '{"success":false,"message":"error message"}'
+    post:
+      tags: 
+        - node
+        - admin  
+      description: "添加节点"
+      produces:
+        - application/json
+      summary: add node
+      parameters:
+        - description: request body
+          name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/models.AddNodeReq'
+      responses:
+        '200':
+          description: "success"
+          schema:
+            $ref: '#/definitions/models.NodeResp'
+        '500':
+          description: "server error"
+          schema:
+            type: string
+            example: '{"success":false,"message":"error message"}'
+            
+  /api/admin/auth/nodes/{id}/:
+    parameters: 
+      - name: id
+        in: path
+        description: User ID
+        required: true
+        type: integer
+      - type: string
+        description: Authentication header
+        name: Authorization
+        in: header
+        required: true
+    put:
+      tags: 
+        - node
+        - admin
+      description: "更新节点"
+      produces:
+        - application/json
+      summary: update node
+      parameters:
+        - description: 请求参数
+          name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/models.UpdateNodeReq'
+      responses:
+        '200':
+          description: "success"
+          schema:
+            type: string
+            example: '{"success":true,"message":"success"}'
+        '500':
+          description: "server error"
+          schema:
+            type: string
+            example: '{"success":false,"message":"error message"}'
+    delete:
+      tags: 
+        - node
+        - admin
+      description: 删除节点
+      produces:
+        - application/json
+      summary: delete a node
+      responses:
+        '200':
+          description: "success"
+          schema:
+            type: string
+            example: '{"success":true,"message":"success"}'
+        '500':
+          description: "server error"
+          schema:
+            type: string
+            example: '{"success":false,"message":"error message"}'
+            
+  /api/admin/services/:
+    parameters:
+    - type: string
+      description: Authentication header
+      name: Authorization
+      in: header
+      required: true
+    get:
+      tags: 
+        - service
+        - admin
+      description: "获取服务信息"
+      produces:
+        - application/json
+      summary: get services info
+      parameters: 
+        - in: query
+          name: "user_id"
+          description: "用户 ID"
+          required: false
+          type: integer
+        - in: query
+          name: "node_id"
+          description: "节点 ID"
+          required: false
+          type: integer
+      responses:
+        '200':
+          description: 'success'
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/models.ServiceInfoResp'
+        '500':
+          description: "server error"
+          schema:
+            type: string
+            example: '{"success":false,"message":"error message"}'
+          
+  /api/admin/services/{id}/:
+    parameters: 
+      - name: id
+        in: path
+        description: service ID
+        required: true
+        type: integer
+      - type: string
+        description: Authentication header
+        name: Authorization
+        in: header
+        required: true
+    delete:
+      tags: 
+        - service
+        - admin
+      description: "删除服务"
+      summary: delete service
+      responses:
+        '200':
+          description: 'success'
+          schema:
+            type: string
+            example: '{"success":true,"message":"success",data:null}'
+        '500':
+          description: "server error"
+          schema:
+            type: string
+            example: '{"success":false,"message":"error message"}'
+            
+#user            
+  /api/user/login/:
+    post:
+      tags: 
+        - login
+        - user
+      description: "用户登录"
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      summary: user login
+      parameters:
+        - type: string
+          description: "用户名"
+          name: username
+          in: formData
+          required: true
+        - type: string
+          description: "密码"
+          name: password
+          in: formData
+          required: true
+      responses:
+        '200':
+          description: 'success'
+          schema:
+            type: string
+            example: '{"success":true,"message":"success",data:"Bearer eyJhbGciOiJIUzI1..."}'
+        '500':
+          description: "server error"
+          schema:
+            type: string
+            example: '{"success":false,"message":"error message"}'
+            
+  /api/user/signup/:
+    post:
+      tags: 
+        - register
+        - user
+      description: "用户注册"
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      summary: user sign up
+      parameters:
+        - type: string
+          description: invite-code
+          name: invite-code
+          in: formData
+          required: true
+        - type: string
+          description: username
+          name: username
+          in: formData
+          required: true
+        - type: string
+          description: password
+          name: password
+          in: formData
+          required: true
+        - type: string
+          description: confirm-password
+          name: confirm-password
+          in: formData
+          required: true
+      responses:
+        '200':
+          description: 'success'
+          schema:
+            type: string
+            example: '{"success":true,"message":"success",data:"Bearer eyJhbGciOiJIUzI1..."}'
+        '500':
+          description: "server error"
+          schema:
+            type: string
+            example: '{"success":false,"message":"error message"}'
+            
+  /api/user/services/config/:
+    parameters:
+    - type: string
+      description: Authentication header
+      name: Authorization
+      in: header
+      required: true
+    get:
+      tags: 
+        - service
+        - user
+      description: "获取服务配置"
+      produces:
+        - application/json
+      summary: get service configs
+      responses:
+        '200':
+          description: 'success'
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/models.ServiceConfig'
+        '500':
+          description: "server error"
+          schema:
+            type: string
+            example: '{"success":false,"message":"error message"}'        
+            
+          
+  /api/user/services/:
+    parameters:
+    - type: string
+      description: Authentication header
+      name: Authorization
+      in: header
+      required: true
+    get:
+      tags: 
+        - service
+        - user
+      description: "获取用户服务信息"
+      produces:
+        - application/json
+      summary: get user services info
+      responses:
+        '200':
+          description: 'success'
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/models.ServiceInfoResp'
+        '500':
+          description: "server error"
+          schema:
+            type: string
+            example: '{"success":false,"message":"error message"}'
+            
+  /api/user/services/{id}/:
+    parameters: 
+      - name: id
+        in: path
+        description: User ID
+        required: true
+        type: integer
+      - type: string
+        description: Authentication header
+        name: Authorization
+        in: header
+        required: true
+    delete:
+      tags: 
+        - service
+        - user
+      description: "删除用户服务"
+      summary: delete service
+      responses:
+        '200':
+          description: 'success'
+          schema:
+            type: string
+            example: '{"success":true,"message":"success",data:null}'
+        '500':
+          description: "server error"
+          schema:
+            type: string
+            example: '{"success":false,"message":"error message"}'
+            
+  /api/user/nodes/{nodeID}/services/:
+    parameters: 
+      - name: nodeID
+        in: path
+        description: node ID
+        required: true
+        type: integer
+      - type: string
+        description: Authentication header
+        name: Authorization
+        in: header
+        required: true
+    post:
+      tags: 
+        - service
+        - user
+      summary: create service
+      description: "创建用户服务"
+      parameters: 
+        - description: request body
+          name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/models.CreateServiceRequest'
+      responses:
+        '200':
+          description: 'success'
+          schema:
+            $ref: '#/definitions/models.ServiceInfoResp'
+        '500':
+          description: "server error"
+          schema:
+            type: string
+            example: '{"success":false,"message":"error message"}'
+    
+  
 definitions:
-  models.AddNodeReq:
-    properties:
-      address:
-        type: string
-      name:
-        type: string
+# admin
+  models.AdminLoginReq:
     type: object
-  models.NodeResp:
     properties:
-      address:
-        type: string
-      id:
-        type: integer
-      name:
-        type: string
-    type: object
-  models.ServiceConfig:
-    properties:
-      servers:
-        items:
-          type: string
-        type: array
-      ssMethods:
-        items:
-          type: string
-        type: array
-      ssrMethods:
-        items:
-          type: string
-        type: array
-    type: object
-  models.ServiceResult:
-    properties:
-      host:
-        type: string
-      packageLimit:
-        type: integer
-      serviceId:
-        type: string
-      servicePort:
-        type: integer
-      servicePwd:
-        type: string
-    type: object
-  models.UpdateNodeReq:
-    properties:
-      name:
-        type: string
-    type: object
-  models.UserInfo:
-    properties:
-      expired:
-        type: string
-      host:
-        type: string
-      id:
-        type: integer
-      packageLeft:
-        type: string
-      packageLeftPercent:
-        type: string
-      packageLimit:
-        type: integer
-      packageUsed:
-        type: string
-      serviceMethod:
-        type: string
-      servicePort:
-        type: integer
-      servicePwd:
-        type: string
-      serviceType:
-        type: string
-      serviceURL:
-        type: string
-      status:
-        type: integer
       username:
         type: string
+        description: "用户名"
+      password:
+        type: string
+        description: "密码"
+        
+  models.AddNodeReq:
     type: object
-info:
-  contact: {}
-  license: {}
-paths:
-  /api/admin/auth/nodes:
-    get:
-      description: get node list
-      parameters:
-      - description: Authentication header
-        in: header
-        name: Authorization
-        required: true
+    properties:
+      address:
         type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: '{"success":false,"message":"error message"}'
-          schema:
-            type: string
-      summary: get node list
-    post:
-      description: add node
-      parameters:
-      - description: 请求参数
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/models.AddNodeReq'
-          type: object
-      - description: Authentication header
-        in: header
-        name: Authorization
-        required: true
+        description: "请求 agent 的地址(可以为内网地址)"
+      name:
         type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: '{"success":false,"message":"error message"}'
-          schema:
-            type: string
-      summary: add node
-  /api/admin/auth/nodes/:
-    delete:
-      description: delete a node
-      parameters:
-      - description: Authentication header
-        in: header
-        name: Authorization
-        required: true
+        description: "节点名(唯一)"
+      comment:
         type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: '{"success":false,"message":"error message"}'
-          schema:
-            type: string
-      summary: delete a node
-    put:
-      description: update a node
-      parameters:
-      - description: Authentication header
-        in: header
-        name: Authorization
-        required: true
+        description: "备注"
+      connection:
         type: string
-      - description: 请求参数
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/models.UpdateNodeReq'
-          type: object
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: '{"success":false,"message":"error message"}'
-          schema:
-            type: string
-      summary: update a node
-  /api/user/auth/info:
-    get:
-      description: get user info
-      parameters:
-      - description: Authentication header
-        in: header
-        name: Authorization
-        required: true
+        description: "节点上创建的服务的连接 IP 地址(公网IP)"
+      port_from:
+        type: integer
+        description: "在节点上创建服务的端口范围的起始端口(包含)"
+      port_to:
+        type: integer
+        description: "在节点上创建服务的端口范围的终止端口(包含)"
+    required: ["name","address","connection","port_from","port_to"]
+    
+  models.NodeResp:
+    type: object
+    properties:
+      id:
+        type: integer
+      address:
         type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: '{"success":false,"message":"error message"}'
-          schema:
-            type: string
-      summary: get user info
-  /api/user/auth/service/config:
-    get:
-      description: get user info
-      parameters:
-      - description: Authentication header
-        in: header
-        name: Authorization
-        required: true
+        description: "请求 agent 的地址(可以为内网地址)"
+      name:
         type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.ServiceConfig'
-            type: object
-      summary: get user info
-  /api/user/auth/service/create:
-    post:
-      consumes:
-      - application/x-www-form-urlencoded
-      description: create service
-      parameters:
-      - description: Authentication header
-        in: header
-        name: Authorization
-        required: true
+        description: "节点名(唯一)"
+      comment:
         type: string
-      - description: method
-        in: formData
-        name: method
-        required: true
-        type: file
-      - description: server-type
-        in: formData
-        name: server-type
-        required: true
-        type: file
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: '{"success":false,"message":"error message"}'
-          schema:
-            type: string
-      summary: create service
-  /api/user/login:
-    post:
-      consumes:
-      - application/x-www-form-urlencoded
-      description: user login
-      parameters:
-      - description: username
-        in: formData
-        name: username
-        required: true
-        type: file
-      - description: password
-        in: formData
-        name: password
-        required: true
-        type: file
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: '{"success":false,"message":"error message"}'
-          schema:
-            type: string
-      summary: user login
-  /api/user/signup:
-    post:
-      consumes:
-      - application/x-www-form-urlencoded
-      description: user signup
-      parameters:
-      - description: invite-code
-        in: formData
-        name: invite-code
-        required: true
-        type: file
-      - description: username
-        in: formData
-        name: username
-        required: true
-        type: file
-      - description: password
-        in: formData
-        name: password
-        required: true
-        type: file
-      - description: confirm-password
-        in: formData
-        name: confirm-password
-        required: true
-        type: file
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: '{"success":false,"message":"error message"}'
-          schema:
-            type: string
-      summary: user signup
-swagger: "2.0"
+        description: "备注"
+      connection:
+        type: string
+        description: "节点上创建的服务的连接 IP 地址(公网IP)"
+      port_from:
+        type: integer
+        description: "在节点上创建服务的端口范围的起始端口(包含)"
+      port_to:
+        type: integer
+        description: "在节点上创建服务的端口范围的终止端口(包含)"
+    
+  models.ServiceConfig:
+    type: object
+    properties:
+      type:
+        type: string
+        description: "服务类型 1.ss-libev 2.ssr"
+      methods:
+        type: array
+        items:
+          type: string
+        description: "加密方式"
+
+  models.CreateServiceRequest:
+    type: object
+    properties:
+      type:
+        type: string
+        description: "服务类型 1.ss-libev 2.ssr"
+      method:
+        type: string
+        description: "加密方式"
+      password:
+        type: string
+        description: "服务密码"
+          
+  models.ServiceInfoResp:
+    type: object
+    properties:
+      id:
+        type: string
+      node_id:
+        type: integer
+      type:
+        type: string
+      port:
+        type: integer
+      password:
+        type: string
+      method:
+        type: string
+      status:
+        type: string
+      created:
+        type: integer
+        
+  models.UpdateNodeReq:
+    type: object
+    properties:
+      name:
+        type: string
+        description: "节点名(唯一)"
+      comment:
+        type: string
+        description: "备注"
+      connection:
+        type: string
+        description: "节点上创建的服务的连接 IP 地址(公网IP)"
+      port_from:
+        type: integer
+        description: "在节点上创建服务的端口范围的起始端口(包含)"
+      port_to:
+        type: integer
+        description: "在节点上创建服务的端口范围的终止端口(包含)"
