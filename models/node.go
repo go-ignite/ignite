@@ -1,14 +1,14 @@
 package models
 
 type NodeResp struct {
-	Id        int64  `json:"id"`
-	Name      string `json:"name"`
-	Comment   string `json:"comment"`
-	Address   string `json:"address"`
-	ConnectIP string `json:"connect_ip"`
-	PortFrom  int    `json:"port_from"`
-	PortTo    int    `json:"port_to"`
-	Available bool   `json:"available"`
+	Id         int64  `json:"id"`
+	Name       string `json:"name"`
+	Comment    string `json:"comment"`
+	Address    string `json:"address"`
+	Connection string `json:"connection"`
+	PortFrom   int    `json:"port_from"`
+	PortTo     int    `json:"port_to"`
+	Available  bool   `json:"available"`
 }
 
 type AddNodeReq struct {
