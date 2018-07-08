@@ -143,7 +143,7 @@ paths:
             type: string
             example: '{"success":false,"message":"error message"}'
             
-  /api/admin/services/:
+  /api/admin/auth/services/:
     parameters:
     - type: string
       description: Authentication header
@@ -182,7 +182,7 @@ paths:
             type: string
             example: '{"success":false,"message":"error message"}'
           
-  /api/admin/services/{id}/:
+  /api/admin/auth/services/{id}/:
     parameters: 
       - name: id
         in: path
@@ -291,7 +291,7 @@ paths:
             type: string
             example: '{"success":false,"message":"error message"}'
             
-  /api/user/services/config/:
+  /api/user/auth/services/config/:
     parameters:
     - type: string
       description: Authentication header
@@ -320,7 +320,7 @@ paths:
             example: '{"success":false,"message":"error message"}'        
             
           
-  /api/user/services/:
+  /api/user/auth/services/:
     parameters:
     - type: string
       description: Authentication header
@@ -348,7 +348,7 @@ paths:
             type: string
             example: '{"success":false,"message":"error message"}'
             
-  /api/user/services/{id}/:
+  /api/user/auth/services/{id}/:
     parameters: 
       - name: id
         in: path
@@ -378,7 +378,7 @@ paths:
             type: string
             example: '{"success":false,"message":"error message"}'
             
-  /api/user/nodes/{nodeID}/services/:
+  /api/user/auth/nodes/{nodeID}/services/:
     parameters: 
       - name: nodeID
         in: path
