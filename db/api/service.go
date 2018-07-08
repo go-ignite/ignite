@@ -11,8 +11,12 @@ func (api *API) GetAllServices() ([]*db.Service, error) {
 }
 
 func (api *API) GetServiceByIDAndUserID(id, userID int64) (*db.Service, error) {
+	q := api.Where("id = ?", id)
+	if userID > 0 {
+		q = q.Where("user_id = ?", userID)
+	}
 	service := new(db.Service)
-	_, err := api.Where("id = ? AND user_id = ?", id, userID).Get(service)
+	_, err := q.Get(service)
 	return service, err
 }
 
