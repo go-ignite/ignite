@@ -23,6 +23,10 @@ func (ah *AdminHandler) AddNode(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, models.NewErrorResp(err.Error()))
 		return
 	}
+	if nodeEntity.PortTo < nodeEntity.PortFrom {
+		c.JSON(http.StatusBadRequest, models.NewErrorResp("端口范围配置错误！"))
+		return
+	}
 	ah.logger.WithFields(logrus.Fields{
 		"name":       nodeEntity.Name,
 		"comment":    nodeEntity.Comment,
@@ -115,6 +119,10 @@ func (ah *AdminHandler) UpdateNode(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, models.NewErrorResp("id is invalid"))
 		return
 	}
+	if nodeEntity.PortTo < nodeEntity.PortFrom {
+		c.JSON(http.StatusBadRequest, models.NewErrorResp("端口范围配置错误！"))
+		return
+	}
 	ah.logger.WithFields(logrus.Fields{
 		"id":         id,
 		"name":       nodeEntity.Name,
@@ -126,7 +134,8 @@ func (ah *AdminHandler) UpdateNode(c *gin.Context) {
 
 	node := &db.Node{Id: id}
 	copier.Copy(node, nodeEntity)
-	if _, err = api.NewAPI().UpsertNode(node); err != nil {
+
+	if _, err = dbAPI.UpsertNode(node); err != nil {
 		ah.logger.WithError(err).Error("update node error")
 		c.JSON(http.StatusInternalServerError, models.NewErrorResp("更新节点失败！"))
 		return
