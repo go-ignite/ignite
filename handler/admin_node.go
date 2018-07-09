@@ -131,6 +131,17 @@ func (ah *AdminHandler) UpdateNode(c *gin.Context) {
 		"port_from":  nodeEntity.PortFrom,
 		"port_to":    nodeEntity.PortTo,
 	}).Debug("update node")
+	dbAPI := api.NewAPI()
+
+	count, err := dbAPI.GetServiceCountByNodeIDAndPortRange(id, nodeEntity.PortFrom, nodeEntity.PortTo)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, models.NewErrorResp("查询服务失败！"))
+		return
+	}
+	if count > 0 {
+		c.JSON(http.StatusOK, models.NewErrorResp("端口范围外存在服务，请调整端口范围或移除服务！"))
+		return
+	}
 
 	node := &db.Node{Id: id}
 	copier.Copy(node, nodeEntity)

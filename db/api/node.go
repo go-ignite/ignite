@@ -11,7 +11,7 @@ func (api *API) UpsertNode(node *db.Node) (int64, error) {
 	if node.Id == 0 {
 		return api.Insert(node)
 	}
-	return api.ID(node.Id).Cols("name", "comment").Update(node)
+	return api.ID(node.Id).Cols("name", "comment","port_from","port_to").Update(node)
 }
 
 func (api *API) GetNodeByID(id int64) (*db.Node, error) {

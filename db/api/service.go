@@ -20,6 +20,10 @@ func (api *API) GetServiceByIDAndUserID(id, userID int64) (*db.Service, error) {
 	return service, err
 }
 
+func (api *API) GetServiceCountByNodeIDAndPortRange(nodeID int64,portFrom,portTo int)(int64,error){
+	return api.Where("node_id = ? AND (port < ? OR port > ?)",nodeID,portFrom,portTo).Count(new(db.Service))
+}
+
 func (api *API) GetServicesByUserIDAndNodeID(userID, nodeID int64) ([]*db.Service, error) {
 	var session *xorm.Session
 	if userID != 0 {
