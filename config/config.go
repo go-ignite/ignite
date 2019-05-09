@@ -12,32 +12,57 @@ var (
 	C Config
 )
 
-type Config struct {
-	App struct {
-		Address  string `mapstructure:"address"`
-		Secret   string `mapstructure:"secret"`
-		LogLevel string `mapstructure:"log_level"`
-	} `mapstructure:"app"`
-	DB struct {
-		Driver  string `mapstructure:"driver"`
-		Connect string `mapstructure:"connect"`
-	} `mapstructure:"db"`
-	Host struct {
-		Address string `mapstructure:"address"`
-		From    int    `mapstructure:"from"`
-		To      int    `mapstructure:"to"`
-	} `mapstructure:"host"`
+type (
 	Admin struct {
 		Username string `mapstructure:"username"`
 		Password string `mapstructure:"password"`
-	} `mapstructure:"admin"`
+	}
+
+	Config struct {
+		App struct {
+			Address string `mapstructure:"address"`
+			Secret  string `mapstructure:"secret"`
+		} `mapstructure:"app"`
+		Log struct {
+			Task         string `mapstructure:"task"`
+			Agent        string `mapstructure:"agent"`
+			UserHandler  string `mapstructure:"user_handler"`
+			AdminHandler string `mapstructure:"admin_handler"`
+			Level        string `mapstructure:"level"`
+		} `mapstructure:"log"`
+		DB struct {
+			Driver  string `mapstructure:"driver"`
+			Connect string `mapstructure:"connect"`
+		} `mapstructure:"db"`
+		Host struct {
+			Address string `mapstructure:"address"`
+			From    int    `mapstructure:"from"`
+			To      int    `mapstructure:"to"`
+		} `mapstructure:"host"`
+		Admin Admin `mapstructure:"admin"`
+	}
+)
+
+func (a *Admin) Match(username, password string) bool {
+	return a.Username == username && a.Password == password
 }
 
-func Init() {
+func (c *Config) MustCheck() {
+	if _, err := logrus.ParseLevel(C.Log.Level); err != nil {
+		log.Fatalf("parse app.log_level error: %v\n", err)
+	}
+}
+
+func MustInit() {
 	// app
-	viper.SetDefault("app.log_level", "INFO")
 	viper.SetDefault("app.address", ":5000")
 	viper.SetDefault("app.secret", "ignite")
+	// log
+	viper.SetDefault("log.task", "task.log")
+	viper.SetDefault("log.agent", "agent.log")
+	viper.SetDefault("log.user_handler", "user_handler.log")
+	viper.SetDefault("log.admin_handler", "admin_handler.log")
+	viper.SetDefault("log.level", "INFO")
 	// db
 	viper.SetDefault("db.driver", "sqlite3")
 	viper.SetDefault("db.connect", "./data/ignite.db")
@@ -58,10 +83,5 @@ func Init() {
 		log.Fatalf("viper.Unmarshal error: %v\n", err)
 	}
 
-	// log
-	lv, err := logrus.ParseLevel(C.App.LogLevel)
-	if err != nil {
-		log.Fatalf("logrus.ParseLevel error: %v\n", err)
-	}
-	logrus.SetLevel(lv)
+	C.MustCheck()
 }
