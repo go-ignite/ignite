@@ -1,85 +1,70 @@
 package handler
 
 import (
-	"log"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/go-ignite/ignite/db"
+	"github.com/pkg/errors"
+
+	"github.com/go-ignite/ignite/api"
 	"github.com/go-ignite/ignite/models"
-	"github.com/go-ignite/ignite/utils"
 )
 
-func (ah *AdminHandler) InviteCodeListHandler(c *gin.Context) {
-	pageIndex, _ := strconv.Atoi(c.Query("pageIndex"))
-	pageSize, _ := strconv.Atoi(c.Query("pageSize"))
+func (ah *AdminHandler) GetInviteCodeList(c *gin.Context) {
+	req := new(api.InviteCodeListRequest)
+	if err := c.ShouldBind(req); err != nil {
+		ah.ErrJSON(c, http.StatusBadRequest, err)
+		return
+	}
 
-	codes := new([]*db.InviteCode)
-	db.GetDB().Desc("created").Where("available = 1").Limit(pageSize, pageSize*(pageIndex-1)).Find(codes)
+	inviteCodes, total, err := models.GetAvailableInviteCodeList(req.PageIndex, req.PageSize)
+	if err != nil {
+		ah.ErrJSON(c, http.StatusInternalServerError, errors.Wrap(err, "get invite code list error"))
+		return
+	}
+	var ics []*api.InviteCode
+	for _, inviteCode := range inviteCodes {
+		ic := new(api.InviteCode)
+		if err := ah.copy(ic, inviteCode); err != nil {
+			ah.ErrJSON(c, http.StatusInternalServerError, err)
+			return
+		}
+		ics = append(ics, ic)
+	}
 
-	code := new(db.InviteCode)
-	total, _ := db.GetDB().Where("available = 1").Count(code)
-
-	pd := models.PageData{Total: total, PageSize: pageSize, PageIndex: pageIndex, Data: codes}
-	resp := models.Response{Success: true, Message: "success", Data: pd}
-	c.JSON(http.StatusOK, resp)
+	c.JSON(http.StatusOK, api.NewInviteCodeListResponse(ics, total, req.PageIndex))
 }
 
-func (ah *AdminHandler) RemoveInviteCodeHandler(c *gin.Context) {
-	cid, err := strconv.Atoi(c.Param("id"))
-
+func (ah *AdminHandler) RemoveInviteCode(c *gin.Context) {
+	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
-		resp := models.Response{Success: false, Message: "邀请码ID参数不正确"}
-		c.JSON(http.StatusOK, resp)
+		ah.ErrJSON(c, http.StatusBadRequest, err)
+		return
+	}
+	if err := models.DeleteInviteCodeByID(id); err != nil {
+		ah.ErrJSON(c, http.StatusInternalServerError, errors.Wrap(err, "remove invite code error"))
 		return
 	}
 
-	code := new(db.InviteCode)
-	_, err = db.GetDB().Id(cid).Delete(code)
-
-	if err != nil {
-		resp := models.Response{Success: false, Message: "邀请码删除失败"}
-		c.JSON(http.StatusOK, resp)
-		return
-	}
-
-	resp := models.Response{Success: true, Message: "success"}
-	c.JSON(http.StatusOK, resp)
+	c.JSON(http.StatusNoContent, nil)
 }
 
-func (ah *AdminHandler) GenerateInviteCodeHandler(c *gin.Context) {
-	generateCodeEntity := struct {
-		Amount    int `json:"amount"`
-		Limit     int `json:"limit"`
-		Available int `json:"available"`
-	}{}
+func (ah *AdminHandler) GenerateInviteCodes(c *gin.Context) {
+	req := new(api.GenerateCodesRequest)
+	if err := c.ShouldBind(req); err != nil {
+		ah.ErrJSON(c, http.StatusBadRequest, err)
+		return
+	}
 
-	if err := c.BindJSON(&generateCodeEntity); err != nil {
-		resp := models.Response{Success: false, Message: "Request body error..."}
-		c.JSON(http.StatusOK, &resp)
+	var codes []*models.InviteCode
+	for i := 0; i < int(req.Amount); i++ {
+		codes = append(codes, models.NewInviteCode(req.Limit, req.ExpiredAt.Time()))
+	}
+	if err := models.CreateInviteCodes(codes); err != nil {
+		ah.ErrJSON(c, http.StatusInternalServerError, errors.Wrap(err, "generate invite codes error"))
 		return
 	}
-	if generateCodeEntity.Amount == 0 || generateCodeEntity.Limit == 0 || generateCodeEntity.Available == 0 {
-		resp := models.Response{Success: false, Message: "Data invalid..."}
-		c.JSON(http.StatusOK, &resp)
-		return
-	}
-	codes := []db.InviteCode{}
-	for i := 0; i < generateCodeEntity.Amount; i++ {
-		codes = append(codes, db.InviteCode{
-			InviteCode:     utils.RandString(16),
-			PackageLimit:   generateCodeEntity.Limit,
-			AvailableLimit: generateCodeEntity.Available,
-			Available:      true,
-		})
-	}
-	resp := models.Response{}
-	if _, err := db.GetDB().Insert(&codes); err != nil {
-		log.Println("Save code error: ", err.Error())
-		resp.Message = "Save codes error..."
-	} else {
-		resp.Success = true
-	}
-	c.JSON(http.StatusOK, &resp)
+
+	c.JSON(http.StatusNoContent, nil)
 }

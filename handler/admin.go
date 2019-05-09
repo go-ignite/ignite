@@ -4,46 +4,43 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+
+	"github.com/go-ignite/ignite/api"
 	"github.com/go-ignite/ignite/config"
-	"github.com/go-ignite/ignite/models"
-	"github.com/go-ignite/ignite/utils"
-	"github.com/sirupsen/logrus"
+	"github.com/go-ignite/ignite/logger"
 )
 
 type AdminHandler struct {
-	logger *logrus.Logger
+	*Handler
 }
 
-func NewAdminHandler(l *logrus.Logger) *AdminHandler {
+func NewAdminHandler() *AdminHandler {
 	return &AdminHandler{
-		logger: l,
+		Handler: New(logger.GetAdminHandlerLogger()),
 	}
 }
 
-func (ah *AdminHandler) PanelLoginHandler(c *gin.Context) {
-	loginEntity := struct {
-		Username string `json:"username"`
-		Password string `json:"password"`
-	}{}
+func (ah *AdminHandler) createToken() (string, error) {
+	return ah.Handler.createToken(-1)
+}
 
-	if err := c.BindJSON(&loginEntity); err != nil {
-		c.JSON(http.StatusInternalServerError, models.NewErrorResp("parse json data error"))
+func (ah *AdminHandler) Login(c *gin.Context) {
+	req := new(api.AdminLoginRequest)
+	if err := c.ShouldBind(req); err != nil {
+		ah.ErrJSON(c, http.StatusBadRequest, err)
 		return
 	}
-	ah.logger.WithField("loginEntity", loginEntity).Debug()
 
-	if loginEntity.Username != config.C.Admin.Username || loginEntity.Password != config.C.Admin.Password {
-		c.JSON(http.StatusOK, models.NewErrorResp("用户名或密码错误！"))
+	if !config.C.Admin.Match(req.Username, req.Password) {
+		ah.ErrJSON(c, http.StatusUnauthorized, nil)
 		return
 	}
-	// Create the token
-	token, err := utils.CreateToken(config.C.App.Secret, -1)
+
+	token, err := ah.createToken()
 	if err != nil {
-		logrus.WithField("err", err).Error("generate token error")
-		c.JSON(http.StatusInternalServerError, models.NewErrorResp("登录失败！"))
+		ah.ErrJSON(c, http.StatusInternalServerError, err)
 		return
 	}
 
-	c.JSON(http.StatusOK, models.NewSuccessResp(token))
-	return
+	c.JSON(http.StatusOK, api.NewAdminLoginResponse(token))
 }
