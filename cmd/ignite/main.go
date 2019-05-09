@@ -4,14 +4,12 @@ import (
 	"flag"
 	"fmt"
 
-	"github.com/gin-gonic/gin"
 	"github.com/go-ignite/ignite/config"
-	"github.com/go-ignite/ignite/db"
 	"github.com/go-ignite/ignite/handler"
 	"github.com/go-ignite/ignite/logger"
-	"github.com/go-ignite/ignite/router"
+	"github.com/go-ignite/ignite/models"
+	"github.com/go-ignite/ignite/service"
 	"github.com/go-ignite/ignite/state"
-	"github.com/go-ignite/ignite/task"
 )
 
 var (
@@ -26,26 +24,24 @@ func main() {
 		return
 	}
 
-	config.Init()
+	// init config
+	config.MustInit()
+
+	// init logger
+	logger.MustInit()
 
 	// init db
-	db.GetDB()
-
-	// start task
-	t := task.New(logger.New("task.log"))
-	t.Init()
-	t.Start()
+	models.MustInitDB()
 
 	// init loader
-	loader := state.GetLoader()
-	loader.Logger = logger.New("agent.log")
-	loader.Load()
+	state.MustLoad()
 
-	r := &router.Router{
-		Engine:       gin.Default(),
-		UserHandler:  handler.NewUserHandler(logger.New("user.log")),
-		AdminHandler: handler.NewAdminHandler(logger.New("admin.log")),
-	}
-	r.Init()
-	r.Run(config.C.App.Address)
+	// start task
+	//task.New().AsyncRun()
+
+	// start service
+	service.New(
+		handler.NewUserHandler(),
+		handler.NewAdminHandler(),
+	).Init().Run()
 }

@@ -1,126 +1,111 @@
 package state
 
 import (
-	"fmt"
 	"sync"
 	"time"
 
 	"github.com/go-ignite/ignite/agent"
-	"github.com/go-ignite/ignite/db/api"
-
-	"github.com/sirupsen/logrus"
+	"github.com/go-ignite/ignite/logger"
+	"github.com/go-ignite/ignite/models"
 )
 
-var (
-	l  *Loader
-	no sync.Once
-)
+var loader *Loader
 
 type Loader struct {
-	nodeMutex sync.RWMutex
-	nodeMap   map[int64]*NodeStatus
-	Logger    *logrus.Logger
+	sync.RWMutex
+	nodeStatusMap map[string]*NodeStatus
+	logger        *logger.Logger
+}
+
+func NewLoader() *Loader {
+	return &Loader{
+		nodeStatusMap: make(map[string]*NodeStatus),
+		logger:        logger.GetAgentLogger(),
+	}
 }
 
 func GetLoader() *Loader {
-	no.Do(func() {
-		l = &Loader{
-			nodeMap: map[int64]*NodeStatus{},
-		}
-	})
-	return l
+	return loader
 }
 
-func (loader *Loader) Load() error {
-	loader.nodeMutex.Lock()
-	defer loader.nodeMutex.Unlock()
-
-	nodes, err := api.NewAPI().GetAllNodes()
+func MustLoad() {
+	loader = NewLoader()
+	nodes, err := models.GetAllNodes()
 	if err != nil {
-		return fmt.Errorf("db.GetAllNodes error: %v", err)
+		loader.logger.WithError(err).Fatal("models.GetAllNodes error")
 	}
-	services, err := api.NewAPI().GetAllServices()
+	services, err := models.GetAllServices()
 	if err != nil {
-		return fmt.Errorf("db.GetAllServices error: %v", err)
+		loader.logger.WithError(err).Fatal("models.GetAllServices error")
 	}
 
-	nodePortMap := map[int64]map[int]bool{}
-	for _, service := range services {
-		portMap, ok := nodePortMap[service.NodeId]
-		if !ok {
-			portMap = map[int]bool{}
-			nodePortMap[service.NodeId] = portMap
-		}
-		portMap[service.Port] = true
-	}
-
+	nodeIDServicesMap := services.GetNodeIDServicesMap()
 	for _, node := range nodes {
-		client := agent.NewClient(node.Address)
-		ns := NewNodeStatus(node, client, false, nodePortMap[node.Id])
-		ns.Logger = loader.Logger
-		go loader.WatchNode(ns)
-		loader.nodeMap[node.Id] = ns
+		ns := NewNodeStatus(node, agent.NewClient(node.RequestAddress), nodeIDServicesMap[node.ID].GetPortMap())
+		go loader.WatchNodeStatus(ns)
+		loader.nodeStatusMap[node.ID] = ns
 	}
-
-	return nil
 }
 
-func (loader *Loader) WatchNode(ns *NodeStatus) {
+func (l *Loader) WatchNodeStatus(ns *NodeStatus) {
 	ns.watching = true
 	for ns.watching {
 		if err := ns.Heartbeat(); err != nil {
-			loader.Logger.WithError(err).Error()
+			l.logger.WithError(err).WithField("nodeID", ns.node.ID).Error("node status Heartbeat error")
+			// TODO should be configurable
 			time.Sleep(5 * time.Second)
 		}
 	}
 }
 
-func (loader *Loader) GetNodeAvailable(id int64) bool {
-	loader.nodeMutex.RLock()
-	defer loader.nodeMutex.RUnlock()
+func (l *Loader) NodeIsAvailable(nodeID string) bool {
+	l.RLock()
+	defer l.RUnlock()
 
-	node := loader.nodeMap[id]
-	if node == nil {
+	ns, ok := l.nodeStatusMap[nodeID]
+	if !ok {
 		return false
 	}
-	return node.available
+
+	return ns.available
 }
 
-func (loader *Loader) GetNodeAvailableMap() map[int64]bool {
-	loader.nodeMutex.RLock()
-	defer loader.nodeMutex.RUnlock()
+func (l *Loader) NodeAvailableMap() map[string]bool {
+	l.RLock()
+	defer l.RUnlock()
 
-	nam := map[int64]bool{}
-	for id, ns := range loader.nodeMap {
-		nam[id] = ns.available
+	nam := map[string]bool{}
+	for nodeID, ns := range l.nodeStatusMap {
+		nam[nodeID] = ns.available
 	}
+
 	return nam
 }
 
-func (loader *Loader) DelNode(id int64) {
-	loader.nodeMutex.Lock()
-	defer loader.nodeMutex.Unlock()
+func (l *Loader) DeleteNodeStatus(id string) {
+	l.Lock()
+	defer l.Unlock()
 
-	ns := loader.nodeMap[id]
+	ns := l.nodeStatusMap[id]
 	if ns != nil {
 		ns.watching = false
-		ns.Client.Close()
-		delete(loader.nodeMap, id)
+		ns.client.Close()
+		delete(l.nodeStatusMap, id)
 	}
 }
 
-func (loader *Loader) AddNode(id int64, ns *NodeStatus) {
-	loader.nodeMutex.Lock()
-	defer loader.nodeMutex.Unlock()
+func (l *Loader) AddNodeStatus(ns *NodeStatus) {
+	l.Lock()
+	defer l.Unlock()
 
-	ns.Logger = loader.Logger
-	go loader.WatchNode(ns)
-	loader.nodeMap[id] = ns
+	ns.logger = logger.GetAgentLogger()
+	l.nodeStatusMap[ns.node.ID] = ns
+	go l.WatchNodeStatus(ns)
 }
 
-func (loader *Loader) GetNode(id int64) *NodeStatus {
-	loader.nodeMutex.Lock()
-	defer loader.nodeMutex.Unlock()
+func (l *Loader) GetNodeStatus(nodeID string) *NodeStatus {
+	l.Lock()
+	defer l.Unlock()
 
-	return loader.nodeMap[id]
+	return l.nodeStatusMap[nodeID]
 }

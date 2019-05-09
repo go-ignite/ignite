@@ -6,15 +6,31 @@ import (
 
 	"github.com/go-ignite/ignite/config"
 
-	jwt "github.com/dgrijalva/jwt-go"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/dgrijalva/jwt-go/request"
 	"github.com/gin-gonic/gin"
 )
 
-func Auth(admin bool) gin.HandlerFunc {
+type AuthHandler struct {
+	isAdmin bool
+}
+
+func NewUserAuthHandler() *AuthHandler {
+	return &AuthHandler{
+		isAdmin: false,
+	}
+}
+
+func NewAdminAuthHandler() *AuthHandler {
+	return &AuthHandler{
+		isAdmin: true,
+	}
+}
+
+func (ah *AuthHandler) Auth() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		token, err := request.ParseFromRequest(c.Request, request.AuthorizationHeaderExtractor, func(token *jwt.Token) (interface{}, error) {
-			b := ([]byte(config.C.App.Secret))
+			b := []byte(config.C.App.Secret)
 			return b, nil
 		})
 		if err != nil {
@@ -36,7 +52,7 @@ func Auth(admin bool) gin.HandlerFunc {
 			c.AbortWithError(401, fmt.Errorf("token'id is invalid"))
 			return
 		}
-		if (admin && id != -1) || (!admin && id <= 0) {
+		if (ah.isAdmin && id != -1) || (!ah.isAdmin && id <= 0) {
 			c.AbortWithError(401, fmt.Errorf("token auth error"))
 			return
 		}

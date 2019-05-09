@@ -7,34 +7,33 @@ import (
 )
 
 type Client struct {
-	*grpc.ClientConn
 	pb.AgentServiceClient
-	Address string
+	conn    *grpc.ClientConn
+	address string
 }
 
 func NewClient(address string) *Client {
-	return &Client{Address: address}
+	return &Client{address: address}
 }
 
 func (client *Client) Dial() error {
-	conn, err := grpc.Dial(client.Address, grpc.WithInsecure())
+	var err error
+	client.conn, err = grpc.Dial(client.address, grpc.WithInsecure())
 	if err != nil {
 		return err
 	}
-	client.ClientConn = conn
-	client.AgentServiceClient = pb.NewAgentServiceClient(conn)
+	client.AgentServiceClient = pb.NewAgentServiceClient(client.conn)
 	return nil
 }
 
+func (client *Client) Close() error {
+	return client.conn.Close()
+}
+
 func Dial(address string) (*Client, error) {
-	conn, err := grpc.Dial(address, grpc.WithInsecure())
-	if err != nil {
+	client := NewClient(address)
+	if err := client.Dial(); err != nil {
 		return nil, err
-	}
-	client := &Client{
-		ClientConn:         conn,
-		Address:            address,
-		AgentServiceClient: pb.NewAgentServiceClient(conn),
 	}
 	return client, nil
 }

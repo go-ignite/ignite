@@ -15,19 +15,69 @@ func init() {
 	os.Mkdir("log", os.ModePerm)
 }
 
-func New(fp string) *logrus.Logger {
-	// new logrus logger
-	fp = filepath.Join("log", fp)
-	file, err := os.OpenFile(fp, os.O_CREATE|os.O_APPEND|os.O_RDWR, 0666)
+var (
+	taskLogger         *Logger
+	agentLogger        *Logger
+	userHandlerLogger  *Logger
+	adminHandlerLogger *Logger
+)
+
+type Logger struct {
+	fp string
+	*logrus.Logger
+}
+
+func New(fp string) *Logger {
+	return &Logger{
+		fp: filepath.Join("log", fp),
+	}
+}
+
+func GetTaskLogger() *Logger {
+	if taskLogger != nil {
+		return taskLogger
+	}
+	return New(config.C.Log.Task)
+}
+
+func GetAgentLogger() *Logger {
+	if agentLogger != nil {
+		return agentLogger
+	}
+	return New(config.C.Log.Agent)
+}
+
+func GetUserHandlerLogger() *Logger {
+	if userHandlerLogger != nil {
+		return userHandlerLogger
+	}
+	return New(config.C.Log.UserHandler)
+}
+
+func GetAdminHandlerLogger() *Logger {
+	if adminHandlerLogger != nil {
+		return adminHandlerLogger
+	}
+	return New(config.C.Log.AdminHandler)
+}
+
+func MustInit() {
+	taskLogger = GetTaskLogger().MustInit()
+	agentLogger = GetAgentLogger().MustInit()
+	userHandlerLogger = GetUserHandlerLogger().MustInit()
+	adminHandlerLogger = GetAdminHandlerLogger().MustInit()
+}
+
+func (l *Logger) MustInit() *Logger {
+	file, err := os.OpenFile(l.fp, os.O_CREATE|os.O_APPEND|os.O_RDWR, 0666)
 	if err != nil {
-		log.Fatalf("cannot open file: %s, error: %v", fp, err)
+		log.Fatalf("cannot open file: %s, error: %v", l.fp, err)
 	}
 
-	l := logrus.New()
+	l.Logger = logrus.New()
 	l.Out = io.MultiWriter(os.Stdout, file)
 
-	// set log level
-	lv, _ := logrus.ParseLevel(config.C.App.LogLevel)
+	lv, _ := logrus.ParseLevel(config.C.Log.Level)
 	l.SetLevel(lv)
 
 	return l
