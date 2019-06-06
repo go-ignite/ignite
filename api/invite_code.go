@@ -1,10 +1,10 @@
 package api
 
 type InviteCode struct {
-	ID        uint   `json:"id"`
+	ID        int64  `json:"id"`
 	Code      string `json:"invite_code"`
 	Limit     int    `json:"limit"`
-	ExpiredAt Time   `json:"expired_at"`
+	ExpiredAt int64  `json:"expired_at"`
 }
 
 type InviteCodeListRequest struct {
@@ -18,19 +18,8 @@ type InviteCodeListResponse struct {
 	PageIndex int           `json:"page_index"`
 }
 
-func NewInviteCodeListResponse(list []*InviteCode, total int, pageIndex int) *InviteCodeListResponse {
-	if list == nil {
-		list = []*InviteCode{}
-	}
-	return &InviteCodeListResponse{
-		List:      list,
-		Total:     total,
-		PageIndex: pageIndex,
-	}
-}
-
 type GenerateCodesRequest struct {
-	Amount    uint `form:"amount" binding:"required"`
-	Limit     uint `form:"limit" binding:"required"`
-	ExpiredAt Time `json:"expired_at"`
+	Amount    uint  `form:"amount" binding:"required"`
+	Limit     int   `form:"limit" binding:"required"`
+	ExpiredAt int64 `form:"expired_at"`
 }

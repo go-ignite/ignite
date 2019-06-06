@@ -1,6 +1,6 @@
-package handler
+package service
 
-//func verifyUser(dbAPI *api.API, userID int64) (*db.User, error) {
+//func verifyUser(dbAPI *api.API, userID int64) (*db.Service, error) {
 //	user, err := dbAPI.GetUserByID(userID)
 //	if err != nil {
 //		return nil, err
@@ -39,17 +39,17 @@ package handler
 //		return
 //	}
 //
-//	service, err := dbAPI.GetServiceByIDAndUserID(id, userID)
+//	Service, err := dbAPI.GetServiceByIDAndUserID(id, userID)
 //	if err != nil {
 //		c.JSON(http.StatusInternalServerError, models.NewErrorResp(err))
 //		return
 //	}
-//	if service.Id == 0 {
+//	if Service.Id == 0 {
 //		c.JSON(http.StatusNotFound, models.NewErrorResp("服务不存在"))
 //		return
 //	}
 //
-//	ns, err := verifyNode(service.NodeId)
+//	ns, err := verifyNode(Service.NodeId)
 //	if err != nil {
 //		c.JSON(http.StatusOK, models.NewErrorResp(err))
 //		return
@@ -57,29 +57,29 @@ package handler
 //
 //	logger.WithFields(logrus.Fields{
 //		"userID": userID,
-//		"nodeID": service.NodeId,
+//		"nodeID": Service.NodeId,
 //		"id":     id,
-//	}).Info("remove service")
+//	}).Info("remove Service")
 //
-//	if service.ServiceID != "" {
+//	if Service.ServiceID != "" {
 //		if _, err := ns.Client.RemoveService(context.Background(), &pb.RemoveServiceRequest{
 //			Token:     c.GetString("token"),
-//			ServiceId: service.ServiceID,
+//			ServiceId: Service.ServiceID,
 //		}); err != nil {
 //			ns.Logger.WithFields(logrus.Fields{
 //				"error":     err,
-//				"serviceID": service.ServiceID,
-//			}).Error("remove service error")
+//				"serviceID": Service.ServiceID,
+//			}).Error("remove Service error")
 //			c.JSON(http.StatusOK, models.NewErrorResp("删除代理服务失败！"))
 //			return
 //		}
 //	}
 //	if _, err := dbAPI.RemoveServiceByID(id); err != nil {
-//		logger.WithError(err).Error("remove service error")
+//		logger.WithError(err).Error("remove Service error")
 //		c.JSON(http.StatusInternalServerError, models.NewErrorResp("删除服务失败！"))
 //		return
 //	}
-//	ns.RemovePortFromUsedMap(service.Port)
+//	ns.RemovePortFromUsedMap(Service.Port)
 //	c.JSON(http.StatusOK, models.NewSuccessResp(nil, "删除服务成功！"))
 //}
 //
@@ -87,15 +87,15 @@ package handler
 //	dbAPI := api.NewAPI()
 //	services, err := dbAPI.GetServicesByUserIDAndNodeID(userID, nodeID)
 //	if err != nil {
-//		logger.WithError(err).Error("get service list error")
+//		logger.WithError(err).Error("get Service list error")
 //		c.JSON(http.StatusOK, models.NewErrorResp("获取服务列表失败！"))
 //		return
 //	}
 //	servicesInfo := make([]*models.ServiceInfoResp, 0, len(services))
-//	for _, service := range services {
+//	for _, Service := range services {
 //		sir := new(models.ServiceInfoResp)
-//		copier.Copy(sir, service)
-//		sir.Created = service.Created.Unix()
+//		copier.Copy(sir, Service)
+//		sir.Created = Service.Created.Unix()
 //		servicesInfo = append(servicesInfo, sir)
 //	}
 //	c.JSON(http.StatusOK, models.NewSuccessResp(servicesInfo, "获取服务列表成功！"))

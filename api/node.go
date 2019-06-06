@@ -19,6 +19,6 @@ type UpdateNodeRequest struct {
 	Name              string `json:"name" binding:"required"`
 	Comment           string `json:"comment"`
 	ConnectionAddress string `json:"connection_address" binding:"required"`
-	PortFrom          uint   `json:"port_from" binding:"required"`
-	PortTo            uint   `json:"port_to" binding:"required,gtfield=PortFrom"`
+	PortFrom          int    `json:"port_from" binding:"required"`
+	PortTo            int    `json:"port_to" binding:"required,gtfield=PortFrom"`
 }

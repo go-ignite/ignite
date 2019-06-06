@@ -1,6 +1,6 @@
-package handler
+package service
 
-//func (ah *AdminHandler) StopService(c *gin.Context) {
+//func (ah *Service) StopService(c *gin.Context) {
 //	uid, err := strconv.Atoi(c.Param("id"))
 //
 //	if err != nil {
@@ -9,7 +9,7 @@ package handler
 //		return
 //	}
 //
-//	user := new(db.User)
+//	user := new(db.Service)
 //	db.GetDB().Id(uid).Get(user)
 //
 //	//1. Stop user's container
@@ -22,7 +22,7 @@ package handler
 //			return
 //		}
 //
-//		//2. Update service status
+//		//2. Update Service status
 //		user.Status = 2
 //		db.GetDB().Id(uid).Cols("status").Update(user)
 //	}
@@ -31,7 +31,7 @@ package handler
 //	c.JSON(http.StatusOK, resp)
 //}
 //
-//func (ah *AdminHandler) StartServiceHandler(c *gin.Context) {
+//func (ah *Service) StartServiceHandler(c *gin.Context) {
 //	uid, err := strconv.Atoi(c.Param("id"))
 //
 //	if err != nil {
@@ -40,7 +40,7 @@ package handler
 //		return
 //	}
 //
-//	user := new(db.User)
+//	user := new(db.Service)
 //	db.GetDB().Id(uid).Get(user)
 //
 //	//1. Start user's container
@@ -53,7 +53,7 @@ package handler
 //			return
 //		}
 //
-//		//2. Update service status
+//		//2. Update Service status
 //		user.Status = 1
 //		db.GetDB().Id(uid).Cols("status").Update(user)
 //	} else if user.Status == 2 {
@@ -65,7 +65,7 @@ package handler
 //	c.JSON(http.StatusOK, resp)
 //}
 //
-//func (ah *AdminHandler) RenewServiceHandler(c *gin.Context) {
+//func (ah *Service) RenewServiceHandler(c *gin.Context) {
 //	uid, err := strconv.Atoi(c.Param("id"))
 //
 //	if err != nil {
@@ -84,7 +84,7 @@ package handler
 //		return
 //	}
 //
-//	user := new(db.User)
+//	user := new(db.Service)
 //	db.GetDB().Id(uid).Get(user)
 //	if user.Id == 0 {
 //		resp := models.Response{Success: false, Message: "获取用户失败!"}

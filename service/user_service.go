@@ -1,15 +1,15 @@
-package handler
+package service
 
-//func (uh *UserHandler) GetServiceConfig(c *gin.Context) {
+//func (uh *Service) GetServiceConfig(c *gin.Context) {
 //	c.JSON(http.StatusOK, models.NewSuccessResp(agent.GetServiceConfigs()))
 //}
 //
-//func (uh *UserHandler) ListServices(c *gin.Context) {
+//func (uh *Service) ListServices(c *gin.Context) {
 //	userID := int64(c.GetFloat64("id"))
 //	listServices(c, userID, 0, uh.logger)
 //}
 //
-//func (uh *UserHandler) CreateService(c *gin.Context) {
+//func (uh *Service) CreateService(c *gin.Context) {
 //	userID := int64(c.GetFloat64("id"))
 //	dbAPI := api.NewAPI()
 //
@@ -61,11 +61,11 @@ package handler
 //		"type":     req.Type,
 //		"method":   req.Method,
 //		"password": req.Password,
-//	}).Info("create service")
+//	}).Info("create Service")
 //
 //	exists, err := dbAPI.CheckServiceExists(userID, req.NodeID)
 //	if err != nil {
-//		uh.logger.WithError(err).Error("check service error")
+//		uh.logger.WithError(err).Error("check Service error")
 //		c.JSON(http.StatusInternalServerError, models.NewErrorResp("检查服务失败！"))
 //		return
 //	}
@@ -107,7 +107,7 @@ package handler
 //	}
 //	uh.logger.WithField("port", port).Info("agent available port")
 //
-//	// create service from agent
+//	// create Service from agent
 //	agentResp, err := ns.Client.CreateService(context.Background(), &pb.CreateServiceRequest{
 //		Token:    token,
 //		Port:     int32(port),
@@ -118,7 +118,7 @@ package handler
 //	})
 //	if err != nil {
 //		go ns.RemovePortFromUsedMap(port)
-//		ns.Logger.WithError(err).Error("create service error")
+//		ns.Logger.WithError(err).Error("create Service error")
 //		c.JSON(http.StatusOK, models.NewErrorResp("创建代理服务失败！"))
 //		return
 //	}
@@ -126,9 +126,9 @@ package handler
 //	uh.logger.WithFields(logrus.Fields{
 //		"userID":    userID,
 //		"serviceID": agentResp.ServiceId,
-//	}).Info("create service success")
+//	}).Info("create Service success")
 //
-//	service := &db.Service{
+//	Service := &db.Service{
 //		ServiceID: agentResp.ServiceId,
 //		UserId:    userID,
 //		NodeId:    ns.Node.Id,
@@ -138,27 +138,27 @@ package handler
 //		Method:    req.Method,
 //		Status:    1, // TODO change to enum
 //	}
-//	if affected, err := dbAPI.CreateService(service); err != nil || affected == 0 {
+//	if affected, err := dbAPI.CreateService(Service); err != nil || affected == 0 {
 //		go func() {
 //			ns.RemovePortFromUsedMap(port)
 //			ns.Client.RemoveService(context.Background(), &pb.RemoveServiceRequest{
 //				Token:     token,
-//				ServiceId: service.ServiceID,
+//				ServiceId: Service.ServiceID,
 //			})
 //		}()
 //		uh.logger.WithFields(logrus.Fields{
 //			"affected": affected,
 //			"error":    err,
-//		}).Error("create service error")
+//		}).Error("create Service error")
 //		c.JSON(http.StatusInternalServerError, models.NewErrorResp("创建服务失败！"))
 //		return
 //	}
 //
 //	resp := new(models.ServiceInfoResp)
-//	copier.Copy(resp, service)
+//	copier.Copy(resp, Service)
 //	c.JSON(http.StatusOK, models.NewSuccessResp(resp, "创建服务成功！"))
 //}
 //
-//func (uh *UserHandler) RemoveService(c *gin.Context) {
+//func (uh *Service) RemoveService(c *gin.Context) {
 //	removeService(c, uh.logger)
 //}

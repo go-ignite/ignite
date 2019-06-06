@@ -1,10 +1,10 @@
-package handler
+package service
 
-//func (ah *AdminHandler) RemoveService(c *gin.Context) {
+//func (ah *Service) RemoveService(c *gin.Context) {
 //	removeService(c, ah.logger)
 //}
 //
-//func (ah *AdminHandler) ListServices(c *gin.Context) {
+//func (ah *Service) ListServices(c *gin.Context) {
 //	var (
 //		userID, nodeID int64
 //		err            error

@@ -3,15 +3,9 @@ package utils
 import (
 	"crypto/rand"
 	"encoding/base64"
-	"errors"
 	"fmt"
 	"io"
-	"net"
 	"strings"
-	"time"
-
-	jwt "github.com/dgrijalva/jwt-go"
-	"github.com/go-ignite/ignite/config"
 )
 
 var StdChars = []byte("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789")
@@ -65,68 +59,4 @@ func ServiceURL(serviceType, host string, port int, method, password string) str
 func ssbase64Encode(s string) string {
 	encoded := base64.URLEncoding.EncodeToString([]byte(s))
 	return strings.TrimRight(encoded, "=")
-}
-
-func GetAvailablePort(usedPorts *[]int) (int, error) {
-	portMap := map[int]int{}
-
-	for _, p := range *usedPorts {
-		portMap[p] = p
-	}
-
-	from, to := config.C.Host.From, config.C.Host.From
-	for port := from; port <= to; port++ {
-		if _, exists := portMap[port]; exists {
-			continue
-		}
-		conn, err := net.Dial("tcp", fmt.Sprintf(":%d", port))
-		if err != nil {
-			return port, nil
-		}
-		conn.Close()
-	}
-	return 0, errors.New("no port available")
-}
-
-func CreateToken(secret string, id int64) (string, error) {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"id":  id,
-		"exp": time.Now().Add(time.Hour * 1).Unix(),
-	})
-
-	tokenStr, err := token.SignedString([]byte(secret))
-	if err != nil {
-		return "", err
-	}
-	return "Bearer " + tokenStr, nil
-}
-
-func VerifyToken(tokenString string, isAdmin *bool) bool {
-	tokenString = tokenString[7:]
-	token, err := jwt.ParseWithClaims(tokenString, jwt.MapClaims{}, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("Unexpected siging method")
-		}
-		return []byte(config.C.App.Secret), nil
-	})
-	if err != nil {
-		return false
-	}
-	claims, ok := token.Claims.(jwt.MapClaims)
-	if !ok {
-		return false
-	}
-	if !token.Valid {
-		return false
-	}
-	if isAdmin != nil {
-		id, ok := claims["id"].(float64)
-		if !ok {
-			return false
-		}
-		if (*isAdmin && id != -1) || (!*isAdmin && id <= 0) {
-			return false
-		}
-	}
-	return claims.VerifyExpiresAt(time.Now().Unix(), true)
 }

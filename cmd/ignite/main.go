@@ -3,13 +3,11 @@ package main
 import (
 	"flag"
 	"fmt"
+	"log"
 
-	"github.com/go-ignite/ignite/config"
-	"github.com/go-ignite/ignite/handler"
-	"github.com/go-ignite/ignite/logger"
-	"github.com/go-ignite/ignite/models"
-	"github.com/go-ignite/ignite/service"
-	"github.com/go-ignite/ignite/state"
+	"github.com/sirupsen/logrus"
+
+	"github.com/go-ignite/ignite"
 )
 
 var (
@@ -24,24 +22,10 @@ func main() {
 		return
 	}
 
-	// init config
-	config.MustInit()
+	app, err := ignite.Init()
+	if err != nil {
+		logrus.WithError(err).Fatal()
+	}
 
-	// init logger
-	logger.MustInit()
-
-	// init db
-	models.MustInitDB()
-
-	// init loader
-	state.MustLoad()
-
-	// start task
-	//task.New().AsyncRun()
-
-	// start service
-	service.New(
-		handler.NewUserHandler(),
-		handler.NewAdminHandler(),
-	).Init().Run()
+	log.Fatal(app.Start())
 }

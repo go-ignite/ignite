@@ -1,4 +1,4 @@
-package models
+package model
 
 import (
 	"errors"
@@ -16,14 +16,14 @@ type Node struct {
 	Comment           string `gorm:"type:varchar(100)"`
 	RequestAddress    string `gorm:"type:varchar(20)"`
 	ConnectionAddress string `gorm:"type:varchar(20)"`
-	PortFrom          uint
-	PortTo            uint
+	PortFrom          int
+	PortTo            int
 	CreatedAt         time.Time
 	UpdatedAt         time.Time
 	DeletedAt         *time.Time `sql:"index"`
 }
 
-func NewNode(name, comment, requestAddress, connectionAddress string, portFrom, portTo uint) *Node {
+func NewNode(name, comment, requestAddress, connectionAddress string, portFrom, portTo int) *Node {
 	return &Node{
 		ID:                shortuuid.New(),
 		Name:              name,
@@ -35,18 +35,21 @@ func NewNode(name, comment, requestAddress, connectionAddress string, portFrom, 
 	}
 }
 
-func GetAllNodes() ([]*Node, error) {
+func (h *Handler) GetAllNodes() ([]*Node, error) {
 	var nodes []*Node
-	return nodes, db.Find(&nodes).Error
+	if err := h.db.Find(&nodes).Error; err != nil {
+		return nil, err
+	}
+
+	return nodes, nil
 }
 
-func (n *Node) Save() error {
-	return db.Omit("request_address").Save(n).Error
+func (h *Handler) SaveNode(n *Node) error {
+	return h.db.Omit("request_address").Save(n).Error
 }
 
-func (n *Node) Create() error {
-	tx := db.Begin()
-	return runTx(tx, func() error {
+func (h *Handler) CreateNode(n *Node) error {
+	return h.runTX(func(tx *gorm.DB) error {
 		if n.checkIfNameExist(tx) {
 			return ErrDuplicateNodeName
 		}
@@ -54,26 +57,30 @@ func (n *Node) Create() error {
 	})
 }
 
-func CheckIfNodeNameExist(name string) bool {
+func (h *Handler) CheckIfNodeNameExist(name string) bool {
 	n := &Node{Name: name}
-	return n.checkIfNameExist(db)
+	return n.checkIfNameExist(h.db)
 }
 
-func (n *Node) checkIfNameExist(session *gorm.DB) bool {
+func (n *Node) checkIfNameExist(db *gorm.DB) bool {
 	count := 0
-	session.Model(new(Node)).Where("name = ?", n.Name).Count(&count)
+	db.Model(new(Node)).Where("name = ?", n.Name).Count(&count)
 	return count > 0
 }
 
-func GetNodeByID(id string) (*Node, error) {
+func (h *Handler) GetNode(id string) (*Node, error) {
 	node := new(Node)
-	r := db.First(node, id)
+	r := h.db.First(node, id)
 	if r.RecordNotFound() {
 		return nil, nil
 	}
-	return node, r.Error
+	if r.Error != nil {
+		return nil, r.Error
+	}
+
+	return node, nil
 }
 
-func DeleteNodeByID(id string) error {
-	return db.Delete(new(Node), "id = ?", id).Error
+func (h *Handler) DeleteNode(id string) error {
+	return h.db.Delete(&Node{ID: id}).Error
 }

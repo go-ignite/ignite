@@ -8,9 +8,3 @@ type AdminLoginRequest struct {
 type AdminLoginResponse struct {
 	Token string `json:"token"`
 }
-
-func NewAdminLoginResponse(token string) *AdminLoginResponse {
-	return &AdminLoginResponse{
-		Token: token,
-	}
-}

@@ -1,111 +1,88 @@
 package state
 
 import (
+	"context"
 	"sync"
-	"time"
 
-	"github.com/go-ignite/ignite/agent"
-	"github.com/go-ignite/ignite/logger"
-	"github.com/go-ignite/ignite/models"
+	"github.com/google/wire"
+
+	"github.com/go-ignite/ignite-agent/protos"
+	"github.com/go-ignite/ignite/config"
+	"github.com/go-ignite/ignite/model"
 )
 
-var loader *Loader
+var Set = wire.NewSet(wire.Struct(new(Options), "*"), Init)
 
-type Loader struct {
-	sync.RWMutex
-	nodeStatusMap map[string]*NodeStatus
-	logger        *logger.Logger
+type Handler struct {
+	nodes sync.Map
+	opts  *Options
 }
 
-func NewLoader() *Loader {
-	return &Loader{
-		nodeStatusMap: make(map[string]*NodeStatus),
-		logger:        logger.GetAgentLogger(),
+type Options struct {
+	Config       *config.State
+	ModelHandler *model.Handler
+}
+
+func Init(opts *Options) (*Handler, error) {
+	h := &Handler{
+		opts: opts,
 	}
-}
 
-func GetLoader() *Loader {
-	return loader
-}
-
-func MustLoad() {
-	loader = NewLoader()
-	nodes, err := models.GetAllNodes()
+	nodes, err := h.opts.ModelHandler.GetAllNodes()
 	if err != nil {
-		loader.logger.WithError(err).Fatal("models.GetAllNodes error")
-	}
-	services, err := models.GetAllServices()
-	if err != nil {
-		loader.logger.WithError(err).Fatal("models.GetAllServices error")
+		return nil, err
 	}
 
-	nodeIDServicesMap := services.GetNodeIDServicesMap()
+	services, err := h.opts.ModelHandler.GetServices()
+	if err != nil {
+		return nil, err
+	}
+
+	nodeServices := map[string][]*model.Service{}
+	for _, s := range services {
+		nodeServices[s.NodeID] = append(nodeServices[s.NodeID], s)
+	}
 	for _, node := range nodes {
-		ns := NewNodeStatus(node, agent.NewClient(node.RequestAddress), nodeIDServicesMap[node.ID].GetPortMap())
-		go loader.WatchNodeStatus(ns)
-		loader.nodeStatusMap[node.ID] = ns
-	}
-}
-
-func (l *Loader) WatchNodeStatus(ns *NodeStatus) {
-	ns.watching = true
-	for ns.watching {
-		if err := ns.Heartbeat(); err != nil {
-			l.logger.WithError(err).WithField("nodeID", ns.node.ID).Error("node status Heartbeat error")
-			// TODO should be configurable
-			time.Sleep(5 * time.Second)
+		n, err := newNode(node, nodeServices[node.ID])
+		if err != nil {
+			return nil, err
 		}
+		h.nodes.Store(node.ID, n)
 	}
+
+	return h, nil
 }
 
-func (l *Loader) NodeIsAvailable(nodeID string) bool {
-	l.RLock()
-	defer l.RUnlock()
+func (h *Handler) Start() {
+	h.nodes.Range(func(_, n interface{}) bool {
+		go n.(*Node).sync()
+		return true
+	})
+}
 
-	ns, ok := l.nodeStatusMap[nodeID]
+func (h *Handler) AddNode(ctx context.Context, token string, node *model.Node) error {
+	n, err := newNode(node, nil)
+	if err != nil {
+		return err
+	}
+
+	if _, err := n.client.Init(ctx, &protos.GeneralRequest{}); err != nil {
+		return err
+	}
+
+	go n.sync()
+	return nil
+}
+
+func (h *Handler) RemoveNode(nodeID string) {
+	n, ok := h.nodes.Load(nodeID)
 	if !ok {
-		return false
+		return
 	}
 
-	return ns.available
-}
+	node := n.(*Node)
 
-func (l *Loader) NodeAvailableMap() map[string]bool {
-	l.RLock()
-	defer l.RUnlock()
+	// TODO remove containers
 
-	nam := map[string]bool{}
-	for nodeID, ns := range l.nodeStatusMap {
-		nam[nodeID] = ns.available
-	}
-
-	return nam
-}
-
-func (l *Loader) DeleteNodeStatus(id string) {
-	l.Lock()
-	defer l.Unlock()
-
-	ns := l.nodeStatusMap[id]
-	if ns != nil {
-		ns.watching = false
-		ns.client.Close()
-		delete(l.nodeStatusMap, id)
-	}
-}
-
-func (l *Loader) AddNodeStatus(ns *NodeStatus) {
-	l.Lock()
-	defer l.Unlock()
-
-	ns.logger = logger.GetAgentLogger()
-	l.nodeStatusMap[ns.node.ID] = ns
-	go l.WatchNodeStatus(ns)
-}
-
-func (l *Loader) GetNodeStatus(nodeID string) *NodeStatus {
-	l.Lock()
-	defer l.Unlock()
-
-	return l.nodeStatusMap[nodeID]
+	node.stopSync()
 }
