@@ -10,7 +10,6 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/dgrijalva/jwt-go/request"
 	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
 
 	"github.com/go-ignite/ignite/api"
 	"github.com/go-ignite/ignite/config"
@@ -41,18 +40,13 @@ func (s *Service) errJSON(c *gin.Context, statusCode int, err error, codes ...in
 	if len(codes) > 0 {
 		code = codes[0]
 	}
+
 	message := http.StatusText(statusCode)
 	if err != nil {
 		message = err.Error()
 	}
 
-	resp := api.NewErrResponse(code, message)
-	logrus.WithFields(logrus.Fields{
-		"resp":       resp,
-		"statusCode": statusCode,
-	}).Error(c.Request.URL.String())
-
-	c.JSON(code, resp)
+	c.JSON(code, api.NewErrResponse(code, message))
 }
 
 func (s *Service) createToken(id string) (string, error) {
@@ -61,7 +55,7 @@ func (s *Service) createToken(id string) (string, error) {
 		"exp": time.Now().Add(time.Hour * 1).Unix(),
 	})
 
-	tokenStr, err := token.SignedString([]byte(s.opts.Config.JWTSecret))
+	tokenStr, err := token.SignedString([]byte(s.opts.Config.Secret))
 	if err != nil {
 		return "", err
 	}
@@ -72,7 +66,7 @@ func (s *Service) createToken(id string) (string, error) {
 func (s *Service) Auth(isAdmin bool) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		token, err := request.ParseFromRequest(c.Request, request.AuthorizationHeaderExtractor, func(token *jwt.Token) (interface{}, error) {
-			b := []byte(s.opts.Config.JWTSecret)
+			b := []byte(s.opts.Config.Secret)
 			return b, nil
 		})
 		if err != nil {

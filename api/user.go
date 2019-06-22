@@ -27,10 +27,9 @@ type UserLoginResponse struct {
 }
 
 type UserRegisterRequest struct {
-	InviteCode      string `form:"invite_code" binding:"required"`
-	Username        string `form:"username" binding:"required"`
-	Password        string `form:"password" binding:"required"`
-	ConfirmPassword string `form:"confirm_password" binding:"required"`
+	InviteCode string `json:"invite_code" form:"invite_code" binding:"required"`
+	Username   string `json:"username" form:"username" binding:"required"`
+	Password   string `json:"password" form:"password" binding:"required"`
 }
 
 type UserResisterResponse struct {

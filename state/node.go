@@ -51,31 +51,33 @@ func (ns *Node) sync() {
 		cancel()
 	}()
 
-	for {
-		if err := func() error {
-			streamClient, err := ns.client.NodeHeartbeat(ctx, new(pb.GeneralRequest))
-			if err != nil {
-				return err
-			}
-
-			for {
-				if _, err := streamClient.Recv(); err != nil {
-					ns.available = false
+	go func() {
+		for {
+			if err := func() error {
+				streamClient, err := ns.client.NodeHeartbeat(ctx, new(pb.GeneralRequest))
+				if err != nil {
 					return err
-				} else {
-					ns.available = true
 				}
-			}
-		}(); err != nil {
-			if err == context.Canceled {
-				break
+
+				for {
+					if _, err := streamClient.Recv(); err != nil {
+						ns.available = false
+						return err
+					} else {
+						ns.available = true
+					}
+				}
+			}(); err != nil {
+				if err == context.Canceled {
+					break
+				}
+
+				logrus.WithError(err).WithField("nodeID", ns.node.ID).Error("state: node sync error")
 			}
 
-			logrus.WithError(err).WithField("nodeID", ns.node.ID).Error("state: node sync error")
+			time.Sleep(3 * time.Second)
 		}
-
-		time.Sleep(3 * time.Second)
-	}
+	}()
 
 	ns.done <- struct{}{}
 }

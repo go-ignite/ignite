@@ -5,6 +5,7 @@ import (
 
 	"github.com/jinzhu/gorm"
 
+	"github.com/go-ignite/ignite/api"
 	"github.com/go-ignite/ignite/utils"
 )
 
@@ -25,6 +26,16 @@ func NewInviteCode(limit int, expiredAt time.Time) *InviteCode {
 		Limit:     limit,
 		ExpiredAt: expiredAt,
 		Available: true,
+	}
+}
+
+func (ic InviteCode) Output() *api.InviteCode {
+	return &api.InviteCode{
+		ID:        ic.ID,
+		Code:      ic.Code,
+		Limit:     ic.Limit,
+		ExpiredAt: ic.ExpiredAt,
+		CreatedAt: ic.CreatedAt,
 	}
 }
 

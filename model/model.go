@@ -26,6 +26,10 @@ func InitHandler(config *config.Model) (*Handler, error) {
 		return nil, errors.Wrap(err, "model: connect to db failed")
 	}
 
+	if config.Debug {
+		db.LogMode(true)
+	}
+
 	if err := db.AutoMigrate(new(User), new(InviteCode), new(Node), new(Service)).Error; err != nil {
 		return nil, errors.Wrap(err, "model: db migration error")
 	}

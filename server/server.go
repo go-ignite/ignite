@@ -22,7 +22,7 @@ type Options struct {
 
 func New(opts *Options) *Server {
 	s := &Server{
-		engine: gin.New(),
+		engine: gin.Default(),
 		opts:   opts,
 	}
 

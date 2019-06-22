@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
@@ -92,7 +91,7 @@ func (s *Service) DestroyAccount(c *gin.Context) {
 // --- invite code
 
 func (s *Service) GetInviteCodeList(c *gin.Context) {
-	req := new(api.InviteCodeListRequest)
+	req := new(api.PagingRequest)
 	if err := c.ShouldBind(req); err != nil {
 		s.errJSON(c, http.StatusBadRequest, err)
 		return
@@ -104,20 +103,15 @@ func (s *Service) GetInviteCodeList(c *gin.Context) {
 		return
 	}
 
-	resp := make([]*api.InviteCode, len(inviteCodes))
+	resp := make([]*api.InviteCode, 0, len(inviteCodes))
 	for _, ic := range inviteCodes {
-		resp = append(resp, &api.InviteCode{
-			ID:        ic.ID,
-			Code:      ic.Code,
-			Limit:     ic.Limit,
-			ExpiredAt: ic.ExpiredAt.Unix(),
-		})
+		resp = append(resp, ic.Output())
 	}
 
-	c.JSON(http.StatusOK, api.InviteCodeListResponse{
-		List:      resp,
-		Total:     total,
-		PageIndex: req.PageIndex,
+	c.JSON(http.StatusOK, api.PagingResponse{
+		List:          resp,
+		Total:         total,
+		PagingRequest: *req,
 	})
 }
 
@@ -144,8 +138,9 @@ func (s *Service) GenerateInviteCodes(c *gin.Context) {
 
 	var codes []*model.InviteCode
 	for i := 0; i < int(req.Amount); i++ {
-		codes = append(codes, model.NewInviteCode(req.Limit, time.Unix(req.ExpiredAt, 0)))
+		codes = append(codes, model.NewInviteCode(req.Limit, req.ExpiredAt))
 	}
+
 	if err := s.opts.ModelHandler.CreateInviteCodes(codes); err != nil {
 		s.errJSON(c, http.StatusInternalServerError, err)
 		return

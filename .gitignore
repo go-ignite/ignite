@@ -1,6 +1,6 @@
 .DS_Store
 data
 vendor
-log
 .idea
 /ignite
+/.env
