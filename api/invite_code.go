@@ -11,7 +11,7 @@ type InviteCode struct {
 }
 
 type GenerateCodesRequest struct {
-	Amount    uint      `json:"amount" form:"amount" binding:"required"`
-	Limit     int       `json:"limit" form:"limit" binding:"required"`
-	ExpiredAt time.Time `json:"expired_at" form:"expired_at" binding:"required"`
+	Amount    uint      `json:"amount" binding:"required"`
+	Limit     int       `json:"limit" binding:"required"`
+	ExpiredAt time.Time `json:"expired_at" binding:"required"`
 }

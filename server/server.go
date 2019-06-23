@@ -55,9 +55,9 @@ func New(opts *Options) *Server {
 		adminRouter.Use(s.opts.Service.Auth(true))
 		{
 			//user account related operations
-			//authRouter.GET("/status_list", adminHandler.PanelStatusListHandler)
-			// authRouter.PUT("/:id/reset", r.ResetAccountHandler)
-			// authRouter.PUT("/:id/destroy", r.DestroyAccountHandler)
+			adminRouter.GET("/accounts", s.opts.Service.GetAccountList)
+			//adminRouter.PUT("/accounts/:id/reset", s.opts.Service.ResetAccountHand)
+			adminRouter.DELETE("/accounts/:id", s.opts.Service.DestroyAccount)
 			// authRouter.PUT("/:id/stop", r.StopServiceHandler)
 			// authRouter.PUT("/:id/start", r.StartServiceHandler)
 			// authRouter.PUT("/:id/renew", r.RenewServiceHandler)

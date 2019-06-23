@@ -4,9 +4,9 @@ import (
 	"time"
 
 	"github.com/jinzhu/gorm"
+	"github.com/lithammer/shortuuid"
 
 	"github.com/go-ignite/ignite/api"
-	"github.com/go-ignite/ignite/utils"
 )
 
 type InviteCode struct {
@@ -22,7 +22,7 @@ type InviteCode struct {
 
 func NewInviteCode(limit int, expiredAt time.Time) *InviteCode {
 	return &InviteCode{
-		Code:      utils.RandString(16),
+		Code:      shortuuid.New(),
 		Limit:     limit,
 		ExpiredAt: expiredAt,
 		Available: true,
@@ -49,16 +49,6 @@ func (h *Handler) CreateInviteCodes(inviteCodes []*InviteCode) error {
 
 		return nil
 	})
-}
-
-func (h *Handler) GetInviteCode(code string) (*InviteCode, error) {
-	iv := new(InviteCode)
-	r := h.db.First(iv, "code = ? AND available = 1", code)
-	if r.RecordNotFound() {
-		return nil, nil
-	}
-
-	return iv, r.Error
 }
 
 func (h *Handler) DeleteInviteCode(id int64) error {

@@ -10,8 +10,7 @@ import (
 )
 
 type Handler struct {
-	db     *gorm.DB
-	config *config.Model
+	db *gorm.DB
 }
 
 func InitHandler(config *config.Model) (*Handler, error) {
@@ -34,7 +33,11 @@ func InitHandler(config *config.Model) (*Handler, error) {
 		return nil, errors.Wrap(err, "model: db migration error")
 	}
 
-	return &Handler{db: db}, nil
+	return newHandler(db), nil
+}
+
+func newHandler(db *gorm.DB) *Handler {
+	return &Handler{db: db}
 }
 
 func (h *Handler) runTX(f func(tx *gorm.DB) error) error {

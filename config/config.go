@@ -23,9 +23,10 @@ type Server struct {
 }
 
 type Service struct {
-	AdminUsername string `mapstructure:"admin_username"`
-	AdminPassword string `mapstructure:"admin_password"`
-	Secret        string `mapstructure:"secret"`
+	AdminUsername string        `mapstructure:"admin_username"`
+	AdminPassword string        `mapstructure:"admin_password"`
+	Secret        string        `mapstructure:"secret"`
+	TokenDuration time.Duration `mapstructure:"token_duration"`
 }
 
 type Model struct {
@@ -56,6 +57,7 @@ func Init() (*Config, error) {
 	viper.SetDefault("service.secret", "ignite")
 	viper.SetDefault("service.admin_username", "admin")
 	viper.SetDefault("service.admin_password", "changeme")
+	viper.SetDefault("service.token_duration", 24*time.Hour)
 
 	viper.SetDefault("model.driver", "sqlite3")
 	viper.SetDefault("model.connect", "./data/ignite.db")

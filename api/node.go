@@ -1,13 +1,16 @@
 package api
 
+import "time"
+
 type Node struct {
-	ID                string `json:"id"`
-	Name              string `json:"name"`
-	Comment           string `json:"comment"`
-	RequestAddress    string `json:"request_address"`
-	ConnectionAddress string `json:"connection_address"`
-	PortFrom          int    `json:"port_from"`
-	PortTo            int    `json:"port_to"`
+	ID                string    `json:"id"`
+	Name              string    `json:"name"`
+	Comment           string    `json:"comment"`
+	RequestAddress    string    `json:"request_address"`
+	ConnectionAddress string    `json:"connection_address"`
+	PortFrom          int       `json:"port_from"`
+	PortTo            int       `json:"port_to"`
+	CreatedAt         time.Time `json:"created_at"`
 }
 
 type AddNodeRequest struct {

@@ -46,13 +46,13 @@ func (s *Service) errJSON(c *gin.Context, statusCode int, err error, codes ...in
 		message = err.Error()
 	}
 
-	c.JSON(code, api.NewErrResponse(code, message))
+	c.JSON(statusCode, api.NewErrResponse(code, message))
 }
 
 func (s *Service) createToken(id string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"id":  id,
-		"exp": time.Now().Add(time.Hour * 1).Unix(),
+		"exp": time.Now().Add(s.opts.Config.TokenDuration).Unix(),
 	})
 
 	tokenStr, err := token.SignedString([]byte(s.opts.Config.Secret))

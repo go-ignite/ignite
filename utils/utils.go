@@ -1,41 +1,10 @@
 package utils
 
 import (
-	"crypto/rand"
 	"encoding/base64"
 	"fmt"
-	"io"
 	"strings"
 )
-
-var StdChars = []byte("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789")
-
-func RandString(length int) string {
-	return randChar(length, StdChars)
-}
-
-func randChar(length int, chars []byte) string {
-	new_pword := make([]byte, length)
-	random_data := make([]byte, length+(length/4)) // storage for random bytes.
-	clen := byte(len(chars))
-	maxrb := byte(256 - (256 % len(chars)))
-	i := 0
-	for {
-		if _, err := io.ReadFull(rand.Reader, random_data); err != nil {
-			panic(err)
-		}
-		for _, c := range random_data {
-			if c >= maxrb {
-				continue
-			}
-			new_pword[i] = chars[c%clen]
-			i++
-			if i == length {
-				return string(new_pword)
-			}
-		}
-	}
-}
 
 func ServiceURL(serviceType, host string, port int, method, password string) string {
 	var protocol, base64Link string

@@ -1,12 +1,11 @@
 package service
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/pkg/errors"
+	"github.com/jinzhu/gorm"
 
 	"github.com/go-ignite/ignite/api"
 	"github.com/go-ignite/ignite/model"
@@ -38,7 +37,7 @@ func (s *Service) AdminLogin(c *gin.Context) {
 // --- account
 
 func (s *Service) GetAccountList(c *gin.Context) {
-	req := new(api.UserListRequest)
+	req := new(api.PagingRequest)
 	if err := c.ShouldBind(req); err != nil {
 		s.errJSON(c, http.StatusBadRequest, err)
 		return
@@ -50,37 +49,27 @@ func (s *Service) GetAccountList(c *gin.Context) {
 		return
 	}
 
-	resp := make([]*api.User, len(users))
+	resp := make([]*api.User, 0, len(users))
 	for _, user := range users {
-		resp = append(resp, &api.User{
-			ID:   user.ID,
-			Name: user.Name,
-		})
+		resp = append(resp, user.Output())
 	}
 
-	c.JSON(http.StatusOK, api.UserListResponse{
-		List:      resp,
-		Total:     total,
-		PageIndex: req.PageIndex,
+	c.JSON(http.StatusOK, api.PagingResponse{
+		List:          resp,
+		Total:         total,
+		PagingRequest: *req,
 	})
 }
 
 func (s *Service) DestroyAccount(c *gin.Context) {
 	userID := c.Param("id")
-	user, err := s.opts.ModelHandler.GetUserByID(userID)
-	if err != nil {
-		s.errJSON(c, http.StatusInternalServerError, err)
-		return
+
+	f := func() error {
+		// TODO clean up containers
+		return nil
 	}
 
-	if user == nil {
-		c.JSON(http.StatusNoContent, nil)
-		return
-	}
-
-	// TODO clean up service containers
-
-	if err := s.opts.ModelHandler.DestroyUser(user.ID); err != nil {
+	if err := s.opts.ModelHandler.DestroyUser(userID, f); err != nil {
 		s.errJSON(c, http.StatusInternalServerError, err)
 		return
 	}
@@ -121,6 +110,7 @@ func (s *Service) RemoveInviteCode(c *gin.Context) {
 		s.errJSON(c, http.StatusBadRequest, err)
 		return
 	}
+
 	if err := s.opts.ModelHandler.DeleteInviteCode(id); err != nil {
 		s.errJSON(c, http.StatusInternalServerError, err)
 		return
@@ -151,41 +141,33 @@ func (s *Service) GenerateInviteCodes(c *gin.Context) {
 
 // --- node
 
-// 1 -> cannot connect to node
-// 2 -> cannot init node
-// 3 -> node name already exists
 func (s *Service) AddNode(c *gin.Context) {
 	req := new(api.AddNodeRequest)
 	if err := c.ShouldBind(req); err != nil {
 		s.errJSON(c, http.StatusBadRequest, err)
 		return
 	}
-	if s.opts.ModelHandler.CheckIfNodeNameExist(req.Name) {
-		s.errJSON(c, http.StatusBadRequest, model.ErrDuplicateNodeName, 3)
-		return
-	}
 
-	// TODO ping and init node, sync with node
+	f := func() error {
+		// TODO init node and start sync
+		return nil
+	}
 
 	node := model.NewNode(req.Name, req.Comment, req.RequestAddress, req.ConnectionAddress, req.PortFrom, req.PortTo)
-	if err := s.opts.ModelHandler.CreateNode(node); err != nil {
-		if err == model.ErrDuplicateNodeName {
-			s.errJSON(c, http.StatusBadRequest, model.ErrDuplicateNodeName, 3)
-		} else {
-			s.errJSON(c, http.StatusInternalServerError, errors.Wrap(err, "create node error"))
+	if err := s.opts.ModelHandler.CreateNode(node, f); err != nil {
+		switch err {
+		case model.ErrNodeNameExists:
+			s.errJSON(c, http.StatusBadRequest, err, 1)
+		case model.ErrNodeRequestAddressExists:
+			s.errJSON(c, http.StatusBadRequest, err, 2)
+		default:
+			s.errJSON(c, http.StatusInternalServerError, err)
 		}
+
 		return
 	}
 
-	c.JSON(http.StatusCreated, &api.Node{
-		ID:                node.ID,
-		Name:              node.Name,
-		Comment:           node.Comment,
-		RequestAddress:    node.RequestAddress,
-		ConnectionAddress: node.ConnectionAddress,
-		PortFrom:          node.PortFrom,
-		PortTo:            node.PortTo,
-	})
+	c.JSON(http.StatusCreated, node.Output())
 }
 
 func (s *Service) GetAllNodes(c *gin.Context) {
@@ -195,17 +177,9 @@ func (s *Service) GetAllNodes(c *gin.Context) {
 		return
 	}
 
-	resp := make([]*api.Node, len(nodes))
+	resp := make([]*api.Node, 0, len(nodes))
 	for _, node := range nodes {
-		resp = append(resp, &api.Node{
-			ID:                node.ID,
-			Name:              node.Name,
-			Comment:           node.Comment,
-			RequestAddress:    node.RequestAddress,
-			ConnectionAddress: node.ConnectionAddress,
-			PortFrom:          node.PortFrom,
-			PortTo:            node.PortTo,
-		})
+		resp = append(resp, node.Output())
 	}
 
 	c.JSON(http.StatusOK, resp)
@@ -213,17 +187,20 @@ func (s *Service) GetAllNodes(c *gin.Context) {
 
 func (s *Service) DeleteNode(c *gin.Context) {
 	id := c.Param("id")
-	if err := s.opts.ModelHandler.DeleteNode(id); err != nil {
+
+	f := func() error {
+		// TODO remove containers of node and stop sync
+		return nil
+	}
+
+	if err := s.opts.ModelHandler.DeleteNode(id, f); err != nil {
 		s.errJSON(c, http.StatusInternalServerError, err)
 		return
 	}
 
-	// TODO cancel node monitor
-
 	c.JSON(http.StatusNoContent, nil)
 }
 
-// 1 -> there are services outside the port range
 func (s *Service) UpdateNode(c *gin.Context) {
 	req := new(api.UpdateNodeRequest)
 	if err := c.ShouldBind(req); err != nil {
@@ -231,27 +208,25 @@ func (s *Service) UpdateNode(c *gin.Context) {
 		return
 	}
 
-	id := c.Param("id")
-	count, err := s.opts.ModelHandler.GetNodePortRangeServiceCount(id, req.PortFrom, req.PortTo)
-	if err != nil {
-		s.errJSON(c, http.StatusInternalServerError, err)
-		return
-	}
-	if count > 0 {
-		s.errJSON(c, http.StatusBadRequest, fmt.Errorf("there are %d services outside the port range", count), 1)
-		return
-	}
-
 	node := &model.Node{
-		ID:                id,
+		ID:                c.Param("id"),
 		Name:              req.Name,
 		Comment:           req.Comment,
 		ConnectionAddress: req.ConnectionAddress,
 		PortFrom:          req.PortFrom,
 		PortTo:            req.PortTo,
 	}
-	if err := s.opts.ModelHandler.SaveNode(node); err != nil {
-		s.errJSON(c, http.StatusInternalServerError, err)
+
+	if err := s.opts.ModelHandler.UpdateNode(node); err != nil {
+		switch err {
+		case gorm.ErrRecordNotFound:
+			s.errJSON(c, http.StatusNotFound, err)
+		case model.ErrNodeHasServicesExceedPortRange:
+			s.errJSON(c, http.StatusBadRequest, err, 1)
+		default:
+			s.errJSON(c, http.StatusInternalServerError, err)
+		}
+
 		return
 	}
 

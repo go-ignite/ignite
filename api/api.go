@@ -1,8 +1,9 @@
 package api
 
 type PagingRequest struct {
-	PageIndex int `form:"page_index" json:"page_index"`
-	PageSize  int `form:"page_size" json:"page_size"`
+	Keyword   string `form:"keyword" json:"keyword,omitempty"`
+	PageIndex int    `form:"page_index" json:"page_index"`
+	PageSize  int    `form:"page_size" json:"page_size"`
 }
 
 type PagingResponse struct {

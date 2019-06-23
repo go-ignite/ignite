@@ -17,18 +17,18 @@ func (s *Service) UserLogin(c *gin.Context) {
 		return
 	}
 
-	hashedPass, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
-	if err != nil {
-		s.errJSON(c, http.StatusInternalServerError, err)
-		return
-	}
-	user, err := s.opts.ModelHandler.GetUserByNameAndPassword(req.Username, hashedPass)
+	user, err := s.opts.ModelHandler.GetUserByName(req.Username)
 	if err != nil {
 		s.errJSON(c, http.StatusInternalServerError, err)
 		return
 	}
 
 	if user == nil {
+		s.errJSON(c, http.StatusUnauthorized, nil)
+		return
+	}
+
+	if err := bcrypt.CompareHashAndPassword(user.HashedPwd, []byte(req.Password)); err != nil {
 		s.errJSON(c, http.StatusUnauthorized, nil)
 		return
 	}
@@ -42,21 +42,10 @@ func (s *Service) UserLogin(c *gin.Context) {
 	c.JSON(http.StatusOK, &api.UserLoginResponse{Token: token})
 }
 
-// 1 -> invite code not found
 func (s *Service) UserRegister(c *gin.Context) {
 	req := new(api.UserRegisterRequest)
 	if err := c.ShouldBind(req); err != nil {
 		s.errJSON(c, http.StatusBadRequest, err)
-		return
-	}
-
-	ic, err := s.opts.ModelHandler.GetInviteCode(req.InviteCode)
-	if err != nil {
-		s.errJSON(c, http.StatusInternalServerError, err)
-		return
-	}
-	if ic == nil {
-		s.errJSON(c, http.StatusBadRequest, err, 1)
 		return
 	}
 
@@ -66,9 +55,19 @@ func (s *Service) UserRegister(c *gin.Context) {
 		return
 	}
 
-	user := model.NewUser(req.Username, hashedPass, ic.ID)
-	if err := s.opts.ModelHandler.CreateUser(user); err != nil {
-		s.errJSON(c, http.StatusInternalServerError, err)
+	user := model.NewUser(req.Username, hashedPass)
+	if err := s.opts.ModelHandler.CreateUser(user, req.InviteCode); err != nil {
+		switch err {
+		case model.ErrInviteCodeNotExistOrUnavailable:
+			s.errJSON(c, http.StatusPreconditionFailed, err, 1)
+		case model.ErrInviteCodeExpired:
+			s.errJSON(c, http.StatusPreconditionFailed, err, 2)
+		case model.ErrUserNameExists:
+			s.errJSON(c, http.StatusPreconditionFailed, err, 3)
+		default:
+			s.errJSON(c, http.StatusInternalServerError, err)
+		}
+
 		return
 	}
 
