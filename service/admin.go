@@ -148,12 +148,11 @@ func (s *Service) AddNode(c *gin.Context) {
 		return
 	}
 
+	node := model.NewNode(req.Name, req.Comment, req.RequestAddress, req.ConnectionAddress, req.PortFrom, req.PortTo)
 	f := func() error {
-		// TODO init node and start sync
-		return nil
+		return s.opts.StateHandler.AddNode(c.Request.Context(), node)
 	}
 
-	node := model.NewNode(req.Name, req.Comment, req.RequestAddress, req.ConnectionAddress, req.PortFrom, req.PortTo)
 	if err := s.opts.ModelHandler.CreateNode(node, f); err != nil {
 		switch err {
 		case model.ErrNodeNameExists:
@@ -189,7 +188,7 @@ func (s *Service) DeleteNode(c *gin.Context) {
 	id := c.Param("id")
 
 	f := func() error {
-		// TODO remove containers of node and stop sync
+		s.opts.StateHandler.RemoveNode(id)
 		return nil
 	}
 

@@ -60,17 +60,19 @@ func (h *Handler) Start() {
 	})
 }
 
-func (h *Handler) AddNode(ctx context.Context, token string, node *model.Node) error {
+func (h *Handler) AddNode(ctx context.Context, node *model.Node) error {
 	n, err := newNode(node, nil)
 	if err != nil {
 		return err
 	}
 
-	if _, err := n.client.Init(ctx, &protos.GeneralRequest{}); err != nil {
+	if _, err := n.client.Init(ctx, new(protos.GeneralRequest)); err != nil {
 		return err
 	}
 
 	go n.sync()
+	h.nodes.Store(n.node.ID, n)
+
 	return nil
 }
 
@@ -80,9 +82,6 @@ func (h *Handler) RemoveNode(nodeID string) {
 		return
 	}
 
-	node := n.(*Node)
-
-	// TODO remove containers
-
-	node.stopSync()
+	n.(*Node).stopSync()
+	h.nodes.Delete(nodeID)
 }
