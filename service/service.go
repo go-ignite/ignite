@@ -5,11 +5,10 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/google/wire"
-
 	"github.com/dgrijalva/jwt-go"
 	"github.com/dgrijalva/jwt-go/request"
 	"github.com/gin-gonic/gin"
+	"github.com/google/wire"
 
 	"github.com/go-ignite/ignite/api"
 	"github.com/go-ignite/ignite/config"
@@ -22,7 +21,7 @@ var Set = wire.NewSet(wire.Struct(new(Options), "*"), New)
 type Options struct {
 	StateHandler *state.Handler
 	ModelHandler *model.Handler
-	Config       *config.Service
+	Config       config.Service
 }
 
 type Service struct {

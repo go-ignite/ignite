@@ -18,7 +18,7 @@ var (
 
 type Node struct {
 	ID                string `gorm:"primary_key"`
-	Name              string `gorm:"type:varchar(20);unique_index"`
+	Name              string `gorm:"type:varchar(20)"`
 	Comment           string `gorm:"type:varchar(100)"`
 	RequestAddress    string `gorm:"type:varchar(20)"`
 	ConnectionAddress string `gorm:"type:varchar(20)"`

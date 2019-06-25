@@ -16,7 +16,7 @@ type Server struct {
 }
 
 type Options struct {
-	Config  *config.Server
+	Config  config.Server
 	Service *service.Service
 }
 

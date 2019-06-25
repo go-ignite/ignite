@@ -36,37 +36,45 @@ type Model struct {
 }
 
 type State struct {
+	AgentToken          string        `mapstructure:"agent_token"`
 	SyncInterval        time.Duration `mapstructure:"sync_interval"`
 	HeartbeatInterval   time.Duration `mapstructure:"heartbeat_interval"`
 	StreamRetryInterval time.Duration `mapstructure:"stream_retry_interval"`
 }
 
 type Config struct {
-	LogLevel string   `mapstructure:"log_level"`
-	Server   *Server  `mapstructure:"server"`
-	Service  *Service `mapstructure:"service"`
-	Model    *Model   `mapstructure:"model"`
-	State    *State   `mapstructure:"state"`
+	LogLevel string  `mapstructure:"log_level"`
+	Server   Server  `mapstructure:"server"`
+	Service  Service `mapstructure:"service"`
+	Model    Model   `mapstructure:"model"`
+	State    State   `mapstructure:"state"`
+}
+
+var defaultConfig = Config{
+	LogLevel: logrus.InfoLevel.String(),
+	Server: Server{
+		Address: ":5000",
+	},
+	Service: Service{
+		Secret:        "ignite",
+		AdminUsername: "admin",
+		AdminPassword: "changeme",
+		TokenDuration: 24 * time.Hour,
+	},
+	Model: Model{
+		Driver:  "sqlite3",
+		Connect: "./data/ignite.db",
+		Debug:   false,
+	},
+	State: State{
+		HeartbeatInterval:   time.Second,
+		SyncInterval:        5 * time.Second,
+		StreamRetryInterval: 3 * time.Second,
+		AgentToken:          "ignite-agent",
+	},
 }
 
 func Init() (*Config, error) {
-	viper.SetDefault("log_level", "INFO")
-
-	viper.SetDefault("server.address", ":5000")
-
-	viper.SetDefault("service.secret", "ignite")
-	viper.SetDefault("service.admin_username", "admin")
-	viper.SetDefault("service.admin_password", "changeme")
-	viper.SetDefault("service.token_duration", 24*time.Hour)
-
-	viper.SetDefault("model.driver", "sqlite3")
-	viper.SetDefault("model.connect", "./data/ignite.db")
-	viper.SetDefault("model.debug", false)
-
-	viper.SetDefault("state.heartbeat_interval", time.Second)
-	viper.SetDefault("state.sync_interval", 5*time.Second)
-	viper.SetDefault("state.stream_retry_interval", 3*time.Second)
-
 	if err := godotenv.Load(); err != nil && !os.IsNotExist(err) {
 		return nil, errors.Wrap(err, "config: load .env file error")
 	}
@@ -76,8 +84,8 @@ func Init() (*Config, error) {
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	viper.AutomaticEnv()
 
-	c := &Config{}
-	if err := viper.Unmarshal(c); err != nil {
+	c := defaultConfig
+	if err := viper.Unmarshal(&c); err != nil {
 		return nil, errors.Wrap(err, "config: unmarshal error")
 	}
 
@@ -85,5 +93,17 @@ func Init() (*Config, error) {
 		return nil, fmt.Errorf("config: log_level is invalid")
 	}
 
-	return c, nil
+	if c.State.SyncInterval <= 0 {
+		return nil, fmt.Errorf("config: state.sync_interval is invalid")
+	}
+
+	if c.State.HeartbeatInterval <= 0 {
+		return nil, fmt.Errorf("config: state.heartbeat_interval is invalid")
+	}
+
+	if c.State.StreamRetryInterval <= 0 {
+		return nil, fmt.Errorf("config: state.stream_retry_interval is invalid")
+	}
+
+	return &c, nil
 }

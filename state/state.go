@@ -19,7 +19,7 @@ type Handler struct {
 }
 
 type Options struct {
-	Config       *config.State
+	Config       config.State
 	ModelHandler *model.Handler
 }
 
@@ -43,7 +43,7 @@ func Init(opts *Options) (*Handler, error) {
 		nodeServices[s.NodeID] = append(nodeServices[s.NodeID], s)
 	}
 	for _, node := range nodes {
-		n, err := newNode(node, nodeServices[node.ID])
+		n, err := newNode(h.opts.Config, node, nodeServices[node.ID])
 		if err != nil {
 			return nil, err
 		}
@@ -61,7 +61,7 @@ func (h *Handler) Start() {
 }
 
 func (h *Handler) AddNode(ctx context.Context, node *model.Node) error {
-	n, err := newNode(node, nil)
+	n, err := newNode(h.opts.Config, node, nil)
 	if err != nil {
 		return err
 	}

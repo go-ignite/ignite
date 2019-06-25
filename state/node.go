@@ -14,9 +14,21 @@ import (
 	"github.com/go-ignite/ignite/model"
 )
 
+type token string
+
+func (t token) GetRequestMetadata(ctx context.Context, in ...string) (map[string]string, error) {
+	return map[string]string{
+		"authorization": string(t),
+	}, nil
+}
+
+func (token) RequireTransportSecurity() bool {
+	return false
+}
+
 type Node struct {
 	lock      sync.RWMutex
-	config    *config.State
+	config    config.State
 	node      *model.Node
 	services  map[string]*Service
 	ports     map[int]bool
@@ -26,8 +38,12 @@ type Node struct {
 	done      chan struct{}
 }
 
-func newNode(node *model.Node, services []*model.Service) (*Node, error) {
-	conn, err := grpc.Dial(node.RequestAddress, grpc.WithInsecure())
+func newNode(config config.State, node *model.Node, services []*model.Service) (*Node, error) {
+	conn, err := grpc.Dial(
+		node.RequestAddress,
+		grpc.WithInsecure(),
+		grpc.WithPerRPCCredentials(token(config.AgentToken)),
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -37,6 +53,7 @@ func newNode(node *model.Node, services []*model.Service) (*Node, error) {
 		services: map[string]*Service{},
 		ports:    map[int]bool{},
 		conn:     conn,
+		config:   config,
 		client:   protos.NewAgentServiceClient(conn),
 		done:     make(chan struct{}),
 	}

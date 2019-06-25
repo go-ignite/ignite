@@ -13,7 +13,7 @@ type Handler struct {
 	db *gorm.DB
 }
 
-func InitHandler(config *config.Model) (*Handler, error) {
+func InitHandler(config config.Model) (*Handler, error) {
 	switch config.Driver {
 	case "mysql", "sqlite3":
 	default:
