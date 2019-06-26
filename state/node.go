@@ -72,6 +72,20 @@ func (n *Node) setAvailable(available bool) {
 	n.available = available
 }
 
+func (n *Node) isAvailable() bool {
+	n.lock.RLock()
+	defer n.lock.RUnlock()
+
+	return n.available
+}
+
+func (n *Node) addService(s *model.Service) {
+	n.lock.Lock()
+	defer n.lock.Unlock()
+
+	n.services[s.UserID] = newService(s)
+}
+
 func (n *Node) applySyncResponse(resp *protos.SyncStreamServer) {
 	n.lock.RLock()
 	defer n.lock.RUnlock()
@@ -83,92 +97,95 @@ func (n *Node) applySyncResponse(resp *protos.SyncStreamServer) {
 	}
 }
 
-func (n *Node) sync() {
+func (n *Node) heartbeat(ctx context.Context, wg *sync.WaitGroup) {
+	defer wg.Done()
+	for {
+		if err := func() error {
+			req := &protos.HeartbeatRequest{
+				Interval: ptypes.DurationProto(n.config.HeartbeatInterval),
+			}
+			stream, err := n.client.Heartbeat(ctx, req)
+			if err != nil {
+				return err
+			}
+
+			for {
+				_, err := stream.Recv()
+				n.setAvailable(err == nil)
+				if err != nil {
+					return err
+				}
+			}
+		}(); err != nil {
+			if err == context.Canceled {
+				return
+			}
+
+			logrus.WithError(err).WithField("nodeID", n.node.ID).Error("state: node heartbeat error")
+		}
+
+		select {
+		case <-time.After(n.config.StreamRetryInterval):
+		case <-ctx.Done():
+			return
+		}
+	}
+}
+
+func (n *Node) sync(ctx context.Context, wg *sync.WaitGroup) {
+	defer wg.Done()
+	for {
+		if err := func() error {
+			req := &protos.SyncRequest{
+				SyncInterval: ptypes.DurationProto(n.config.SyncInterval),
+			}
+			stream, err := n.client.Sync(ctx, req)
+			if err != nil {
+				return err
+			}
+
+			for {
+				resp, err := stream.Recv()
+				if err != nil {
+					return err
+				}
+
+				n.applySyncResponse(resp)
+			}
+		}(); err != nil {
+			if err == context.Canceled {
+				return
+			}
+
+			logrus.WithError(err).WithField("nodeID", n.node.ID).Error("state: node sync error")
+		}
+
+		select {
+		case <-time.After(n.config.StreamRetryInterval):
+		case <-ctx.Done():
+			return
+		}
+	}
+}
+
+func (n *Node) monitor() {
 	ctx, cancel := context.WithCancel(context.Background())
 	go func() {
 		<-n.done
 		cancel()
 	}()
 
-	wg := sync.WaitGroup{}
+	wg := &sync.WaitGroup{}
 	wg.Add(2)
 
-	go func() {
-		defer wg.Done()
-		for {
-			if err := func() error {
-				req := &protos.HeartbeatRequest{
-					Interval: ptypes.DurationProto(n.config.HeartbeatInterval),
-				}
-				stream, err := n.client.Heartbeat(ctx, req)
-				if err != nil {
-					return err
-				}
-
-				for {
-					_, err := stream.Recv()
-					n.setAvailable(err == nil)
-					if err != nil {
-						return err
-					}
-				}
-			}(); err != nil {
-				if err == context.Canceled {
-					return
-				}
-
-				logrus.WithError(err).WithField("nodeID", n.node.ID).Error("state: node heartbeat error")
-			}
-
-			select {
-			case <-time.After(n.config.StreamRetryInterval):
-			case <-ctx.Done():
-				return
-			}
-		}
-	}()
-
-	go func() {
-		defer wg.Done()
-		for {
-			if err := func() error {
-				req := &protos.SyncRequest{
-					SyncInterval: ptypes.DurationProto(n.config.SyncInterval),
-				}
-				stream, err := n.client.Sync(ctx, req)
-				if err != nil {
-					return err
-				}
-
-				for {
-					resp, err := stream.Recv()
-					if err != nil {
-						return err
-					}
-
-					n.applySyncResponse(resp)
-				}
-			}(); err != nil {
-				if err == context.Canceled {
-					return
-				}
-
-				logrus.WithError(err).WithField("nodeID", n.node.ID).Error("state: node sync error")
-			}
-
-			select {
-			case <-time.After(n.config.StreamRetryInterval):
-			case <-ctx.Done():
-				return
-			}
-		}
-	}()
+	go n.heartbeat(ctx, wg)
+	go n.sync(ctx, wg)
 
 	wg.Wait()
 	close(n.done)
 }
 
-func (n *Node) stopSync() {
+func (n *Node) stopMonitor() {
 	n.done <- struct{}{}
 	<-n.done
 

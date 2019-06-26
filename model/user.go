@@ -14,6 +14,7 @@ var (
 	ErrInviteCodeNotExistOrUnavailable = errors.New("model: invite code does not exist or is unavailable")
 	ErrInviteCodeExpired               = errors.New("model: invite code is expired")
 	ErrUserNameExists                  = errors.New("model: user name already exists")
+	ErrUserDeleted                     = errors.New("model: user has been deleted")
 )
 
 type User struct {
@@ -82,6 +83,19 @@ func (h *Handler) GetUserByID(id string) (*User, error) {
 	}
 
 	return user, r.Error
+}
+
+func (h *Handler) mustGetUserByID(id string) (*User, error) {
+	u, err := h.GetUserByID(id)
+	if err != nil {
+		return nil, err
+	}
+
+	if u == nil {
+		return nil, ErrUserDeleted
+	}
+
+	return u, nil
 }
 
 func (h *Handler) SaveUser(u *User) error {

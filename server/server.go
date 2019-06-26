@@ -31,10 +31,10 @@ func New(opts *Options) *Server {
 		userRouter.POST("/login", s.opts.Service.UserLogin)
 		userRouter.POST("/register", s.opts.Service.UserRegister)
 
-		authRouter := userRouter.Group("/auth")
-		authRouter.Use(s.opts.Service.Auth(false))
+		userRouter.Use(s.opts.Service.Auth(false))
 		{
 			userRouter.POST("/sync", s.opts.Service.Sync)
+			userRouter.POST("/services", s.opts.Service.CreateService)
 			//authRouter.GET("/info", userHandler.UserInfoHandler)
 
 			// nodes

@@ -89,9 +89,11 @@ func Init() (*Config, error) {
 		return nil, errors.Wrap(err, "config: unmarshal error")
 	}
 
-	if _, err := logrus.ParseLevel(c.LogLevel); err != nil {
+	lv, err := logrus.ParseLevel(c.LogLevel)
+	if err != nil {
 		return nil, fmt.Errorf("config: log_level is invalid")
 	}
+	logrus.SetLevel(lv)
 
 	if c.State.SyncInterval <= 0 {
 		return nil, fmt.Errorf("config: state.sync_interval is invalid")

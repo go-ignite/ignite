@@ -8,6 +8,7 @@ import (
 
 	"github.com/go-ignite/ignite/api"
 	"github.com/go-ignite/ignite/model"
+	"github.com/go-ignite/ignite/state"
 )
 
 func (s *Service) UserLogin(c *gin.Context) {
@@ -111,4 +112,42 @@ func (s *Service) Sync(c *gin.Context) {
 	//}
 
 	c.Status(http.StatusOK)
+}
+
+func (s *Service) CreateService(c *gin.Context) {
+	userID := c.GetString("id")
+
+	req := &api.CreateServiceRequest{}
+	if err := c.BindJSON(req); err != nil {
+		s.errJSON(c, http.StatusBadRequest, err)
+		return
+	}
+
+	sc := &model.ServiceConfig{
+		EncryptionMethod: req.EncryptionMethod,
+	}
+	service := model.NewService(userID, req.NodeID, req.Type, sc)
+
+	f := func() error {
+		return s.opts.StateHandler.AddService(c.Request.Context(), service)
+	}
+	if err := s.opts.ModelHandler.CreateService(service, f); err != nil {
+		switch err {
+		case model.ErrUserDeleted:
+			s.errJSON(c, http.StatusUnauthorized, nil)
+		case model.ErrServiceExists:
+			s.errJSON(c, http.StatusPreconditionFailed, err, 1)
+		case state.ErrNodeNotExist:
+			s.errJSON(c, http.StatusBadRequest, err)
+		case state.ErrNodeUnavailable:
+			s.errJSON(c, http.StatusPreconditionFailed, err, 2)
+		default:
+			s.errJSON(c, http.StatusInternalServerError, err)
+		}
+	}
+
+	c.JSON(http.StatusOK, nil)
+}
+
+func (s *Service) RemoveService(c *gin.Context) {
 }

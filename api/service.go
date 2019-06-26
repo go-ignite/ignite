@@ -7,11 +7,10 @@ type ServiceConfig struct {
 	Methods []string                `json:"methods"`
 }
 
-type CreateServiceReq struct {
-	Type     protos.ServiceType_Enum `json:"type"`
-	Method   string                  `json:"method"`
-	Password string                  `json:"password"`
-	NodeID   int64                   `json:"-"`
+type CreateServiceRequest struct {
+	Type             protos.ServiceType_Enum             `json:"type"`
+	EncryptionMethod protos.ServiceEncryptionMethod_Enum `json:"encryption_method"`
+	NodeID           string                              `json:"node_id"`
 }
 
 type ServiceInfoResp struct {
