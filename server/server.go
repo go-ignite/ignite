@@ -35,6 +35,8 @@ func New(opts *Options) *Server {
 		{
 			userRouter.POST("/sync", s.opts.Service.Sync)
 			userRouter.POST("/services", s.opts.Service.CreateService)
+			userRouter.GET("/services", s.opts.Service.GetServices)
+			userRouter.GET("/services/options", s.opts.Service.GetServiceOptions)
 			//authRouter.GET("/info", userHandler.UserInfoHandler)
 
 			// nodes
@@ -44,7 +46,6 @@ func New(opts *Options) *Server {
 			//authRouter.GET("/services/config", userHandler.GetServiceConfig)
 
 			//authRouter.GET("/services", userHandler.ListServices)
-			//authRouter.DELETE("/services/:id", userHandler.RemoveService)
 			//authRouter.POST("/nodes/:nodeID/services", userHandler.CreateService)
 		}
 	}

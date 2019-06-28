@@ -31,7 +31,6 @@ type Node struct {
 	config    config.State
 	node      *model.Node
 	services  map[string]*Service
-	ports     map[int]bool
 	available bool
 	conn      *grpc.ClientConn
 	client    protos.AgentServiceClient
@@ -51,7 +50,6 @@ func newNode(config config.State, node *model.Node, services []*model.Service) (
 	n := &Node{
 		node:     node,
 		services: map[string]*Service{},
-		ports:    map[int]bool{},
 		conn:     conn,
 		config:   config,
 		client:   protos.NewAgentServiceClient(conn),
@@ -59,7 +57,6 @@ func newNode(config config.State, node *model.Node, services []*model.Service) (
 	}
 	for _, s := range services {
 		n.services[s.UserID] = newService(s)
-		n.ports[s.Port] = true
 	}
 
 	return n, nil
@@ -138,6 +135,7 @@ func (n *Node) sync(ctx context.Context, wg *sync.WaitGroup) {
 		if err := func() error {
 			req := &protos.SyncRequest{
 				SyncInterval: ptypes.DurationProto(n.config.SyncInterval),
+				NodeId:       n.node.ID,
 			}
 			stream, err := n.client.Sync(ctx, req)
 			if err != nil {

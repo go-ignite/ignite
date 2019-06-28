@@ -11,9 +11,8 @@ import (
 )
 
 var (
-	ErrNodeNameExists                 = errors.New("model: node name already exists")
-	ErrNodeRequestAddressExists       = errors.New("model: node request address already exists")
-	ErrNodeHasServicesExceedPortRange = errors.New("model: node has services that exceed port range")
+	ErrNodeNameExists           = errors.New("model: node name already exists")
+	ErrNodeRequestAddressExists = errors.New("model: node request address already exists")
 )
 
 type Node struct {
@@ -64,29 +63,13 @@ func (h *Handler) GetAllNodes() ([]*Node, error) {
 }
 
 func (h *Handler) UpdateNode(n *Node) error {
-	return h.runTX(func(tx *gorm.DB) error {
-		node, err := newHandler(tx).GetNode(n.ID)
-		if err != nil {
-			return err
-		}
-
-		if node == nil {
-			return gorm.ErrRecordNotFound
-		}
-
-		if node.PortFrom != n.PortFrom || node.PortTo != n.PortTo {
-			var count int
-			if err := tx.Model(Service{}).Where("node_id = ? AND (port < ? OR port > ?)", n.ID, n.PortFrom, n.PortTo).Count(&count).Error; err != nil {
-				return err
-			}
-
-			if count > 0 {
-				return ErrNodeHasServicesExceedPortRange
-			}
-		}
-
-		return h.db.Omit("request_address").Update(n).Error
-	})
+	return h.db.Model(n).Updates(map[string]interface{}{
+		"name":               n.Name,
+		"comment":            n.Comment,
+		"connection_address": n.ConnectionAddress,
+		"port_from":          n.PortFrom,
+		"port_to":            n.PortTo,
+	}).Error
 }
 
 func (h *Handler) CreateNode(n *Node, f func() error) error {

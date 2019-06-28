@@ -4,8 +4,9 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/go-ignite/ignite/state"
+
 	"github.com/gin-gonic/gin"
-	"github.com/jinzhu/gorm"
 
 	"github.com/go-ignite/ignite/api"
 	"github.com/go-ignite/ignite/model"
@@ -216,11 +217,14 @@ func (s *Service) UpdateNode(c *gin.Context) {
 		PortTo:            req.PortTo,
 	}
 
-	if err := s.opts.ModelHandler.UpdateNode(node); err != nil {
+	f := func() error {
+		return s.opts.ModelHandler.UpdateNode(node)
+	}
+	if err := s.opts.StateHandler.UpdateNode(node, f); err != nil {
 		switch err {
-		case gorm.ErrRecordNotFound:
+		case state.ErrNodeNotExist:
 			s.errJSON(c, http.StatusNotFound, err)
-		case model.ErrNodeHasServicesExceedPortRange:
+		case state.ErrNodeHasServicesExceedPortRange:
 			s.errJSON(c, http.StatusBadRequest, err, 1)
 		default:
 			s.errJSON(c, http.StatusInternalServerError, err)

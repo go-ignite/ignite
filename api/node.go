@@ -13,6 +13,11 @@ type Node struct {
 	CreatedAt         time.Time `json:"created_at"`
 }
 
+type NodeService struct {
+	Node    *Node    `json:"node"`
+	Service *Service `json:"service"`
+}
+
 type AddNodeRequest struct {
 	RequestAddress string `json:"request_address" binding:"required"`
 	UpdateNodeRequest

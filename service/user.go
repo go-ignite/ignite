@@ -2,6 +2,9 @@ package service
 
 import (
 	"net/http"
+	"sort"
+
+	"github.com/go-ignite/ignite-agent/protos"
 
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
@@ -146,8 +149,37 @@ func (s *Service) CreateService(c *gin.Context) {
 		}
 	}
 
-	c.JSON(http.StatusOK, nil)
+	c.JSON(http.StatusOK, service.Output())
 }
 
-func (s *Service) RemoveService(c *gin.Context) {
+func (s *Service) GetServices(c *gin.Context) {
+	c.JSON(http.StatusOK, s.opts.StateHandler.GetUserServices(c.GetString("id")))
+}
+
+func (s *Service) GetServiceOptions(c *gin.Context) {
+	sos := make([]*api.ServiceOptions, 0, len(protos.ServiceType_Enum_name))
+	for _, t := range []protos.ServiceType_Enum{protos.ServiceType_SS_LIBEV, protos.ServiceType_SSR} {
+		so := &api.ServiceOptions{
+			Type: t,
+		}
+		for k := range protos.ServiceEncryptionMethod_Enum_name {
+			m := protos.ServiceEncryptionMethod_Enum(k)
+			if m == protos.ServiceEncryptionMethod_NOT_SET {
+				continue
+			}
+
+			if t.Suit(m) {
+				so.EncryptionMethods = append(so.EncryptionMethods, m)
+			}
+		}
+		sos = append(sos, so)
+	}
+
+	for _, so := range sos {
+		sort.Slice(so.EncryptionMethods, func(i, j int) bool {
+			return so.EncryptionMethods[i] < so.EncryptionMethods[j]
+		})
+	}
+
+	c.JSON(http.StatusOK, sos)
 }

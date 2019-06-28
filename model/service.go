@@ -1,12 +1,16 @@
 package model
 
 import (
+	"database/sql/driver"
+	"encoding/json"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/jinzhu/gorm"
 
 	"github.com/go-ignite/ignite-agent/protos"
+	"github.com/go-ignite/ignite/api"
 )
 
 var (
@@ -14,7 +18,26 @@ var (
 )
 
 type ServiceConfig struct {
-	EncryptionMethod protos.ServiceEncryptionMethod_Enum `json:"encryption_method,omitempty"`
+	EncryptionMethod protos.ServiceEncryptionMethod_Enum `json:"encryption_method"`
+	Password         string                              `json:"password"`
+}
+
+func (s ServiceConfig) Value() (driver.Value, error) {
+	return json.Marshal(s)
+}
+
+func (s *ServiceConfig) Scan(value interface{}) error {
+	var data []byte
+	switch st := value.(type) {
+	case []byte:
+		data = st
+	case string:
+		data = []byte(st)
+	default:
+		return fmt.Errorf("scan src type not matched, get %T", value)
+	}
+
+	return json.Unmarshal(data, s)
 }
 
 type Service struct {
@@ -24,14 +47,12 @@ type Service struct {
 	ContainerID     string
 	Type            protos.ServiceType_Enum
 	Port            int
-	Config          *ServiceConfig
-	LastStatsResult uint64     // last time stats result,unit: byte
-	LastStatsTime   *time.Time // last time stats time
+	Config          *ServiceConfig `gorm:"type:varchar(1024)"`
+	LastStatsResult uint64         // last time stats result,unit: byte
+	LastStatsTime   *time.Time     // last time stats time
 	CreatedAt       time.Time
 	UpdatedAt       time.Time
 	DeletedAt       *time.Time `sql:"index"`
-
-	Password string `gorm:"-"`
 }
 
 func NewService(userID, nodeID string, ty protos.ServiceType_Enum, sc *ServiceConfig) *Service {
@@ -40,6 +61,19 @@ func NewService(userID, nodeID string, ty protos.ServiceType_Enum, sc *ServiceCo
 		NodeID: nodeID,
 		Type:   ty,
 		Config: sc,
+	}
+}
+
+func (s Service) Output() *api.Service {
+	return &api.Service{
+		ID:               s.ID,
+		UserID:           s.UserID,
+		NodeID:           s.NodeID,
+		Type:             s.Type,
+		Port:             s.Port,
+		EncryptionMethod: s.Config.EncryptionMethod,
+		Password:         s.Config.Password,
+		CreatedAt:        s.CreatedAt,
 	}
 }
 
@@ -66,11 +100,6 @@ func (h *Handler) GetService(id, userID int64) (*Service, error) {
 	return service, nil
 }
 
-func (h *Handler) GetNodePortRangeServiceCount(nodeID string, portFrom, portTo int) (int, error) {
-	var count int
-	return count, h.db.Model(new(Service)).Where("node_id = ? AND (port < ? OR port > ?)", nodeID, portFrom, portTo).Count(&count).Error
-}
-
 func (h *Handler) CreateService(s *Service, f func() error) error {
 	return h.runTX(func(tx *gorm.DB) error {
 		th := newHandler(tx)
@@ -89,7 +118,7 @@ func (h *Handler) CreateService(s *Service, f func() error) error {
 			return ErrServiceExists
 		}
 
-		s.Password = u.ServicePassword
+		s.Config.Password = u.ServicePassword
 
 		// create container so that we can get the port
 		if err := f(); err != nil {
