@@ -52,8 +52,8 @@ github.com/gin-contrib/sse v0.1.0 h1:Y/yl/+YNO8GZSjAhjMsSuLt29uWRFHdHYUb5lYOV9qE
 github.com/gin-contrib/sse v0.1.0/go.mod h1:RHrZQHXnP2xjPF+u1gW/2HnVO7nvIa9PG3Gm+fLHvGI=
 github.com/gin-gonic/gin v1.4.0 h1:3tMoCCfM7ppqsR0ptz/wi1impNpT7/9wQtMZ8lr1mCQ=
 github.com/gin-gonic/gin v1.4.0/go.mod h1:OW2EZn3DO8Ln9oIKOvM++LBO+5UPHJJDH72/q/3rZdM=
-github.com/go-ignite/ignite-agent v0.0.0-20190628195852-9db3a98fcc40 h1:eTg8n6O/tevBWPuc89/0S/FeOKOOlKMLnOYiqbgkHy8=
-github.com/go-ignite/ignite-agent v0.0.0-20190628195852-9db3a98fcc40/go.mod h1:OfDW82kavJ+iEaKAxofN2R2pctyyoZp24ViRLL5tan8=
+github.com/go-ignite/ignite-agent v0.0.0-20190630093530-040c11d36eaa h1:sKQ0+8n8hIRNMUvKOwPIAPC1mHV41ha0yqslB+6y04k=
+github.com/go-ignite/ignite-agent v0.0.0-20190630093530-040c11d36eaa/go.mod h1:OfDW82kavJ+iEaKAxofN2R2pctyyoZp24ViRLL5tan8=
 github.com/go-kit/kit v0.8.0/go.mod h1:xBxKIO96dXMWWy0MnWVtmwkA9/13aqxPnvrjFYMA2as=
 github.com/go-logfmt/logfmt v0.3.0/go.mod h1:Qt1PoO58o5twSAckw1HlFXLmHsOX5/0LbT9GBnD5lWE=
 github.com/go-logfmt/logfmt v0.4.0/go.mod h1:3RMwSq7FuexP4Kalkev3ejPJsZTpXXBr9+V4qmtdjCk=

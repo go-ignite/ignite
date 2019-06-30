@@ -11,7 +11,6 @@ import (
 
 	"github.com/go-ignite/ignite/api"
 	"github.com/go-ignite/ignite/model"
-	"github.com/go-ignite/ignite/state"
 )
 
 func (s *Service) UserLogin(c *gin.Context) {
@@ -62,12 +61,12 @@ func (s *Service) UserRegister(c *gin.Context) {
 	user := model.NewUser(req.Username, hashedPass)
 	if err := s.opts.ModelHandler.CreateUser(user, req.InviteCode); err != nil {
 		switch err {
-		case model.ErrInviteCodeNotExistOrUnavailable:
-			s.errJSON(c, http.StatusPreconditionFailed, err, 1)
-		case model.ErrInviteCodeExpired:
-			s.errJSON(c, http.StatusPreconditionFailed, err, 2)
-		case model.ErrUserNameExists:
-			s.errJSON(c, http.StatusPreconditionFailed, err, 3)
+		case api.ErrInviteCodeNotExistOrUnavailable:
+			s.errJSON(c, http.StatusPreconditionFailed, err)
+		case api.ErrInviteCodeExpired:
+			s.errJSON(c, http.StatusPreconditionFailed, err)
+		case api.ErrUserNameExists:
+			s.errJSON(c, http.StatusPreconditionFailed, err)
 		default:
 			s.errJSON(c, http.StatusInternalServerError, err)
 		}
@@ -119,34 +118,43 @@ func (s *Service) Sync(c *gin.Context) {
 
 func (s *Service) CreateService(c *gin.Context) {
 	userID := c.GetString("id")
-
 	req := &api.CreateServiceRequest{}
 	if err := c.BindJSON(req); err != nil {
 		s.errJSON(c, http.StatusBadRequest, err)
 		return
 	}
 
+	user, err := s.opts.ModelHandler.GetUserByID(userID)
+	if err != nil {
+		s.errJSON(c, http.StatusInternalServerError, err)
+		return
+	}
+	if user == nil {
+		s.errJSON(c, http.StatusUnauthorized, api.ErrUserDeleted)
+		return
+	}
+
 	sc := &model.ServiceConfig{
 		EncryptionMethod: req.EncryptionMethod,
+		Password:         user.ServicePassword,
 	}
 	service := model.NewService(userID, req.NodeID, req.Type, sc)
 
 	f := func() error {
-		return s.opts.StateHandler.AddService(c.Request.Context(), service)
+		return s.opts.ModelHandler.CreateService(service)
 	}
-	if err := s.opts.ModelHandler.CreateService(service, f); err != nil {
+	if err := s.opts.StateHandler.AddService(service, f); err != nil {
 		switch err {
-		case model.ErrUserDeleted:
-			s.errJSON(c, http.StatusUnauthorized, nil)
-		case model.ErrServiceExists:
-			s.errJSON(c, http.StatusPreconditionFailed, err, 1)
-		case state.ErrNodeNotExist:
+		case api.ErrServiceExists:
+			s.errJSON(c, http.StatusPreconditionFailed, err)
+		case api.ErrNodeNotExist:
 			s.errJSON(c, http.StatusBadRequest, err)
-		case state.ErrNodeUnavailable:
-			s.errJSON(c, http.StatusPreconditionFailed, err, 2)
+		case api.ErrNodeUnavailable:
+			s.errJSON(c, http.StatusPreconditionFailed, err)
 		default:
 			s.errJSON(c, http.StatusInternalServerError, err)
 		}
+		return
 	}
 
 	c.JSON(http.StatusOK, service.Output())

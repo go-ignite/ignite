@@ -7,7 +7,7 @@ require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/gin-gonic/gin v1.4.0
-	github.com/go-ignite/ignite-agent v0.0.0-20190628195852-9db3a98fcc40
+	github.com/go-ignite/ignite-agent v0.0.0-20190630093530-040c11d36eaa
 	github.com/go-sql-driver/mysql v1.4.1
 	github.com/golang/protobuf v1.3.1
 	github.com/google/uuid v1.1.1 // indirect

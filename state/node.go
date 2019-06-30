@@ -83,12 +83,20 @@ func (n *Node) addService(s *model.Service) {
 	n.services[s.UserID] = newService(s)
 }
 
+func (n *Node) checkServiceExist(userID string) bool {
+	n.lock.RLock()
+	defer n.lock.RUnlock()
+
+	_, ok := n.services[userID]
+	return ok
+}
+
 func (n *Node) applySyncResponse(resp *protos.SyncStreamServer) {
 	n.lock.RLock()
 	defer n.lock.RUnlock()
 
 	for _, s := range resp.Services {
-		if service, ok := n.services[s.ServiceId]; ok {
+		if service, ok := n.services[s.ContainerName]; ok {
 			service.updateSyncResponse(s)
 		}
 	}

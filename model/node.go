@@ -1,18 +1,12 @@
 package model
 
 import (
-	"errors"
 	"time"
 
 	"github.com/jinzhu/gorm"
 	"github.com/lithammer/shortuuid"
 
 	"github.com/go-ignite/ignite/api"
-)
-
-var (
-	ErrNodeNameExists           = errors.New("model: node name already exists")
-	ErrNodeRequestAddressExists = errors.New("model: node request address already exists")
 )
 
 type Node struct {
@@ -72,28 +66,8 @@ func (h *Handler) UpdateNode(n *Node) error {
 	}).Error
 }
 
-func (h *Handler) CreateNode(n *Node, f func() error) error {
-	return h.runTX(func(tx *gorm.DB) error {
-		n1 := new(Node)
-		if err := tx.Where("name = ? or request_address = ?", n.Name, n.RequestAddress).First(n1).Error; err != nil && err != gorm.ErrRecordNotFound {
-			return err
-		}
-
-		if n1.ID != "" {
-			switch {
-			case n.Name == n1.Name:
-				return ErrNodeNameExists
-			case n.RequestAddress == n1.RequestAddress:
-				return ErrNodeRequestAddressExists
-			}
-		}
-
-		if err := tx.Create(n).Error; err != nil {
-			return err
-		}
-
-		return f()
-	})
+func (h *Handler) CreateNode(n *Node) error {
+	return h.db.Create(n).Error
 }
 
 func (h *Handler) CheckIfNodeNameExist(name string) bool {

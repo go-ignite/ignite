@@ -3,18 +3,11 @@ package model
 import (
 	"database/sql/driver"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"time"
 
-	"github.com/jinzhu/gorm"
-
 	"github.com/go-ignite/ignite-agent/protos"
 	"github.com/go-ignite/ignite/api"
-)
-
-var (
-	ErrServiceExists = errors.New("model: user already has a service on this node")
 )
 
 type ServiceConfig struct {
@@ -100,44 +93,8 @@ func (h *Handler) GetService(id, userID int64) (*Service, error) {
 	return service, nil
 }
 
-func (h *Handler) CreateService(s *Service, f func() error) error {
-	return h.runTX(func(tx *gorm.DB) error {
-		th := newHandler(tx)
-		u, err := th.mustGetUserByID(s.UserID)
-		if err != nil {
-			return err
-		}
-
-		// check if the user create service repeatedly
-		count, err := th.checkService(s.UserID, s.NodeID)
-		if err != nil {
-			return err
-		}
-
-		if count > 0 {
-			return ErrServiceExists
-		}
-
-		s.Config.Password = u.ServicePassword
-
-		// create container so that we can get the port
-		if err := f(); err != nil {
-			return err
-		}
-
-		// TODO there is a problem, create container success but commit transaction error, we need to clean it up
-		return tx.Create(s).Error
-	})
-}
-
-func (h *Handler) checkService(userID, nodeID string) (int, error) {
-	var count int
-	if err := h.db.Model(Service{}).Where("user_id = ? AND node_id = ?", userID, nodeID).Count(&count).Error; err != nil {
-		return 0, err
-	}
-
-	return count, nil
-
+func (h *Handler) CreateService(s *Service) error {
+	return h.db.Create(s).Error
 }
 
 func (h *Handler) GetServicesByUserID(userID int64) ([]*Service, error) {

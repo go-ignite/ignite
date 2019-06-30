@@ -2,10 +2,11 @@ package state
 
 import (
 	"context"
-	"errors"
 	"sync"
 
 	"github.com/google/wire"
+	"github.com/sirupsen/logrus"
+	"google.golang.org/grpc/health/grpc_health_v1"
 
 	"github.com/go-ignite/ignite-agent/protos"
 	"github.com/go-ignite/ignite/api"
@@ -14,12 +15,6 @@ import (
 )
 
 var Set = wire.NewSet(wire.Struct(new(Options), "*"), Init)
-
-var (
-	ErrNodeNotExist                   = errors.New("state: node does not exist")
-	ErrNodeUnavailable                = errors.New("state: node is unavailable")
-	ErrNodeHasServicesExceedPortRange = errors.New("state: node has services that exceed port range")
-)
 
 type Handler struct {
 	nodes sync.Map
@@ -68,13 +63,37 @@ func (h *Handler) Start() {
 	})
 }
 
-func (h *Handler) AddNode(ctx context.Context, node *model.Node) error {
+func (h *Handler) AddNode(ctx context.Context, node *model.Node, f func() error) error {
+	var err error
+	h.nodes.Range(func(_, v interface{}) bool {
+		n := v.(*Node)
+		switch {
+		case n.node.Name == node.Name:
+			err = api.ErrNodeNameExists
+		case n.node.RequestAddress == node.RequestAddress:
+			err = api.ErrNodeRequestAddressExists
+		default:
+			return true
+		}
+
+		return false
+	})
+	if err != nil {
+		return err
+	}
+
 	n, err := newNode(h.opts.Config, node, nil)
 	if err != nil {
 		return err
 	}
 
-	if _, err := n.client.Ping(ctx, new(protos.PingRequest)); err != nil {
+	if _, err := grpc_health_v1.NewHealthClient(n.conn).Check(ctx, &grpc_health_v1.HealthCheckRequest{
+		Service: protos.ServiceName,
+	}); err != nil {
+		return err
+	}
+
+	if err := f(); err != nil {
 		return err
 	}
 
@@ -87,7 +106,7 @@ func (h *Handler) AddNode(ctx context.Context, node *model.Node) error {
 func (h *Handler) UpdateNode(node *model.Node, f func() error) error {
 	n1, ok := h.nodes.Load(node.ID)
 	if !ok {
-		return ErrNodeNotExist
+		return api.ErrNodeNotExist
 	}
 	if err := f(); err != nil {
 		return err
@@ -105,7 +124,7 @@ func (h *Handler) UpdateNode(node *model.Node, f func() error) error {
 			}
 		}
 		if count > 0 {
-			return ErrNodeHasServicesExceedPortRange
+			return api.ErrNodeHasServicesExceedPortRange
 		}
 	}
 
@@ -127,15 +146,19 @@ func (h *Handler) RemoveNode(nodeID string) {
 	h.nodes.Delete(nodeID)
 }
 
-func (h *Handler) AddService(ctx context.Context, service *model.Service) error {
+func (h *Handler) AddService(service *model.Service, f func() error) error {
 	n1, ok := h.nodes.Load(service.NodeID)
 	if !ok {
-		return ErrNodeNotExist
+		return api.ErrNodeNotExist
 	}
 
 	n := n1.(*Node)
 	if !n.isAvailable() {
-		return ErrNodeUnavailable
+		return api.ErrNodeUnavailable
+	}
+
+	if n.checkServiceExist(service.UserID) {
+		return api.ErrServiceExists
 	}
 
 	req := &protos.CreateServiceRequest{
@@ -144,19 +167,33 @@ func (h *Handler) AddService(ctx context.Context, service *model.Service) error 
 		Type:             service.Type,
 		EncryptionMethod: service.Config.EncryptionMethod,
 		Password:         service.Config.Password,
-		Name:             service.UserID,
+		UserId:           service.UserID,
 		NodeId:           service.NodeID,
 	}
 
-	resp, err := n.client.CreateService(ctx, req)
+	resp, err := n.client.CreateService(context.Background(), req)
 	if err != nil {
 		// TODO distinguish error
 		return err
 	}
-
 	service.Port = int(resp.Port)
-	n.addService(service)
+	service.ContainerID = resp.ContainerId
 
+	if err := f(); err != nil {
+		// failed to create service, clean it up
+		removeReq := &protos.RemoveServiceRequest{
+			ContainerId: resp.ContainerId,
+		}
+		if _, err := n.client.RemoveService(context.Background(), removeReq); err != nil {
+			logrus.WithError(err).WithFields(logrus.Fields{
+				"containerID": resp.ContainerId,
+				"userID":      service.UserID,
+			}).Error("create container successfully, but save to db error, then cleaning the container failed")
+		}
+		return err
+	}
+
+	n.addService(service)
 	return nil
 }
 

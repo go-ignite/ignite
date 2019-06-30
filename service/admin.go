@@ -4,8 +4,6 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/go-ignite/ignite/state"
-
 	"github.com/gin-gonic/gin"
 
 	"github.com/go-ignite/ignite/api"
@@ -151,15 +149,15 @@ func (s *Service) AddNode(c *gin.Context) {
 
 	node := model.NewNode(req.Name, req.Comment, req.RequestAddress, req.ConnectionAddress, req.PortFrom, req.PortTo)
 	f := func() error {
-		return s.opts.StateHandler.AddNode(c.Request.Context(), node)
+		return s.opts.ModelHandler.CreateNode(node)
 	}
 
-	if err := s.opts.ModelHandler.CreateNode(node, f); err != nil {
+	if err := s.opts.StateHandler.AddNode(c.Request.Context(), node, f); err != nil {
 		switch err {
-		case model.ErrNodeNameExists:
-			s.errJSON(c, http.StatusBadRequest, err, 1)
-		case model.ErrNodeRequestAddressExists:
-			s.errJSON(c, http.StatusBadRequest, err, 2)
+		case api.ErrNodeNameExists:
+			s.errJSON(c, http.StatusBadRequest, err)
+		case api.ErrNodeRequestAddressExists:
+			s.errJSON(c, http.StatusBadRequest, err)
 		default:
 			s.errJSON(c, http.StatusInternalServerError, err)
 		}
@@ -222,10 +220,10 @@ func (s *Service) UpdateNode(c *gin.Context) {
 	}
 	if err := s.opts.StateHandler.UpdateNode(node, f); err != nil {
 		switch err {
-		case state.ErrNodeNotExist:
+		case api.ErrNodeNotExist:
 			s.errJSON(c, http.StatusNotFound, err)
-		case state.ErrNodeHasServicesExceedPortRange:
-			s.errJSON(c, http.StatusBadRequest, err, 1)
+		case api.ErrNodeHasServicesExceedPortRange:
+			s.errJSON(c, http.StatusBadRequest, err)
 		default:
 			s.errJSON(c, http.StatusInternalServerError, err)
 		}

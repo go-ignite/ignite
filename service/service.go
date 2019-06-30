@@ -2,7 +2,6 @@ package service
 
 import (
 	"fmt"
-	"net/http"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -34,18 +33,13 @@ func New(opts *Options) *Service {
 	}
 }
 
-func (s *Service) errJSON(c *gin.Context, statusCode int, err error, codes ...int) {
-	code := statusCode
-	if len(codes) > 0 {
-		code = codes[0]
+func (s *Service) errJSON(c *gin.Context, statusCode int, err error) {
+	switch v := err.(type) {
+	case *api.ErrResponse:
+		c.JSON(statusCode, v)
+	default:
+		c.JSON(statusCode, api.NewErrResponse(statusCode, err.Error()))
 	}
-
-	message := http.StatusText(statusCode)
-	if err != nil {
-		message = err.Error()
-	}
-
-	c.JSON(statusCode, api.NewErrResponse(code, message))
 }
 
 func (s *Service) createToken(id string) (string, error) {
