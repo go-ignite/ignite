@@ -2,5 +2,5 @@
 data
 vendor
 .idea
-/ignite
 /.env
+cmd/ignite/ignite

@@ -5,6 +5,7 @@ go 1.12
 require (
 	cloud.google.com/go v0.40.0 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/fatih/color v1.7.0
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/gin-gonic/gin v1.4.0
 	github.com/go-ignite/ignite-agent v0.0.0-20190630093530-040c11d36eaa

@@ -22,6 +22,7 @@ func main() {
 		return
 	}
 
+	DisplayVersion()
 	app, err := ignite.Init()
 	if err != nil {
 		logrus.WithError(err).Fatal()
