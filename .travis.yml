@@ -1,8 +1,9 @@
 language: go
 go: 
- - 1.9.x
- - 1.10.x
-
+ - 1.12.x
 install:
-  - go get -u github.com/golang/dep/cmd/dep
-  - dep ensure
+ - export GO111MODULE="on"
+ - go mod download
+script:
+ - cd cmd/ignite
+ - go build
