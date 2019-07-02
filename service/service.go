@@ -2,6 +2,7 @@ package service
 
 import (
 	"fmt"
+	"net/http"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -34,12 +35,19 @@ func New(opts *Options) *Service {
 }
 
 func (s *Service) errJSON(c *gin.Context, statusCode int, err error) {
-	switch v := err.(type) {
-	case *api.ErrResponse:
+	if v, ok := err.(*api.ErrResponse); ok {
 		c.JSON(statusCode, v)
-	default:
-		c.JSON(statusCode, api.NewErrResponse(statusCode, err.Error()))
+		return
 	}
+
+	var message string
+	if err == nil {
+		message = http.StatusText(statusCode)
+	} else {
+		message = err.Error()
+	}
+
+	c.JSON(statusCode, api.NewErrResponse(statusCode, message))
 }
 
 func (s *Service) createToken(id string) (string, error) {

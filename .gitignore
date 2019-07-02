@@ -4,3 +4,4 @@ vendor
 .idea
 /.env
 cmd/ignite/ignite
+/ignite

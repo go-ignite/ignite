@@ -63,7 +63,7 @@ func (h *Handler) Start() {
 	})
 }
 
-func (h *Handler) AddNode(ctx context.Context, node *model.Node, f func() error) error {
+func (h *Handler) AddNode(ctx context.Context, node *model.Node) error {
 	var err error
 	h.nodes.Range(func(_, v interface{}) bool {
 		n := v.(*Node)
@@ -93,7 +93,7 @@ func (h *Handler) AddNode(ctx context.Context, node *model.Node, f func() error)
 		return err
 	}
 
-	if err := f(); err != nil {
+	if err := h.opts.ModelHandler.CreateNode(node); err != nil {
 		return err
 	}
 
@@ -103,13 +103,10 @@ func (h *Handler) AddNode(ctx context.Context, node *model.Node, f func() error)
 	return nil
 }
 
-func (h *Handler) UpdateNode(node *model.Node, f func() error) error {
+func (h *Handler) UpdateNode(node *model.Node) error {
 	n1, ok := h.nodes.Load(node.ID)
 	if !ok {
 		return api.ErrNodeNotExist
-	}
-	if err := f(); err != nil {
-		return err
 	}
 
 	n := n1.(*Node)
@@ -128,6 +125,10 @@ func (h *Handler) UpdateNode(node *model.Node, f func() error) error {
 		}
 	}
 
+	if err := h.opts.ModelHandler.UpdateNode(node); err != nil {
+		return err
+	}
+
 	n.node.Name = node.Name
 	n.node.Comment = node.Comment
 	n.node.ConnectionAddress = node.ConnectionAddress
@@ -136,17 +137,23 @@ func (h *Handler) UpdateNode(node *model.Node, f func() error) error {
 	return nil
 }
 
-func (h *Handler) RemoveNode(nodeID string) {
-	n, ok := h.nodes.Load(nodeID)
+func (h *Handler) RemoveNode(nodeID string) error {
+	n1, ok := h.nodes.Load(nodeID)
 	if !ok {
-		return
+		return nil
 	}
 
-	n.(*Node).stopMonitor()
+	if err := h.opts.ModelHandler.DeleteNode(nodeID); err != nil {
+		return err
+	}
+
+	// TODO clean up node containers
+	n1.(*Node).stopMonitor()
 	h.nodes.Delete(nodeID)
+	return nil
 }
 
-func (h *Handler) AddService(service *model.Service, f func() error) error {
+func (h *Handler) AddService(service *model.Service) error {
 	n1, ok := h.nodes.Load(service.NodeID)
 	if !ok {
 		return api.ErrNodeNotExist
@@ -179,7 +186,7 @@ func (h *Handler) AddService(service *model.Service, f func() error) error {
 	service.Port = int(resp.Port)
 	service.ContainerID = resp.ContainerId
 
-	if err := f(); err != nil {
+	if err := h.opts.ModelHandler.CreateService(service); err != nil {
 		// failed to create service, clean it up
 		removeReq := &protos.RemoveServiceRequest{
 			ContainerId: resp.ContainerId,

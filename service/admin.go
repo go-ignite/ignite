@@ -148,11 +148,8 @@ func (s *Service) AddNode(c *gin.Context) {
 	}
 
 	node := model.NewNode(req.Name, req.Comment, req.RequestAddress, req.ConnectionAddress, req.PortFrom, req.PortTo)
-	f := func() error {
-		return s.opts.ModelHandler.CreateNode(node)
-	}
 
-	if err := s.opts.StateHandler.AddNode(c.Request.Context(), node, f); err != nil {
+	if err := s.opts.StateHandler.AddNode(c.Request.Context(), node); err != nil {
 		switch err {
 		case api.ErrNodeNameExists:
 			s.errJSON(c, http.StatusBadRequest, err)
@@ -184,14 +181,7 @@ func (s *Service) GetAllNodes(c *gin.Context) {
 }
 
 func (s *Service) DeleteNode(c *gin.Context) {
-	id := c.Param("id")
-
-	f := func() error {
-		s.opts.StateHandler.RemoveNode(id)
-		return nil
-	}
-
-	if err := s.opts.ModelHandler.DeleteNode(id, f); err != nil {
+	if err := s.opts.StateHandler.RemoveNode(c.Param("id")); err != nil {
 		s.errJSON(c, http.StatusInternalServerError, err)
 		return
 	}
@@ -215,10 +205,7 @@ func (s *Service) UpdateNode(c *gin.Context) {
 		PortTo:            req.PortTo,
 	}
 
-	f := func() error {
-		return s.opts.ModelHandler.UpdateNode(node)
-	}
-	if err := s.opts.StateHandler.UpdateNode(node, f); err != nil {
+	if err := s.opts.StateHandler.UpdateNode(node); err != nil {
 		switch err {
 		case api.ErrNodeNotExist:
 			s.errJSON(c, http.StatusNotFound, err)

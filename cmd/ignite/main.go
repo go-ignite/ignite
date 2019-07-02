@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"log"
 
 	"github.com/sirupsen/logrus"
@@ -12,17 +11,16 @@ import (
 
 var (
 	versionFlag = flag.Bool("v", false, "version")
-	version     = "unknown"
 )
 
 func main() {
 	flag.Parse()
+	displayVersion()
+
 	if *versionFlag {
-		fmt.Println(version)
 		return
 	}
 
-	displayVersion()
 	app, err := ignite.Init()
 	if err != nil {
 		logrus.WithError(err).Fatal()

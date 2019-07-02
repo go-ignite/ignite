@@ -130,7 +130,7 @@ func (s *Service) CreateService(c *gin.Context) {
 		return
 	}
 	if user == nil {
-		s.errJSON(c, http.StatusUnauthorized, api.ErrUserDeleted)
+		s.errJSON(c, http.StatusUnauthorized, nil)
 		return
 	}
 
@@ -140,10 +140,7 @@ func (s *Service) CreateService(c *gin.Context) {
 	}
 	service := model.NewService(userID, req.NodeID, req.Type, sc)
 
-	f := func() error {
-		return s.opts.ModelHandler.CreateService(service)
-	}
-	if err := s.opts.StateHandler.AddService(service, f); err != nil {
+	if err := s.opts.StateHandler.AddService(service); err != nil {
 		switch err {
 		case api.ErrServiceExists:
 			s.errJSON(c, http.StatusPreconditionFailed, err)

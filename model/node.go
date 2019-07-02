@@ -94,21 +94,6 @@ func (h *Handler) GetNode(id string) (*Node, error) {
 	return node, nil
 }
 
-func (h *Handler) DeleteNode(id string, f func() error) error {
-	return h.runTX(func(tx *gorm.DB) error {
-		node, err := newHandler(tx).GetNode(id)
-		if err != nil {
-			return err
-		}
-
-		if node == nil {
-			return nil
-		}
-
-		if err := tx.Delete(Node{ID: id}).Error; err != nil {
-			return err
-		}
-
-		return f()
-	})
+func (h *Handler) DeleteNode(id string) error {
+	return h.db.Delete(Node{ID: id}).Error
 }

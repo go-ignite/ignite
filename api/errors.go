@@ -5,7 +5,6 @@ var (
 	ErrInviteCodeNotExistOrUnavailable = NewErrResponse(1000, "invite code does not exist or is unavailable")
 	ErrInviteCodeExpired               = NewErrResponse(1001, "invite code is expired")
 	ErrUserNameExists                  = NewErrResponse(1002, "user name already exists")
-	ErrUserDeleted                     = NewErrResponse(1003, "user has been deleted")
 
 	// state
 	ErrNodeNotExist                   = NewErrResponse(1100, "node does not exist")
