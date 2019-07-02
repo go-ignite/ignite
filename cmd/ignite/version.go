@@ -14,6 +14,6 @@ V%s
 
 `
 
-func DisplayVersion() {
+func displayVersion() {
 	color.Cyan(logo, Version)
 }
