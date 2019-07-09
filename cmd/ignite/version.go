@@ -10,7 +10,7 @@ var logo = `
 └─┘└─┘  ┴└─┘┘└┘┴ ┴ └─┘
 
 https://github.com/go-ignite/ignite
-V%s
+%s
 
 `
 
