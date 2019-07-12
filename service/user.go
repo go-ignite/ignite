@@ -154,7 +154,7 @@ func (s *Service) CreateService(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, service.Output())
+	c.JSON(http.StatusNoContent, nil)
 }
 
 func (s *Service) GetServices(c *gin.Context) {

@@ -211,8 +211,7 @@ func (h *Handler) GetUserServices(userID string) []*api.NodeService {
 		node := n.(*Node)
 		ns.Node = node.node.Output()
 		if s, ok := node.services[userID]; ok {
-			ns.Service = s.service.Output()
-
+			ns.Service = s.service.Output(node.node.ConnectionAddress)
 		}
 
 		nss = append(nss, ns)

@@ -2,8 +2,10 @@ package model
 
 import (
 	"database/sql/driver"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/go-ignite/ignite-agent/protos"
@@ -57,7 +59,7 @@ func NewService(userID, nodeID string, ty protos.ServiceType_Enum, sc *ServiceCo
 	}
 }
 
-func (s Service) Output() *api.Service {
+func (s Service) Output(host string) *api.Service {
 	return &api.Service{
 		ID:               s.ID,
 		UserID:           s.UserID,
@@ -67,7 +69,31 @@ func (s Service) Output() *api.Service {
 		EncryptionMethod: s.Config.EncryptionMethod,
 		Password:         s.Config.Password,
 		CreatedAt:        s.CreatedAt,
+		URL:              s.URL(host),
 	}
+}
+
+func (s Service) URL(host string) string {
+	base64Encode := func(s string) string {
+		return strings.TrimRight(base64.URLEncoding.EncodeToString([]byte(s)), "=")
+	}
+
+	var protocol, base64Link string
+	switch s.Type {
+	case protos.ServiceType_SS_LIBEV:
+		protocol = "ss"
+		//method:password@server:port
+		base64Link = base64Encode(fmt.Sprintf("%s:%s@%s:%d", s.Config.EncryptionMethod.ValidMethod(), s.Config.Password, host, s.Port))
+	case protos.ServiceType_SSR:
+		protocol = "ssr"
+		//server:port:protocol:method:obfs:password_base64/?suffix_base64
+		suffix := fmt.Sprintf("protoparam=%s", base64Encode("32"))
+		base64Link = base64Encode(fmt.Sprintf("%s:%d:%s:%s:%s:%s/?%s", host, s.Port, "auth_aes128_md5", s.Config.EncryptionMethod.ValidMethod(), "tls1.2_ticket_auth_compatible", base64Encode(s.Config.Password), suffix))
+	default:
+		return ""
+	}
+	return fmt.Sprintf("%s://%s", protocol, base64Link)
+
 }
 
 func (h *Handler) GetServices() ([]*Service, error) {

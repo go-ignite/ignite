@@ -30,4 +30,5 @@ type Service struct {
 	EncryptionMethod protos.ServiceEncryptionMethod_Enum `json:"encryption_method"`
 	Password         string                              `json:"password"`
 	CreatedAt        time.Time                           `json:"created_at"`
+	URL              string                              `json:"url"`
 }
