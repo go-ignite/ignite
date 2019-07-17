@@ -220,3 +220,15 @@ func (s *Service) UpdateNode(c *gin.Context) {
 
 	c.JSON(http.StatusNoContent, nil)
 }
+
+// --- service
+
+func (s *Service) GetServices(c *gin.Context) {
+	req := new(api.AdminServicesRequest)
+	if err := c.ShouldBind(req); err != nil {
+		s.errJSON(c, http.StatusBadRequest, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, s.opts.StateHandler.GetNodeServices(req.UserID, req.NodeID))
+}

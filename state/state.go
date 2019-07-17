@@ -204,17 +204,41 @@ func (h *Handler) AddService(service *model.Service) error {
 	return nil
 }
 
-func (h *Handler) GetUserServices(userID string) []*api.NodeService {
-	nss := make([]*api.NodeService, 0)
-	h.nodes.Range(func(_, n interface{}) bool {
-		ns := &api.NodeService{}
-		node := n.(*Node)
-		ns.Node = node.node.Output()
-		if s, ok := node.services[userID]; ok {
-			ns.Service = s.service.Output(node.node.ConnectionAddress)
+func (h *Handler) GetNodeServices(userID, nodeID string) []*api.NodeServices {
+	nss := make([]*api.NodeServices, 0)
+
+	getUserServices := func(n *Node) *api.NodeServices {
+		n.lock.RLock()
+		defer n.lock.RUnlock()
+
+		ns := &api.NodeServices{}
+		ns.Node = n.node.Output()
+
+		if userID != "" {
+			if s, ok := n.services[userID]; ok {
+				ns.Services = append(ns.Services, s.service.Output(n.node.ConnectionAddress))
+			}
+		} else {
+			for _, s := range n.services {
+				ns.Services = append(ns.Services, s.service.Output(n.node.ConnectionAddress))
+			}
 		}
 
-		nss = append(nss, ns)
+		return ns
+	}
+
+	if nodeID != "" {
+		n1, ok := h.nodes.Load(nodeID)
+		if !ok {
+			return nss
+		}
+
+		nss = append(nss, getUserServices(n1.(*Node)))
+		return nss
+	}
+
+	h.nodes.Range(func(_, n1 interface{}) bool {
+		nss = append(nss, getUserServices(n1.(*Node)))
 		return true
 	})
 

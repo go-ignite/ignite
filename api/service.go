@@ -21,6 +21,11 @@ type ServiceOptions struct {
 	EncryptionMethods []protos.ServiceEncryptionMethod_Enum `json:"encryption_methods"`
 }
 
+type AdminServicesRequest struct {
+	UserID string `form:"user_id"`
+	NodeID string `form:"node_id"`
+}
+
 type Service struct {
 	ID               int64                               `json:"id"`
 	UserID           string                              `json:"user_id"`

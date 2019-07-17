@@ -4,11 +4,10 @@ import (
 	"net/http"
 	"sort"
 
-	"github.com/go-ignite/ignite-agent/protos"
-
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 
+	"github.com/go-ignite/ignite-agent/protos"
 	"github.com/go-ignite/ignite/api"
 	"github.com/go-ignite/ignite/model"
 )
@@ -157,8 +156,20 @@ func (s *Service) CreateService(c *gin.Context) {
 	c.JSON(http.StatusNoContent, nil)
 }
 
-func (s *Service) GetServices(c *gin.Context) {
-	c.JSON(http.StatusOK, s.opts.StateHandler.GetUserServices(c.GetString("id")))
+func (s *Service) GetUserServices(c *gin.Context) {
+	resp := make([]*api.NodeService, 0)
+	for _, ns := range s.opts.StateHandler.GetNodeServices(c.GetString("id"), "") {
+		r := &api.NodeService{
+			Node: ns.Node,
+		}
+		if len(ns.Services) > 0 {
+			r.Service = ns.Services[0]
+		}
+
+		resp = append(resp, r)
+	}
+
+	c.JSON(http.StatusOK, resp)
 }
 
 func (s *Service) GetServiceOptions(c *gin.Context) {

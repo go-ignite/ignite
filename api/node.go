@@ -18,6 +18,11 @@ type NodeService struct {
 	Service *Service `json:"service"`
 }
 
+type NodeServices struct {
+	Node     *Node      `json:"node"`
+	Services []*Service `json:"services"`
+}
+
 type AddNodeRequest struct {
 	RequestAddress string `json:"request_address" binding:"required"`
 	UpdateNodeRequest
