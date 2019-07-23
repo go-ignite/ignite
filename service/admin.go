@@ -62,13 +62,7 @@ func (s *Service) GetAccountList(c *gin.Context) {
 
 func (s *Service) DestroyAccount(c *gin.Context) {
 	userID := c.Param("id")
-
-	f := func() error {
-		// TODO clean up containers
-		return nil
-	}
-
-	if err := s.opts.ModelHandler.DestroyUser(userID, f); err != nil {
+	if err := s.opts.StateHandler.RemoveUser(userID); err != nil {
 		s.errJSON(c, http.StatusInternalServerError, err)
 		return
 	}

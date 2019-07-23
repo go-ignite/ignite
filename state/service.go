@@ -7,15 +7,13 @@ import (
 
 type Service struct {
 	service *model.Service
+	user    *User
 	status  protos.ServiceStatus_Enum
 }
 
-func newService(s *model.Service) *Service {
+func newService(s *model.Service, u *User) *Service {
 	return &Service{
 		service: s,
+		user:    u,
 	}
-}
-
-func (s *Service) updateSyncResponse(resp *protos.ServiceInfo) {
-	// TODO
 }

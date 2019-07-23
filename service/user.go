@@ -1,8 +1,10 @@
 package service
 
 import (
+	"io"
 	"net/http"
 	"sort"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
@@ -57,8 +59,8 @@ func (s *Service) UserRegister(c *gin.Context) {
 		return
 	}
 
-	user := model.NewUser(req.Username, hashedPass)
-	if err := s.opts.ModelHandler.CreateUser(user, req.InviteCode); err != nil {
+	user := model.NewUser(req.Username, hashedPass, req.InviteCode)
+	if err := s.opts.StateHandler.AddUser(user); err != nil {
 		switch err {
 		case api.ErrInviteCodeNotExistOrUnavailable:
 			s.errJSON(c, http.StatusPreconditionFailed, err)
@@ -100,19 +102,20 @@ func (s *Service) GetUserInfo(c *gin.Context) {
 	})
 }
 
-func (s *Service) Sync(c *gin.Context) {
-	//for {
-	//	nam := s.opts.StateHandler.NodeAvailableMap()
-	//	msg, _ := json.Marshal(nam)
-	//	if _, err := c.Writer.Write(msg); err != nil {
-	//		break
-	//	}
-	//
-	//	// TODO should be configurable
-	//	time.Sleep(3 * time.Second)
-	//}
+func (s *Service) UserServicesSync(c *gin.Context) {
+	userID := c.GetString("id")
+	first := true
+	c.Stream(func(w io.Writer) bool {
+		if !first {
+			time.Sleep(s.opts.Config.SyncInterval)
+		} else {
+			first = false
+		}
 
-	c.Status(http.StatusOK)
+		r := s.opts.StateHandler.GetSyncResponse(userID)
+		c.SSEvent("user_sync", r)
+		return true
+	})
 }
 
 func (s *Service) CreateService(c *gin.Context) {

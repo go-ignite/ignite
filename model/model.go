@@ -33,16 +33,12 @@ func InitHandler(config config.Model) (*Handler, error) {
 		return nil, errors.Wrap(err, "model: db migration error")
 	}
 
-	return newHandler(db), nil
+	return &Handler{db: db}, nil
 }
 
-func newHandler(db *gorm.DB) *Handler {
-	return &Handler{db: db}
-}
-
-func (h *Handler) runTX(f func(tx *gorm.DB) error) error {
+func (h *Handler) runTX(f func(h *Handler) error) error {
 	tx := h.db.Begin()
-	if err := f(tx); err != nil {
+	if err := f(&Handler{db: tx}); err != nil {
 		tx.Rollback()
 		return err
 	}

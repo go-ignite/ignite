@@ -14,6 +14,8 @@ import (
 	"github.com/go-ignite/ignite/model"
 )
 
+const GB = 1024 * 1024 * 1024
+
 type token string
 
 func (t token) GetRequestMetadata(ctx context.Context, in ...string) (map[string]string, error) {
@@ -27,17 +29,18 @@ func (token) RequireTransportSecurity() bool {
 }
 
 type Node struct {
-	lock      sync.RWMutex
-	config    config.State
-	node      *model.Node
-	services  map[string]*Service
-	available bool
-	conn      *grpc.ClientConn
-	client    protos.AgentServiceClient
-	done      chan struct{}
+	modelHandler *model.Handler
+	config       config.State
+	locker       sync.RWMutex
+	node         *model.Node
+	services     map[string]*Service
+	available    bool
+	conn         *grpc.ClientConn
+	client       protos.AgentServiceClient
+	done         chan struct{}
 }
 
-func newNode(config config.State, node *model.Node, services []*model.Service) (*Node, error) {
+func newNode(config config.State, node *model.Node, services []*Service, modelHandler *model.Handler) (*Node, error) {
 	conn, err := grpc.Dial(
 		node.RequestAddress,
 		grpc.WithInsecure(),
@@ -48,58 +51,19 @@ func newNode(config config.State, node *model.Node, services []*model.Service) (
 	}
 
 	n := &Node{
-		node:     node,
-		services: map[string]*Service{},
-		conn:     conn,
-		config:   config,
-		client:   protos.NewAgentServiceClient(conn),
-		done:     make(chan struct{}),
+		modelHandler: modelHandler,
+		node:         node,
+		services:     map[string]*Service{},
+		conn:         conn,
+		config:       config,
+		client:       protos.NewAgentServiceClient(conn),
+		done:         make(chan struct{}),
 	}
 	for _, s := range services {
-		n.services[s.UserID] = newService(s)
+		n.services[s.service.UserID] = s
 	}
 
 	return n, nil
-}
-
-func (n *Node) setAvailable(available bool) {
-	n.lock.Lock()
-	defer n.lock.Unlock()
-
-	n.available = available
-}
-
-func (n *Node) isAvailable() bool {
-	n.lock.RLock()
-	defer n.lock.RUnlock()
-
-	return n.available
-}
-
-func (n *Node) addService(s *model.Service) {
-	n.lock.Lock()
-	defer n.lock.Unlock()
-
-	n.services[s.UserID] = newService(s)
-}
-
-func (n *Node) checkServiceExist(userID string) bool {
-	n.lock.RLock()
-	defer n.lock.RUnlock()
-
-	_, ok := n.services[userID]
-	return ok
-}
-
-func (n *Node) applySyncResponse(resp *protos.SyncStreamServer) {
-	n.lock.RLock()
-	defer n.lock.RUnlock()
-
-	for _, s := range resp.Services {
-		if service, ok := n.services[s.ContainerName]; ok {
-			service.updateSyncResponse(s)
-		}
-	}
 }
 
 func (n *Node) heartbeat(ctx context.Context, wg *sync.WaitGroup) {
@@ -116,7 +80,17 @@ func (n *Node) heartbeat(ctx context.Context, wg *sync.WaitGroup) {
 
 			for {
 				_, err := stream.Recv()
-				n.setAvailable(err == nil)
+				func() {
+					n.locker.Lock()
+					defer n.locker.Unlock()
+
+					available := err == nil
+					if !available && n.available {
+						for _, s := range n.services {
+							s.status = protos.ServiceStatus_NOT_SET
+						}
+					}
+				}()
 				if err != nil {
 					return err
 				}
@@ -155,8 +129,7 @@ func (n *Node) sync(ctx context.Context, wg *sync.WaitGroup) {
 				if err != nil {
 					return err
 				}
-
-				n.applySyncResponse(resp)
+				n.applySyncResp(resp)
 			}
 		}(); err != nil {
 			if err == context.Canceled {
@@ -196,4 +169,46 @@ func (n *Node) stopMonitor() {
 	<-n.done
 
 	_ = n.conn.Close()
+}
+
+func (n *Node) applySyncResp(resp *protos.SyncStreamServer) {
+	now := time.Now()
+	n.locker.Lock()
+	defer n.locker.Unlock()
+
+	for _, s := range resp.Services {
+		func() {
+			if service, ok := n.services[s.ContainerName]; ok {
+				service.status = s.Status
+				service.service.LastStatsResult = uint64(s.StatsResult)
+				service.service.LastStatsTime = now
+
+				if err := n.modelHandler.UpdateServiceLastStats(service.service); err != nil {
+					logrus.WithError(err).WithFields(logrus.Fields{
+						"nodeID":    n.node.ID,
+						"userID":    service.user.user.ID,
+						"serviceID": service.service.ID,
+					}).Error("state: update service last stats error")
+				}
+
+				if service.user != nil {
+					service.user.locker.RLock()
+					defer service.user.locker.RUnlock()
+
+					if service.service.MonthTrafficUsed() >= uint64(service.user.user.PackageLimit*GB) && service.status == protos.ServiceStatus_RUNNING {
+						req := &protos.StopServiceRequest{
+							ContainerId: s.ContainerId,
+						}
+						if _, err := n.client.StopService(context.Background(), req); err != nil {
+							logrus.WithError(err).WithFields(logrus.Fields{
+								"nodeID":    n.node.ID,
+								"userID":    service.user.user.ID,
+								"serviceID": service.service.ID,
+							}).Error("state: user exceed package limit, but stop service error")
+						}
+					}
+				}
+			}
+		}()
+	}
 }

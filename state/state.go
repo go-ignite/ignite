@@ -14,11 +14,17 @@ import (
 	"github.com/go-ignite/ignite/model"
 )
 
-var Set = wire.NewSet(wire.Struct(new(Options), "*"), Init)
+var Set = wire.NewSet(
+	wire.Struct(new(Options), "*"),
+	Init,
+)
 
 type Handler struct {
-	nodes sync.Map
-	opts  *Options
+	nodes       map[string]*Node
+	nodesLocker sync.RWMutex
+	users       map[string]*User
+	usersLocker sync.RWMutex
+	opts        *Options
 }
 
 type Options struct {
@@ -28,7 +34,17 @@ type Options struct {
 
 func Init(opts *Options) (*Handler, error) {
 	h := &Handler{
-		opts: opts,
+		opts:  opts,
+		users: map[string]*User{},
+		nodes: map[string]*Node{},
+	}
+
+	users, err := h.opts.ModelHandler.GetUsers()
+	if err != nil {
+		return nil, err
+	}
+	for _, user := range users {
+		h.users[user.ID] = newUser(user)
 	}
 
 	nodes, err := h.opts.ModelHandler.GetAllNodes()
@@ -41,82 +57,87 @@ func Init(opts *Options) (*Handler, error) {
 		return nil, err
 	}
 
-	nodeServices := map[string][]*model.Service{}
+	nodeServices := map[string][]*Service{}
 	for _, s := range services {
-		nodeServices[s.NodeID] = append(nodeServices[s.NodeID], s)
+		nodeServices[s.NodeID] = append(nodeServices[s.NodeID], newService(s, h.users[s.UserID]))
 	}
+
+	h.nodesLocker.Lock()
+	defer h.nodesLocker.Unlock()
+
 	for _, node := range nodes {
-		n, err := newNode(h.opts.Config, node, nodeServices[node.ID])
+		n, err := newNode(h.opts.Config, node, nodeServices[node.ID], opts.ModelHandler)
 		if err != nil {
 			return nil, err
 		}
-		h.nodes.Store(node.ID, n)
+
+		h.nodes[node.ID] = n
 	}
 
 	return h, nil
 }
 
 func (h *Handler) Start() {
-	h.nodes.Range(func(_, n interface{}) bool {
-		go n.(*Node).monitor()
-		return true
-	})
+	h.nodesLocker.RLock()
+	defer h.nodesLocker.RUnlock()
+
+	for _, node := range h.nodes {
+		go node.monitor()
+	}
+
+	go h.runDailyTask()
 }
 
-func (h *Handler) AddNode(ctx context.Context, node *model.Node) error {
-	var err error
-	h.nodes.Range(func(_, v interface{}) bool {
-		n := v.(*Node)
+func (h *Handler) AddNode(ctx context.Context, n *model.Node) error {
+	h.nodesLocker.Lock()
+	defer h.nodesLocker.Unlock()
+
+	for _, node := range h.nodes {
+		var err error
 		switch {
-		case n.node.Name == node.Name:
+		case node.node.Name == n.Name:
 			err = api.ErrNodeNameExists
-		case n.node.RequestAddress == node.RequestAddress:
+		case node.node.RequestAddress == n.RequestAddress:
 			err = api.ErrNodeRequestAddressExists
-		default:
-			return true
 		}
 
-		return false
-	})
+		if err != nil {
+			return err
+		}
+	}
+
+	node, err := newNode(h.opts.Config, n, nil, h.opts.ModelHandler)
 	if err != nil {
 		return err
 	}
 
-	n, err := newNode(h.opts.Config, node, nil)
-	if err != nil {
-		return err
-	}
-
-	if _, err := grpc_health_v1.NewHealthClient(n.conn).Check(ctx, &grpc_health_v1.HealthCheckRequest{
+	if _, err := grpc_health_v1.NewHealthClient(node.conn).Check(ctx, &grpc_health_v1.HealthCheckRequest{
 		Service: protos.ServiceName,
 	}); err != nil {
 		return err
 	}
 
-	if err := h.opts.ModelHandler.CreateNode(node); err != nil {
+	if err := h.opts.ModelHandler.CreateNode(n); err != nil {
 		return err
 	}
 
-	go n.monitor()
-	h.nodes.Store(n.node.ID, n)
+	go node.monitor()
+	h.nodes[node.node.ID] = node
 
 	return nil
 }
 
-func (h *Handler) UpdateNode(node *model.Node) error {
-	n1, ok := h.nodes.Load(node.ID)
-	if !ok {
+func (h *Handler) UpdateNode(n *model.Node) error {
+	node, unlock := h.getLockedNode(n.ID)
+	if node == nil {
 		return api.ErrNodeNotExist
 	}
+	defer unlock()
 
-	n := n1.(*Node)
-	n.lock.Lock()
-	defer n.lock.Unlock()
-
-	if n.node.PortFrom != node.PortFrom || n.node.PortTo != node.PortTo {
+	if node.node.PortFrom != n.PortFrom || node.node.PortTo != n.PortTo {
 		count := 0
-		for _, s := range n.services {
-			if s.service.Port < node.PortFrom || s.service.Port > node.PortTo {
+		for _, s := range node.services {
+			if s.service.Port < n.PortFrom || s.service.Port > n.PortTo {
 				count++
 			}
 		}
@@ -125,20 +146,23 @@ func (h *Handler) UpdateNode(node *model.Node) error {
 		}
 	}
 
-	if err := h.opts.ModelHandler.UpdateNode(node); err != nil {
+	if err := h.opts.ModelHandler.UpdateNode(n); err != nil {
 		return err
 	}
 
-	n.node.Name = node.Name
-	n.node.Comment = node.Comment
-	n.node.ConnectionAddress = node.ConnectionAddress
-	n.node.PortFrom = node.PortFrom
-	n.node.PortTo = node.PortTo
+	node.node.Name = n.Name
+	node.node.Comment = n.Comment
+	node.node.ConnectionAddress = n.ConnectionAddress
+	node.node.PortFrom = n.PortFrom
+	node.node.PortTo = n.PortTo
 	return nil
 }
 
 func (h *Handler) RemoveNode(nodeID string) error {
-	n1, ok := h.nodes.Load(nodeID)
+	h.nodesLocker.Lock()
+	defer h.nodesLocker.Unlock()
+
+	node, ok := h.nodes[nodeID]
 	if !ok {
 		return nil
 	}
@@ -148,29 +172,29 @@ func (h *Handler) RemoveNode(nodeID string) error {
 	}
 
 	// TODO clean up node containers
-	n1.(*Node).stopMonitor()
-	h.nodes.Delete(nodeID)
+	node.stopMonitor()
+	delete(h.nodes, nodeID)
 	return nil
 }
 
 func (h *Handler) AddService(service *model.Service) error {
-	n1, ok := h.nodes.Load(service.NodeID)
-	if !ok {
+	node, unlock := h.getLockedNode(service.NodeID)
+	if node == nil {
 		return api.ErrNodeNotExist
 	}
+	defer unlock()
 
-	n := n1.(*Node)
-	if !n.isAvailable() {
+	if !node.available {
 		return api.ErrNodeUnavailable
 	}
 
-	if n.checkServiceExist(service.UserID) {
+	if _, ok := node.services[service.UserID]; ok {
 		return api.ErrServiceExists
 	}
 
 	req := &protos.CreateServiceRequest{
-		PortFrom:         int32(n.node.PortFrom),
-		PortTo:           int32(n.node.PortTo),
+		PortFrom:         int32(node.node.PortFrom),
+		PortTo:           int32(node.node.PortTo),
 		Type:             service.Type,
 		EncryptionMethod: service.Config.EncryptionMethod,
 		Password:         service.Config.Password,
@@ -178,7 +202,7 @@ func (h *Handler) AddService(service *model.Service) error {
 		NodeId:           service.NodeID,
 	}
 
-	resp, err := n.client.CreateService(context.Background(), req)
+	resp, err := node.client.CreateService(context.Background(), req)
 	if err != nil {
 		// TODO distinguish error
 		return err
@@ -191,7 +215,7 @@ func (h *Handler) AddService(service *model.Service) error {
 		removeReq := &protos.RemoveServiceRequest{
 			ContainerId: resp.ContainerId,
 		}
-		if _, err := n.client.RemoveService(context.Background(), removeReq); err != nil {
+		if _, err := node.client.RemoveService(context.Background(), removeReq); err != nil {
 			logrus.WithError(err).WithFields(logrus.Fields{
 				"containerID": resp.ContainerId,
 				"userID":      service.UserID,
@@ -200,7 +224,10 @@ func (h *Handler) AddService(service *model.Service) error {
 		return err
 	}
 
-	n.addService(service)
+	h.usersLocker.RLock()
+	defer h.usersLocker.RUnlock()
+
+	node.services[service.UserID] = newService(service, h.users[service.UserID])
 	return nil
 }
 
@@ -208,9 +235,6 @@ func (h *Handler) GetNodeServices(userID, nodeID string) []*api.NodeServices {
 	nss := make([]*api.NodeServices, 0)
 
 	getUserServices := func(n *Node) *api.NodeServices {
-		n.lock.RLock()
-		defer n.lock.RUnlock()
-
 		ns := &api.NodeServices{}
 		ns.Node = n.node.Output()
 
@@ -228,19 +252,141 @@ func (h *Handler) GetNodeServices(userID, nodeID string) []*api.NodeServices {
 	}
 
 	if nodeID != "" {
-		n1, ok := h.nodes.Load(nodeID)
-		if !ok {
+		node, unlock := h.getRLockedNode(nodeID)
+		if node == nil {
 			return nss
 		}
+		defer unlock()
 
-		nss = append(nss, getUserServices(n1.(*Node)))
+		nss = append(nss, getUserServices(node))
 		return nss
 	}
 
-	h.nodes.Range(func(_, n1 interface{}) bool {
-		nss = append(nss, getUserServices(n1.(*Node)))
-		return true
-	})
+	h.nodesLocker.RLock()
+	defer h.nodesLocker.RUnlock()
+
+	for _, node := range h.nodes {
+		nss = append(nss, getUserServices(node))
+	}
 
 	return nss
+}
+
+func (h *Handler) GetSyncResponse(userID string) []*api.UserSyncResponse {
+	h.usersLocker.RLock()
+	defer h.usersLocker.RUnlock()
+
+	r := make([]*api.UserSyncResponse, 0)
+	for _, user := range h.users {
+		if userID != "" && user.user.ID != userID {
+			continue
+		}
+
+		func() {
+			user.locker.RLock()
+			defer user.locker.RUnlock()
+
+			usr := &api.UserSyncResponse{
+				UserID: user.user.ID,
+			}
+
+			h.nodesLocker.RLock()
+			defer h.nodesLocker.RUnlock()
+
+			for _, node := range h.nodes {
+				func() {
+					node.locker.RLock()
+					defer node.locker.RUnlock()
+
+					nodeService := &api.NodeServiceSyncResponse{
+						Node: api.NodeSyncResponse{
+							ID:        node.node.ID,
+							Available: node.available,
+						},
+					}
+
+					if service := node.services[user.user.ID]; service != nil {
+						nodeService.Service = &api.ServiceSyncResponse{
+							ID:               service.service.ID,
+							Status:           service.status,
+							MonthTrafficUsed: service.service.MonthTrafficUsed(),
+							LastStatsTime:    service.service.LastStatsTime,
+						}
+						usr.MonthTrafficUsed += nodeService.Service.MonthTrafficUsed
+					}
+
+					usr.NodeService = append(usr.NodeService, nodeService)
+
+				}()
+			}
+
+			r = append(r, usr)
+		}()
+	}
+
+	return r
+}
+
+func (h *Handler) AddUser(user *model.User) error {
+	if err := h.opts.ModelHandler.CreateUser(user); err != nil {
+		return err
+	}
+
+	h.usersLocker.Lock()
+	defer h.usersLocker.Unlock()
+
+	h.users[user.ID] = newUser(user)
+	return nil
+}
+
+func (h *Handler) RemoveUser(userID string) error {
+	if err := h.opts.ModelHandler.DestroyUser(userID); err != nil {
+		return err
+	}
+
+	// TODO clean up containers
+
+	h.usersLocker.Lock()
+	defer h.usersLocker.Unlock()
+
+	delete(h.users, userID)
+	return nil
+}
+
+func (h *Handler) getLockedNode(nodeID string) (*Node, func()) {
+	h.nodesLocker.RLock()
+
+	node := h.nodes[nodeID]
+	if node == nil {
+		h.nodesLocker.RUnlock()
+		return nil, nil
+	}
+
+	node.locker.Lock()
+
+	f := func() {
+		node.locker.Unlock()
+		h.nodesLocker.RUnlock()
+	}
+
+	return node, f
+}
+
+func (h *Handler) getRLockedNode(nodeID string) (*Node, func()) {
+	h.nodesLocker.RLock()
+
+	node := h.nodes[nodeID]
+	if node == nil {
+		h.nodesLocker.RUnlock()
+		return nil, nil
+	}
+
+	node.locker.RLock()
+
+	f := func() {
+		node.locker.RUnlock()
+		h.nodesLocker.RUnlock()
+	}
+
+	return node, f
 }

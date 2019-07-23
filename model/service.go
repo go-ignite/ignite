@@ -36,26 +36,30 @@ func (s *ServiceConfig) Scan(value interface{}) error {
 }
 
 type Service struct {
-	ID              int64 `gorm:"primary_key"`
-	UserID          string
-	NodeID          string
-	ContainerID     string
-	Type            protos.ServiceType_Enum
-	Port            int
-	Config          *ServiceConfig `gorm:"type:varchar(1024)"`
-	LastStatsResult uint64         // last time stats result,unit: byte
-	LastStatsTime   *time.Time     // last time stats time
-	CreatedAt       time.Time
-	UpdatedAt       time.Time
-	DeletedAt       *time.Time `sql:"index"`
+	ID                   int64 `gorm:"primary_key"`
+	UserID               string
+	NodeID               string
+	ContainerID          string
+	Type                 protos.ServiceType_Enum
+	Port                 int
+	Config               *ServiceConfig `gorm:"type:varchar(1024)"`
+	MonthBaseStatsTime   time.Time      // month base time
+	MonthBaseStatsResult uint64         // month base stats result, unit: byte
+	LastStatsResult      uint64         // last time stats result, unit: byte
+	LastStatsTime        time.Time      // last time stats time
+	CreatedAt            time.Time
+	UpdatedAt            time.Time
+	DeletedAt            *time.Time `sql:"index"`
 }
 
 func NewService(userID, nodeID string, ty protos.ServiceType_Enum, sc *ServiceConfig) *Service {
 	return &Service{
-		UserID: userID,
-		NodeID: nodeID,
-		Type:   ty,
-		Config: sc,
+		UserID:             userID,
+		NodeID:             nodeID,
+		Type:               ty,
+		Config:             sc,
+		MonthBaseStatsTime: time.Now(),
+		LastStatsTime:      time.Now(),
 	}
 }
 
@@ -96,6 +100,10 @@ func (s Service) URL(host string) string {
 
 }
 
+func (s Service) MonthTrafficUsed() uint64 {
+	return s.LastStatsResult - s.MonthBaseStatsResult
+}
+
 func (h *Handler) GetServices() ([]*Service, error) {
 	var services []*Service
 	return services, h.db.Find(&services).Error
@@ -126,4 +134,46 @@ func (h *Handler) CreateService(s *Service) error {
 func (h *Handler) GetServicesByUserID(userID int64) ([]*Service, error) {
 	var services []*Service
 	return services, h.db.Find(&services, "user_id = ?", userID).Error
+}
+
+func (h *Handler) UpdateServiceLastStats(s *Service) error {
+	return h.db.Model(s).Updates(map[string]interface{}{
+		"last_stats_result": s.LastStatsResult,
+		"last_stats_time":   s.LastStatsTime,
+	}).Error
+}
+
+func (h *Handler) UpdateServiceStats(s *Service, t time.Time) error {
+	return h.runTX(func(h *Handler) error {
+		if s.MonthBaseStatsTime.Year() != t.Year() || s.MonthBaseStatsTime.Month() != s.MonthBaseStatsTime.Month() {
+			if err := h.db.Model(s).Updates(map[string]interface{}{
+				"month_base_stats_time":   t,
+				"month_base_stats_result": s.LastStatsResult,
+			}).Error; err != nil {
+				return err
+			}
+		}
+
+		ls, err := h.GetLastServiceStats(s.ID)
+		if err != nil {
+			return err
+		}
+
+		startTime := s.CreatedAt
+		var statsResult uint64
+		if ls != nil {
+			startTime = ls.EndTime
+			statsResult = ls.StatsResult
+		}
+
+		return h.db.Create(&ServiceStats{
+			UserID:      s.UserID,
+			NodeID:      s.NodeID,
+			ServiceID:   s.ID,
+			StartTime:   startTime,
+			EndTime:     t,
+			TrafficUsed: s.LastStatsResult - statsResult,
+			StatsResult: s.LastStatsResult,
+		}).Error
+	})
 }

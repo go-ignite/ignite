@@ -40,9 +40,9 @@ func (ic InviteCode) Output() *api.InviteCode {
 }
 
 func (h *Handler) CreateInviteCodes(inviteCodes []*InviteCode) error {
-	return h.runTX(func(tx *gorm.DB) error {
+	return h.runTX(func(h *Handler) error {
 		for _, inviteCode := range inviteCodes {
-			if err := tx.Create(inviteCode).Error; err != nil {
+			if err := h.db.Create(inviteCode).Error; err != nil {
 				return err
 			}
 		}

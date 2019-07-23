@@ -33,7 +33,7 @@ func New(opts *Options) *Server {
 
 		userRouter.Use(s.opts.Service.Auth(false))
 		{
-			userRouter.POST("/sync", s.opts.Service.Sync)
+			userRouter.GET("/sync", s.opts.Service.UserServicesSync)
 			userRouter.POST("/services", s.opts.Service.CreateService)
 			userRouter.GET("/services", s.opts.Service.GetUserServices)
 			userRouter.GET("/services/options", s.opts.Service.GetServiceOptions)

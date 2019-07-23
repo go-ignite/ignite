@@ -13,19 +13,22 @@ type User struct {
 	ID              string `gorm:"primary_key"`
 	Name            string
 	HashedPwd       []byte
-	InviteCodeID    int64
+	InviteCode      string
 	ServicePassword string
+	PackageLimit    int // unit: GB/month
+	ExpiredAt       time.Time
 	CreatedAt       time.Time
 	UpdatedAt       time.Time
 	DeletedAt       *time.Time `sql:"index"`
 }
 
-func NewUser(name string, hashedPwd []byte) *User {
+func NewUser(name string, hashedPwd []byte, inviteCode string) *User {
 	return &User{
 		ID:              shortuuid.New(),
 		ServicePassword: shortuuid.New(),
 		Name:            name,
 		HashedPwd:       hashedPwd,
+		InviteCode:      inviteCode,
 	}
 }
 
@@ -35,6 +38,11 @@ func (u User) Output() *api.User {
 		Name:      u.Name,
 		CreatedAt: u.CreatedAt,
 	}
+}
+
+func (h *Handler) GetUsers() ([]*User, error) {
+	var users []*User
+	return users, h.db.Find(&users).Error
 }
 
 func (h *Handler) GetUserList(keyword string, pageIndex, pageSize int) ([]*User, int, error) {
@@ -81,10 +89,10 @@ func (h *Handler) SaveUser(u *User) error {
 	return h.db.Save(u).Error
 }
 
-func (h *Handler) CreateUser(u *User, inviteCode string) error {
-	return h.runTX(func(tx *gorm.DB) error {
+func (h *Handler) CreateUser(u *User) error {
+	return h.runTX(func(h *Handler) error {
 		ic := new(InviteCode)
-		if err := h.db.First(ic, "code = ? AND available = 1", inviteCode).Error; err != nil {
+		if err := h.db.First(ic, "code = ? AND available = 1", u.InviteCode).Error; err != nil {
 			if gorm.IsRecordNotFoundError(err) {
 				return api.ErrInviteCodeNotExistOrUnavailable
 			}
@@ -96,11 +104,11 @@ func (h *Handler) CreateUser(u *User, inviteCode string) error {
 			return api.ErrInviteCodeExpired
 		}
 
-		if err := tx.Model(InviteCode{ID: ic.ID}).UpdateColumn("available", false).Error; err != nil {
+		if err := h.db.Model(InviteCode{ID: ic.ID}).UpdateColumn("available", false).Error; err != nil {
 			return err
 		}
 
-		user, err := newHandler(tx).GetUserByName(u.Name)
+		user, err := h.GetUserByName(u.Name)
 		if err != nil {
 			return err
 		}
@@ -109,14 +117,15 @@ func (h *Handler) CreateUser(u *User, inviteCode string) error {
 			return api.ErrUserNameExists
 		}
 
-		u.InviteCodeID = ic.ID
-		return tx.Create(u).Error
+		u.ExpiredAt = ic.ExpiredAt
+		u.PackageLimit = ic.Limit
+		return h.db.Create(u).Error
 	})
 }
 
-func (h *Handler) DestroyUser(userID string, f func() error) error {
-	return h.runTX(func(tx *gorm.DB) error {
-		user, err := newHandler(tx).GetUserByID(userID)
+func (h *Handler) DestroyUser(userID string) error {
+	return h.runTX(func(h *Handler) error {
+		user, err := h.GetUserByID(userID)
 		if err != nil {
 			return err
 		}
@@ -125,15 +134,15 @@ func (h *Handler) DestroyUser(userID string, f func() error) error {
 			return nil
 		}
 
-		if err := tx.Delete(&User{ID: userID}).Error; err != nil {
+		if err := h.db.Delete(&User{ID: userID}).Error; err != nil {
 			return err
 		}
 
 		// FIXME depends on the agent response to remove services
-		if err := tx.Delete(Service{}, "user_id = ?", userID).Error; err != nil {
+		if err := h.db.Delete(Service{}, "user_id = ?", userID).Error; err != nil {
 			return err
 		}
 
-		return f()
+		return nil
 	})
 }

@@ -2,12 +2,10 @@ package config
 
 import (
 	"fmt"
-	"os"
 	"strings"
 	"time"
 
 	"github.com/google/wire"
-	"github.com/joho/godotenv"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
@@ -26,6 +24,7 @@ type Service struct {
 	AdminUsername string        `mapstructure:"admin_username"`
 	AdminPassword string        `mapstructure:"admin_password"`
 	Secret        string        `mapstructure:"secret"`
+	SyncInterval  time.Duration `mapstructure:"sync_interval"`
 	TokenDuration time.Duration `mapstructure:"token_duration"`
 }
 
@@ -60,6 +59,7 @@ var defaultConfig = Config{
 		AdminUsername: "admin",
 		AdminPassword: "changeme",
 		TokenDuration: 24 * time.Hour,
+		SyncInterval:  10 * time.Second,
 	},
 	Model: Model{
 		Driver:  "sqlite3",
@@ -67,18 +67,14 @@ var defaultConfig = Config{
 		Debug:   false,
 	},
 	State: State{
-		HeartbeatInterval:   time.Second,
-		SyncInterval:        5 * time.Second,
+		HeartbeatInterval:   5 * time.Second,
+		SyncInterval:        30 * time.Second,
 		StreamRetryInterval: 3 * time.Second,
 		AgentToken:          "ignite-agent",
 	},
 }
 
 func Init() (*Config, error) {
-	if err := godotenv.Load(); err != nil && !os.IsNotExist(err) {
-		return nil, errors.Wrap(err, "config: load .env file error")
-	}
-
 	// bind envs
 	viper.SetEnvPrefix("ignite")
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
@@ -94,6 +90,11 @@ func Init() (*Config, error) {
 		return nil, fmt.Errorf("config: log_level is invalid")
 	}
 	logrus.SetLevel(lv)
+	fmt.Printf("%+v\n", c.Service)
+
+	if c.Service.SyncInterval <= 0 {
+		return nil, fmt.Errorf("config: service.sync_interval is invalid")
+	}
 
 	if c.State.SyncInterval <= 0 {
 		return nil, fmt.Errorf("config: state.sync_interval is invalid")
