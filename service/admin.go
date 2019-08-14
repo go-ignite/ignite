@@ -1,8 +1,10 @@
 package service
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 
@@ -112,10 +114,24 @@ func (s *Service) RemoveInviteCode(c *gin.Context) {
 	c.JSON(http.StatusNoContent, nil)
 }
 
+func (s *Service) PruneInviteCodes(c *gin.Context) {
+	if err := s.opts.ModelHandler.DeleteExpiredInviteCodes(); err != nil {
+		s.errJSON(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	c.JSON(http.StatusNoContent, nil)
+}
+
 func (s *Service) GenerateInviteCodes(c *gin.Context) {
 	req := new(api.GenerateCodesRequest)
 	if err := c.ShouldBind(req); err != nil {
 		s.errJSON(c, http.StatusBadRequest, err)
+		return
+	}
+
+	if req.ExpiredAt.Before(time.Now()) {
+		s.errJSON(c, http.StatusBadRequest, errors.New("expired_at must after now"))
 		return
 	}
 

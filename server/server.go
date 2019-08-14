@@ -67,6 +67,7 @@ func New(opts *Options) *Server {
 			adminRouter.GET("/codes", s.opts.Service.GetInviteCodeList)
 			adminRouter.DELETE("/codes/:id", s.opts.Service.RemoveInviteCode)
 			adminRouter.POST("/codes_batch", s.opts.Service.GenerateInviteCodes)
+			adminRouter.POST("/codes_prune", s.opts.Service.PruneInviteCodes)
 
 			// nodes
 			adminRouter.GET("/nodes", s.opts.Service.GetAllNodes)

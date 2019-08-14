@@ -55,6 +55,10 @@ func (h *Handler) DeleteInviteCode(id int64) error {
 	return h.db.Delete(&InviteCode{ID: id}).Error
 }
 
+func (h *Handler) DeleteExpiredInviteCodes() error {
+	return h.db.Delete(InviteCode{}, "expired_at < ?", time.Now()).Error
+}
+
 func (h *Handler) GetAvailableInviteCodeList(pageIndex, pageSize int) ([]*InviteCode, int, error) {
 	where := func() *gorm.DB {
 		return h.db.Model(InviteCode{}).Where("available = 1")
