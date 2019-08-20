@@ -90,6 +90,7 @@ func (n *Node) heartbeat(ctx context.Context, wg *sync.WaitGroup) {
 							s.status = protos.ServiceStatus_NOT_SET
 						}
 					}
+					n.available = available
 				}()
 				if err != nil {
 					return err
