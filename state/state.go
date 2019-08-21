@@ -6,6 +6,7 @@ import (
 
 	"github.com/google/wire"
 	"github.com/sirupsen/logrus"
+	"golang.org/x/crypto/bcrypt"
 	"google.golang.org/grpc/health/grpc_health_v1"
 
 	"github.com/go-ignite/ignite-agent/protos"
@@ -350,6 +351,40 @@ func (h *Handler) RemoveUser(userID string) error {
 	defer h.usersLocker.Unlock()
 
 	delete(h.users, userID)
+	return nil
+}
+
+func (h *Handler) CheckUserExists(userID string) bool {
+	h.usersLocker.RLock()
+	defer h.usersLocker.RUnlock()
+
+	return h.users[userID] != nil
+}
+
+func (h *Handler) ChangeUserPassword(userID, newPassword string, oldPassword *string) error {
+	h.usersLocker.RLock()
+	defer h.usersLocker.RUnlock()
+
+	u := h.users[userID]
+	u.locker.Lock()
+	defer u.locker.Unlock()
+
+	if oldPassword != nil {
+		if err := bcrypt.CompareHashAndPassword(u.user.HashedPwd, []byte(*oldPassword)); err != nil {
+			return api.ErrUserPasswordIncorrect
+		}
+	}
+
+	hashedPwd, err := bcrypt.GenerateFromPassword([]byte(newPassword), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+
+	if err := h.opts.ModelHandler.ChangeUserPassword(userID, hashedPwd); err != nil {
+		return err
+	}
+
+	u.user.HashedPwd = hashedPwd
 	return nil
 }
 

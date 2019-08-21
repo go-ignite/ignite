@@ -33,20 +33,12 @@ func New(opts *Options) *Server {
 
 		userRouter.Use(s.opts.Service.Auth(false))
 		{
+			userRouter.PUT("/change_password", s.opts.Service.UserChangePassword)
 			userRouter.GET("/sync", s.opts.Service.UserServicesSync)
 			userRouter.POST("/services", s.opts.Service.CreateService)
 			userRouter.GET("/services", s.opts.Service.GetUserServices)
 			userRouter.GET("/services/options", s.opts.Service.GetServiceOptions)
 			//authRouter.GET("/info", userHandler.UserInfoHandler)
-
-			// nodes
-			//authRouter.GET("/nodes", userHandler.ListNodes)
-
-			// services
-			//authRouter.GET("/services/config", userHandler.GetServiceConfig)
-
-			//authRouter.GET("/services", userHandler.ListServices)
-			//authRouter.POST("/nodes/:nodeID/services", userHandler.CreateService)
 		}
 	}
 
@@ -57,7 +49,7 @@ func New(opts *Options) *Server {
 		{
 			//user account related operations
 			adminRouter.GET("/accounts", s.opts.Service.GetAccountList)
-			//adminRouter.PUT("/accounts/:id/reset", s.opts.Service.ResetAccountHand)
+			adminRouter.PUT("/accounts/:id/reset_password", s.opts.Service.ResetAccountPassword)
 			adminRouter.DELETE("/accounts/:id", s.opts.Service.DestroyAccount)
 			// authRouter.PUT("/:id/stop", r.StopServiceHandler)
 			// authRouter.PUT("/:id/start", r.StartServiceHandler)
@@ -67,7 +59,7 @@ func New(opts *Options) *Server {
 			adminRouter.GET("/codes", s.opts.Service.GetInviteCodeList)
 			adminRouter.DELETE("/codes/:id", s.opts.Service.RemoveInviteCode)
 			adminRouter.POST("/codes_batch", s.opts.Service.GenerateInviteCodes)
-			adminRouter.POST("/codes_prune", s.opts.Service.PruneInviteCodes)
+			adminRouter.DELETE("/codes_prune", s.opts.Service.PruneInviteCodes)
 
 			// nodes
 			adminRouter.GET("/nodes", s.opts.Service.GetAllNodes)

@@ -64,6 +64,14 @@ func (s *Service) createToken(id string) (string, error) {
 	return tokenStr, nil
 }
 
+func checkPassword(password string) error {
+	if len(password) < 6 || len(password) > 12 {
+		return fmt.Errorf("invalid password")
+	}
+
+	return nil
+}
+
 func (s *Service) Auth(isAdmin bool) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		token, err := request.ParseFromRequest(c.Request, request.AuthorizationHeaderExtractor, func(token *jwt.Token) (interface{}, error) {
@@ -71,26 +79,31 @@ func (s *Service) Auth(isAdmin bool) gin.HandlerFunc {
 			return b, nil
 		})
 		if err != nil {
-			_ = c.AbortWithError(401, err)
+			_ = c.AbortWithError(http.StatusUnauthorized, err)
 			return
 		}
 		if !token.Valid {
-			_ = c.AbortWithError(401, fmt.Errorf("token is invalid"))
+			_ = c.AbortWithError(http.StatusUnauthorized, fmt.Errorf("token is invalid"))
 			return
 		}
 
 		claims := token.Claims.(jwt.MapClaims)
 		if !claims.VerifyExpiresAt(time.Now().Unix(), true) {
-			_ = c.AbortWithError(401, fmt.Errorf("token is expired"))
+			_ = c.AbortWithError(http.StatusUnauthorized, fmt.Errorf("token is expired"))
 			return
 		}
 		id, ok := claims["id"].(string)
 		if !ok {
-			_ = c.AbortWithError(401, fmt.Errorf("token'id is invalid"))
+			_ = c.AbortWithError(http.StatusUnauthorized, fmt.Errorf("token'id is invalid"))
 			return
 		}
 		if (isAdmin && id != s.opts.Config.AdminUsername) || (!isAdmin && id == "") {
-			_ = c.AbortWithError(401, fmt.Errorf("token auth error"))
+			_ = c.AbortWithError(http.StatusUnauthorized, fmt.Errorf("token auth error"))
+			return
+		}
+
+		if !isAdmin && !s.opts.StateHandler.CheckUserExists(id) {
+			_ = c.AbortWithError(http.StatusUnauthorized, fmt.Errorf("user not exists"))
 			return
 		}
 

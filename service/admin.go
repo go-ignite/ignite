@@ -72,6 +72,32 @@ func (s *Service) DestroyAccount(c *gin.Context) {
 	c.JSON(http.StatusNoContent, nil)
 }
 
+func (s *Service) ResetAccountPassword(c *gin.Context) {
+	userID := c.Param("id")
+	req := new(api.AdminResetAccountPasswordRequest)
+	if err := c.ShouldBind(req); err != nil {
+		s.errJSON(c, http.StatusBadRequest, err)
+		return
+	}
+
+	if !s.opts.StateHandler.CheckUserExists(userID) {
+		s.errJSON(c, http.StatusNotFound, errors.New("user does not exist"))
+		return
+	}
+
+	if err := checkPassword(req.NewPassword); err != nil {
+		s.errJSON(c, http.StatusBadRequest, err)
+		return
+	}
+
+	if err := s.opts.StateHandler.ChangeUserPassword(userID, req.NewPassword, nil); err != nil {
+		s.errJSON(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	c.JSON(http.StatusNoContent, nil)
+}
+
 // --- invite code
 
 func (s *Service) GetInviteCodeList(c *gin.Context) {

@@ -146,3 +146,7 @@ func (h *Handler) DestroyUser(userID string) error {
 		return nil
 	})
 }
+
+func (h *Handler) ChangeUserPassword(id string, hashedPwd []byte) error {
+	return h.db.Model(User{ID: id}).UpdateColumn("hashed_pwd", hashedPwd).Error
+}

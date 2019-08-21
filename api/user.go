@@ -26,3 +26,8 @@ type UserRegisterRequest struct {
 type UserResisterResponse struct {
 	Token string `json:"token"`
 }
+
+type UserChangePasswordRequest struct {
+	OldPassword string `json:"old_password" binding:"required"`
+	NewPassword string `json:"new_password" binding:"required"`
+}

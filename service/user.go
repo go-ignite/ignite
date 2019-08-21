@@ -52,6 +52,10 @@ func (s *Service) UserRegister(c *gin.Context) {
 		s.errJSON(c, http.StatusBadRequest, err)
 		return
 	}
+	if err := checkPassword(req.Password); err != nil {
+		s.errJSON(c, http.StatusBadRequest, err)
+		return
+	}
 
 	hashedPass, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
@@ -84,6 +88,31 @@ func (s *Service) UserRegister(c *gin.Context) {
 	c.JSON(http.StatusCreated, api.UserResisterResponse{Token: token})
 }
 
+func (s *Service) UserChangePassword(c *gin.Context) {
+	req := new(api.UserChangePasswordRequest)
+	if err := c.ShouldBind(req); err != nil {
+		s.errJSON(c, http.StatusBadRequest, err)
+		return
+	}
+
+	if err := checkPassword(req.NewPassword); err != nil {
+		s.errJSON(c, http.StatusBadRequest, err)
+		return
+	}
+
+	userID := c.GetString("id")
+	if err := s.opts.StateHandler.ChangeUserPassword(userID, req.NewPassword, &req.OldPassword); err != nil {
+		switch err {
+		case api.ErrUserPasswordIncorrect:
+			s.errJSON(c, http.StatusPreconditionFailed, err)
+		default:
+			s.errJSON(c, http.StatusInternalServerError, err)
+		}
+	}
+
+	c.JSON(http.StatusNoContent, nil)
+}
+
 func (s *Service) GetUserInfo(c *gin.Context) {
 	userID := c.GetString("id")
 	user, err := s.opts.ModelHandler.GetUserByID(userID)
@@ -113,7 +142,12 @@ func (s *Service) UserServicesSync(c *gin.Context) {
 		}
 
 		r := s.opts.StateHandler.GetSyncResponse(userID)
-		c.SSEvent("user_sync", r)
+		if len(r) > 0 {
+			c.SSEvent("user_sync", r[0])
+		} else {
+			return false
+		}
+
 		return true
 	})
 }

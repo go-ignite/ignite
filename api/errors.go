@@ -13,6 +13,7 @@ var (
 	ErrNodeNameExists                 = NewErrResponse(1103, "node name already exists")
 	ErrNodeRequestAddressExists       = NewErrResponse(1104, "node request address already exists")
 	ErrServiceExists                  = NewErrResponse(1105, "user already has a service on this node")
+	ErrUserPasswordIncorrect          = NewErrResponse(1106, "user password incorrect")
 )
 
 type ErrResponse struct {
