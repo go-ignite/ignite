@@ -115,20 +115,7 @@ func (s *Service) UserChangePassword(c *gin.Context) {
 
 func (s *Service) GetUserInfo(c *gin.Context) {
 	userID := c.GetString("id")
-	user, err := s.opts.ModelHandler.GetUserByID(userID)
-	if err != nil {
-		s.errJSON(c, http.StatusInternalServerError, err)
-		return
-	}
-	if user == nil {
-		s.errJSON(c, http.StatusNotFound, nil)
-		return
-	}
-
-	c.JSON(http.StatusOK, &api.User{
-		ID:   userID,
-		Name: user.Name,
-	})
+	c.JSON(http.StatusOK, s.opts.StateHandler.GetUserInfo(userID))
 }
 
 func (s *Service) UserServicesSync(c *gin.Context) {
@@ -141,13 +128,12 @@ func (s *Service) UserServicesSync(c *gin.Context) {
 			first = false
 		}
 
-		r := s.opts.StateHandler.GetSyncResponse(userID)
-		if len(r) > 0 {
-			c.SSEvent("user_sync", r[0])
-		} else {
+		r := s.opts.StateHandler.GetUserSyncResponse(userID)
+		if r == nil {
 			return false
 		}
 
+		c.SSEvent("user_sync", r)
 		return true
 	})
 }
@@ -194,19 +180,7 @@ func (s *Service) CreateService(c *gin.Context) {
 }
 
 func (s *Service) GetUserServices(c *gin.Context) {
-	resp := make([]*api.NodeService, 0)
-	for _, ns := range s.opts.StateHandler.GetNodeServices(c.GetString("id"), "") {
-		r := &api.NodeService{
-			Node: ns.Node,
-		}
-		if len(ns.Services) > 0 {
-			r.Service = ns.Services[0]
-		}
-
-		resp = append(resp, r)
-	}
-
-	c.JSON(http.StatusOK, resp)
+	c.JSON(http.StatusOK, s.opts.StateHandler.GetUserServices(c.GetString("id")))
 }
 
 func (s *Service) GetServiceOptions(c *gin.Context) {

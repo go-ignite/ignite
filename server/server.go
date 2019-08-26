@@ -34,11 +34,11 @@ func New(opts *Options) *Server {
 		userRouter.Use(s.opts.Service.Auth(false))
 		{
 			userRouter.PUT("/change_password", s.opts.Service.UserChangePassword)
-			userRouter.GET("/sync", s.opts.Service.UserServicesSync)
+			userRouter.GET("/info", s.opts.Service.GetUserInfo)
 			userRouter.POST("/services", s.opts.Service.CreateService)
 			userRouter.GET("/services", s.opts.Service.GetUserServices)
+			userRouter.GET("/services/sync", s.opts.Service.UserServicesSync)
 			userRouter.GET("/services/options", s.opts.Service.GetServiceOptions)
-			//authRouter.GET("/info", userHandler.UserInfoHandler)
 		}
 	}
 

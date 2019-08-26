@@ -7,8 +7,8 @@ import (
 )
 
 type User struct {
-	user   *model.User
-	locker sync.RWMutex
+	sync.RWMutex
+	user *model.User
 }
 
 func newUser(u *model.User) *User {

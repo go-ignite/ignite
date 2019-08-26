@@ -46,8 +46,8 @@ func (h *Handler) dailyTask(t time.Time) {
 
 	for nodeID, node := range h.nodes {
 		func() {
-			node.locker.Lock()
-			defer node.locker.Unlock()
+			node.Lock()
+			defer node.Unlock()
 
 			for _, s := range node.services {
 				if expiredUserMap[s.service.UserID] && s.status == protos.ServiceStatus_RUNNING {

@@ -260,11 +260,16 @@ func (s *Service) UpdateNode(c *gin.Context) {
 // --- service
 
 func (s *Service) GetServices(c *gin.Context) {
-	req := new(api.AdminServicesRequest)
+	req := new(api.AdminServiceListRequest)
 	if err := c.ShouldBind(req); err != nil {
 		s.errJSON(c, http.StatusBadRequest, err)
 		return
 	}
 
-	c.JSON(http.StatusOK, s.opts.StateHandler.GetNodeServices(req.UserID, req.NodeID))
+	list, total := s.opts.StateHandler.GetServiceList(req)
+	c.JSON(http.StatusOK, &api.PagingResponse{
+		List:          list,
+		Total:         total,
+		PagingRequest: req.PagingRequest,
+	})
 }

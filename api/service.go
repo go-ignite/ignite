@@ -21,9 +21,10 @@ type ServiceOptions struct {
 	EncryptionMethods []protos.ServiceEncryptionMethod_Enum `json:"encryption_methods"`
 }
 
-type AdminServicesRequest struct {
+type AdminServiceListRequest struct {
 	UserID string `form:"user_id"`
 	NodeID string `form:"node_id"`
+	PagingRequest
 }
 
 type Service struct {
@@ -36,6 +37,8 @@ type Service struct {
 	Password         string                              `json:"password"`
 	CreatedAt        time.Time                           `json:"created_at"`
 	URL              string                              `json:"url"`
+	MonthTrafficUsed uint64                              `json:"month_traffic_used"`
+	LastStatsTime    time.Time                           `json:"last_stats_time"`
 }
 
 type NodeSyncResponse struct {
@@ -44,10 +47,8 @@ type NodeSyncResponse struct {
 }
 
 type ServiceSyncResponse struct {
-	ID               int64                     `json:"id"`
-	Status           protos.ServiceStatus_Enum `json:"status"`
-	MonthTrafficUsed uint64                    `json:"month_traffic_used"`
-	LastStatsTime    time.Time                 `json:"last_stats_time"`
+	ID     int64                     `json:"id"`
+	Status protos.ServiceStatus_Enum `json:"status"`
 }
 
 type NodeServiceSyncResponse struct {
@@ -56,7 +57,6 @@ type NodeServiceSyncResponse struct {
 }
 
 type UserSyncResponse struct {
-	UserID           string                     `json:"user_id"`
-	MonthTrafficUsed uint64                     `json:"month_traffic_used"`
-	NodeService      []*NodeServiceSyncResponse `json:"node_service"`
+	UserID      string                     `json:"user_id"`
+	NodeService []*NodeServiceSyncResponse `json:"node_service"`
 }

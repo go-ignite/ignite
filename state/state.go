@@ -2,6 +2,7 @@ package state
 
 import (
 	"context"
+	"sort"
 	"sync"
 
 	"github.com/google/wire"
@@ -232,96 +233,118 @@ func (h *Handler) AddService(service *model.Service) error {
 	return nil
 }
 
-func (h *Handler) GetNodeServices(userID, nodeID string) []*api.NodeServices {
-	nss := make([]*api.NodeServices, 0)
+func (h *Handler) GetServiceList(req *api.AdminServiceListRequest) ([]*api.Service, int) {
+	nss := make([]*api.Service, 0)
+	getServices := func(n *Node) []*api.Service {
+		var services []*api.Service
 
-	getUserServices := func(n *Node) *api.NodeServices {
-		ns := &api.NodeServices{}
-		ns.Node = n.node.Output()
-
-		if userID != "" {
-			if s, ok := n.services[userID]; ok {
-				ns.Services = append(ns.Services, s.service.Output(n.node.ConnectionAddress))
+		if req.UserID != "" {
+			if s, ok := n.services[req.UserID]; ok {
+				services = append(services, s.service.Output(n.node.ConnectionAddress))
 			}
 		} else {
 			for _, s := range n.services {
-				ns.Services = append(ns.Services, s.service.Output(n.node.ConnectionAddress))
+				services = append(services, s.service.Output(n.node.ConnectionAddress))
 			}
 		}
 
-		return ns
+		return services
 	}
 
-	if nodeID != "" {
-		node, unlock := h.getRLockedNode(nodeID)
+	if req.NodeID != "" {
+		node, unlock := h.getRLockedNode(req.NodeID)
 		if node == nil {
-			return nss
+			return nss, 0
 		}
 		defer unlock()
 
-		nss = append(nss, getUserServices(node))
-		return nss
+		nss = append(nss, getServices(node)...)
+	} else {
+		h.nodesLocker.RLock()
+		defer h.nodesLocker.RUnlock()
+
+		for _, node := range h.nodes {
+			func() {
+				node.RLock()
+				defer node.RUnlock()
+
+				nss = append(nss, getServices(node)...)
+			}()
+		}
+	}
+
+	sort.Slice(nss, func(i, j int) bool {
+		return nss[i].ID > nss[j].ID
+	})
+
+	total := len(nss)
+	start, end := (req.PageIndex-1)*req.PageSize, req.PageIndex*req.PageSize
+	if start > total {
+		start = total
+	}
+	if end > total {
+		end = total
+	}
+	return nss[start:end], len(nss)
+}
+
+func (h *Handler) GetUserServices(userID string) []*api.NodeService {
+	h.nodesLocker.RLock()
+	defer h.nodesLocker.RUnlock()
+
+	nss := make([]*api.NodeService, 0)
+	for _, node := range h.nodes {
+		func() {
+			node.RLock()
+			defer node.RUnlock()
+
+			ns := &api.NodeService{}
+			ns.Node = node.node.Output()
+			if s, ok := node.services[userID]; ok {
+				ns.Service = s.service.Output(node.node.ConnectionAddress)
+			}
+			nss = append(nss, ns)
+		}()
+	}
+
+	return nss
+}
+
+func (h *Handler) GetUserSyncResponse(userID string) *api.UserSyncResponse {
+	user, unlock := h.getRLockedUser(userID)
+	if user == nil {
+		return nil
+	}
+	defer unlock()
+
+	r := &api.UserSyncResponse{
+		UserID:      user.user.ID,
+		NodeService: []*api.NodeServiceSyncResponse{},
 	}
 
 	h.nodesLocker.RLock()
 	defer h.nodesLocker.RUnlock()
 
 	for _, node := range h.nodes {
-		nss = append(nss, getUserServices(node))
-	}
-
-	return nss
-}
-
-func (h *Handler) GetSyncResponse(userID string) []*api.UserSyncResponse {
-	h.usersLocker.RLock()
-	defer h.usersLocker.RUnlock()
-
-	r := make([]*api.UserSyncResponse, 0)
-	for _, user := range h.users {
-		if userID != "" && user.user.ID != userID {
-			continue
-		}
-
 		func() {
-			user.locker.RLock()
-			defer user.locker.RUnlock()
+			node.RLock()
+			defer node.RUnlock()
 
-			usr := &api.UserSyncResponse{
-				UserID: user.user.ID,
+			nodeService := &api.NodeServiceSyncResponse{
+				Node: api.NodeSyncResponse{
+					ID:        node.node.ID,
+					Available: node.available,
+				},
 			}
 
-			h.nodesLocker.RLock()
-			defer h.nodesLocker.RUnlock()
-
-			for _, node := range h.nodes {
-				func() {
-					node.locker.RLock()
-					defer node.locker.RUnlock()
-
-					nodeService := &api.NodeServiceSyncResponse{
-						Node: api.NodeSyncResponse{
-							ID:        node.node.ID,
-							Available: node.available,
-						},
-					}
-
-					if service := node.services[user.user.ID]; service != nil {
-						nodeService.Service = &api.ServiceSyncResponse{
-							ID:               service.service.ID,
-							Status:           service.status,
-							MonthTrafficUsed: service.service.MonthTrafficUsed(),
-							LastStatsTime:    service.service.LastStatsTime,
-						}
-						usr.MonthTrafficUsed += nodeService.Service.MonthTrafficUsed
-					}
-
-					usr.NodeService = append(usr.NodeService, nodeService)
-
-				}()
+			if service := node.services[user.user.ID]; service != nil {
+				nodeService.Service = &api.ServiceSyncResponse{
+					ID:     service.service.ID,
+					Status: service.status,
+				}
 			}
 
-			r = append(r, usr)
+			r.NodeService = append(r.NodeService, nodeService)
 		}()
 	}
 
@@ -366,8 +389,8 @@ func (h *Handler) ChangeUserPassword(userID, newPassword string, oldPassword *st
 	defer h.usersLocker.RUnlock()
 
 	u := h.users[userID]
-	u.locker.Lock()
-	defer u.locker.Unlock()
+	u.Lock()
+	defer u.Unlock()
 
 	if oldPassword != nil {
 		if err := bcrypt.CompareHashAndPassword(u.user.HashedPwd, []byte(*oldPassword)); err != nil {
@@ -388,6 +411,41 @@ func (h *Handler) ChangeUserPassword(userID, newPassword string, oldPassword *st
 	return nil
 }
 
+func (h *Handler) GetUserInfo(userID string) *api.User {
+	user, unlock := h.getRLockedUser(userID)
+	if user == nil {
+		return nil
+	}
+	defer unlock()
+
+	r := &api.User{
+		ID:            user.user.ID,
+		Name:          user.user.Name,
+		CreatedAt:     user.user.CreatedAt,
+		PackageLimit:  user.user.PackageLimit,
+		LastStatsTime: user.user.CreatedAt,
+	}
+
+	h.nodesLocker.RLock()
+	defer h.nodesLocker.RUnlock()
+
+	for _, node := range h.nodes {
+		func() {
+			node.RLock()
+			defer node.RUnlock()
+
+			if service := node.services[user.user.ID]; service != nil {
+				r.MonthTrafficUsed += service.service.MonthTrafficUsed()
+				if service.service.LastStatsTime.After(r.LastStatsTime) {
+					r.LastStatsTime = service.service.LastStatsTime
+				}
+			}
+		}()
+	}
+
+	return r
+}
+
 func (h *Handler) getLockedNode(nodeID string) (*Node, func()) {
 	h.nodesLocker.RLock()
 
@@ -397,10 +455,10 @@ func (h *Handler) getLockedNode(nodeID string) (*Node, func()) {
 		return nil, nil
 	}
 
-	node.locker.Lock()
+	node.Lock()
 
 	f := func() {
-		node.locker.Unlock()
+		node.Unlock()
 		h.nodesLocker.RUnlock()
 	}
 
@@ -416,12 +474,50 @@ func (h *Handler) getRLockedNode(nodeID string) (*Node, func()) {
 		return nil, nil
 	}
 
-	node.locker.RLock()
+	node.RLock()
 
 	f := func() {
-		node.locker.RUnlock()
+		node.RUnlock()
 		h.nodesLocker.RUnlock()
 	}
 
 	return node, f
+}
+
+func (h *Handler) getLockedUser(userID string) (*User, func()) {
+	h.usersLocker.RLock()
+
+	user := h.users[userID]
+	if user == nil {
+		h.usersLocker.RUnlock()
+		return nil, nil
+	}
+
+	user.Lock()
+
+	f := func() {
+		user.Unlock()
+		h.usersLocker.RUnlock()
+	}
+
+	return user, f
+}
+
+func (h *Handler) getRLockedUser(userID string) (*User, func()) {
+	h.usersLocker.RLock()
+
+	user := h.users[userID]
+	if user == nil {
+		h.nodesLocker.RUnlock()
+		return nil, nil
+	}
+
+	user.RLock()
+
+	f := func() {
+		user.RUnlock()
+		h.usersLocker.RUnlock()
+	}
+
+	return user, f
 }

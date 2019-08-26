@@ -29,9 +29,9 @@ func (token) RequireTransportSecurity() bool {
 }
 
 type Node struct {
+	sync.RWMutex
 	modelHandler *model.Handler
 	config       config.State
-	locker       sync.RWMutex
 	node         *model.Node
 	services     map[string]*Service
 	available    bool
@@ -81,8 +81,8 @@ func (n *Node) heartbeat(ctx context.Context, wg *sync.WaitGroup) {
 			for {
 				_, err := stream.Recv()
 				func() {
-					n.locker.Lock()
-					defer n.locker.Unlock()
+					n.Lock()
+					defer n.Unlock()
 
 					available := err == nil
 					if !available && n.available {
@@ -174,8 +174,8 @@ func (n *Node) stopMonitor() {
 
 func (n *Node) applySyncResp(resp *protos.SyncStreamServer) {
 	now := time.Now()
-	n.locker.Lock()
-	defer n.locker.Unlock()
+	n.Lock()
+	defer n.Unlock()
 
 	for _, s := range resp.Services {
 		func() {
@@ -193,8 +193,8 @@ func (n *Node) applySyncResp(resp *protos.SyncStreamServer) {
 				}
 
 				if service.user != nil {
-					service.user.locker.RLock()
-					defer service.user.locker.RUnlock()
+					service.user.RLock()
+					defer service.user.RUnlock()
 
 					if service.service.MonthTrafficUsed() >= uint64(service.user.user.PackageLimit*GB) && service.status == protos.ServiceStatus_RUNNING {
 						req := &protos.StopServiceRequest{

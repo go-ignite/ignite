@@ -74,6 +74,8 @@ func (s Service) Output(host string) *api.Service {
 		Password:         s.Config.Password,
 		CreatedAt:        s.CreatedAt,
 		URL:              s.URL(host),
+		MonthTrafficUsed: s.MonthTrafficUsed(),
+		LastStatsTime:    s.LastStatsTime,
 	}
 }
 
